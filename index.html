@@ -13,18 +13,18 @@
         <div class="eyebrow">FIELDOS / FIELDBUILDER</div>
         <div class="title-row">
           <h1>FieldBuilder</h1>
-          <span id="saveBadge" class="save-badge">Ready</span>
+          <span class="status-pill">Draft Ready</span>
         </div>
       </div>
 
       <div class="topbar-actions">
-        <button id="lockToggle" class="ghost-btn" type="button">Edit</button>
-        <button id="saveStableBtn" class="primary-btn" type="button">Save Stable</button>
+        <button class="ghost-btn" type="button">Locked</button>
+        <button class="primary-btn" type="button">Save Stable</button>
       </div>
     </header>
 
     <section class="mode-bar">
-      <button class="mode-chip active" type="button">Build</button>
+      <button class="mode-chip active" type="button">Edit</button>
       <button class="mode-chip" type="button">Preview</button>
       <button class="mode-chip" type="button">Repair</button>
     </section>
@@ -35,25 +35,26 @@
           <div class="card-header">
             <div>
               <div class="card-kicker">Workspace</div>
-              <h2>Current Project</h2>
+              <h2>Home</h2>
             </div>
           </div>
+
           <div class="home-grid">
             <div class="stat-card">
-              <span class="stat-label">Current Tab</span>
-              <span id="homeCurrentTab" class="stat-value">HTML</span>
+              <span class="stat-label">Current Project</span>
+              <span class="stat-value">FieldBuilder Shell</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Current Mode</span>
+              <span class="stat-value">Build</span>
             </div>
             <div class="stat-card">
               <span class="stat-label">Preview State</span>
-              <span id="homePreviewState" class="stat-value">OK</span>
+              <span class="stat-value">Ready</span>
             </div>
             <div class="stat-card">
-              <span class="stat-label">Draft Status</span>
-              <span id="homeDraftState" class="stat-value">Ready</span>
-            </div>
-            <div class="stat-card">
-              <span class="stat-label">Stable Saved</span>
-              <span id="homeStableState" class="stat-value">No</span>
+              <span class="stat-label">Save State</span>
+              <span class="stat-value">Draft Ready</span>
             </div>
           </div>
         </div>
@@ -64,9 +65,9 @@
           <div class="card-header">
             <div>
               <div class="card-kicker">Build Layer</div>
-              <h2 id="editorTitle">HTML</h2>
+              <h2 id="workspaceTitle">HTML</h2>
             </div>
-            <div class="sync-status" id="syncStatus">Draft Saved</div>
+            <div class="sync-status">Draft Saved</div>
           </div>
 
           <div class="layer-rail">
@@ -75,10 +76,21 @@
             <button class="layer-tab" data-layer="js" type="button">JS</button>
           </div>
 
-          <div class="editor-wrap">
-            <textarea id="htmlEditor" class="editor active" spellcheck="false"></textarea>
-            <textarea id="cssEditor" class="editor" spellcheck="false"></textarea>
-            <textarea id="jsEditor" class="editor" spellcheck="false"></textarea>
+          <div class="workspace-shell">
+            <div class="editor-frame active" id="htmlFrame">
+              <div class="editor-label">HTML Workspace</div>
+              <textarea placeholder="HTML goes here..."></textarea>
+            </div>
+
+            <div class="editor-frame" id="cssFrame">
+              <div class="editor-label">CSS Workspace</div>
+              <textarea placeholder="CSS goes here..."></textarea>
+            </div>
+
+            <div class="editor-frame" id="jsFrame">
+              <div class="editor-label">JS Workspace</div>
+              <textarea placeholder="JavaScript goes here..."></textarea>
+            </div>
           </div>
         </div>
       </section>
@@ -90,15 +102,15 @@
               <div class="card-kicker">Manifestation</div>
               <h2>Preview</h2>
             </div>
-            <span id="previewStateBadge" class="preview-state ok">Preview OK</span>
+            <span class="preview-state">Preview OK</span>
           </div>
 
           <div class="preview-shell">
-            <iframe id="previewFrame" title="Preview"></iframe>
+            <div class="preview-placeholder">Live preview will appear here.</div>
           </div>
 
           <div class="preview-footer">
-            <button id="backToBuildBtn" class="primary-btn wide-btn" type="button">Back to Build</button>
+            <button class="primary-btn wide-btn" id="backToBuildBtn" type="button">Back to Build</button>
           </div>
         </div>
       </section>
@@ -112,11 +124,15 @@
             </div>
           </div>
 
-          <div class="history-actions">
-            <button id="restoreStableBtn" class="ghost-btn" type="button">Restore Stable</button>
+          <div class="history-list">
+            <div class="history-item">
+              <div class="history-top">
+                <span class="history-type">Stable</span>
+                <span class="history-time">—</span>
+              </div>
+              <div class="history-note">History system will appear here.</div>
+            </div>
           </div>
-
-          <div id="historyList" class="history-list"></div>
         </div>
       </section>
 
@@ -132,19 +148,15 @@
           <div class="core-grid">
             <div class="setting-row">
               <span>Editing Mode</span>
-              <strong id="coreLockState">Edit</strong>
+              <strong>Locked</strong>
             </div>
             <div class="setting-row">
               <span>Autosave</span>
-              <strong>On</strong>
-            </div>
-            <div class="setting-row">
-              <span>Storage</span>
-              <strong>Local</strong>
+              <strong>Ready</strong>
             </div>
             <div class="setting-row">
               <span>Export</span>
-              <button id="exportBtn" class="ghost-btn" type="button">Export Files</button>
+              <button class="ghost-btn" type="button">Export ZIP</button>
             </div>
           </div>
         </div>
@@ -152,9 +164,9 @@
     </main>
 
     <section class="quick-action-strip">
-      <button id="quickPreviewBtn" class="primary-btn" type="button">Preview</button>
-      <button id="quickSaveBtn" class="ghost-btn" type="button">Save Stable</button>
-      <button id="quickRestoreBtn" class="ghost-btn" type="button">Restore Stable</button>
+      <button class="primary-btn" type="button">Preview</button>
+      <button class="ghost-btn" type="button">Save Stable</button>
+      <button class="ghost-btn" type="button">Restore Stable</button>
     </section>
 
     <nav class="bottom-nav">
