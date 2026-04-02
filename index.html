@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FIELD_OS // CORE</title>
+    <title>FIELD_OS // INTERACT</title>
     <style>
         :root {
             --substrate: #050505;
@@ -14,7 +14,7 @@
             --font: 'Courier New', monospace;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
         body {
             background-color: var(--substrate);
@@ -32,12 +32,13 @@
 
         /* --- SYSTEM HUD --- */
         #field-os-hud {
-            width: 280px;
-            padding: 20px;
+            width: 300px;
+            padding: 25px;
             border: 1px solid var(--cyan-dim);
             background: rgba(0, 242, 255, 0.02);
-            box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+            box-shadow: 0 0 40px rgba(0, 0, 0, 1);
             position: relative;
+            transition: all 0.2s ease;
         }
 
         .metric {
@@ -51,10 +52,37 @@
         .label { color: var(--cyan-dim); font-size: 0.65rem; letter-spacing: 1px; }
         .value { font-size: 0.9rem; font-weight: bold; }
 
-        /* --- STATUS GLOWS --- */
+        /* --- INTERACTION --- */
+        #pulse-trigger {
+            margin-top: 30px;
+            background: transparent;
+            color: var(--cyan);
+            border: 1px solid var(--cyan);
+            padding: 15px 40px;
+            font-family: var(--font);
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.1s ease;
+            outline: none;
+        }
+
+        #pulse-trigger:active {
+            background: var(--cyan);
+            color: var(--substrate);
+            box-shadow: 0 0 20px var(--cyan);
+        }
+
+        /* --- STATUS STATES --- */
         .nominal { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
         .strain { color: var(--warning); text-shadow: 0 0 8px var(--warning); }
         .collapse { color: var(--critical); animation: alert 0.4s infinite; }
+
+        /* --- FEEDBACK ANIMATIONS --- */
+        .flash {
+            box-shadow: 0 0 50px var(--cyan-dim) !important;
+            border-color: var(--cyan) !important;
+        }
 
         @keyframes alert {
             0% { opacity: 1; }
@@ -76,12 +104,12 @@
     <div id="field-os-hud">
         <div class="metric">
             <span class="label">SYSTEM_IDENT</span>
-            <span class="value">FIELD_OS_v0.0.1</span>
+            <span class="value">FIELD_OS_v0.0.3</span>
         </div>
 
         <div class="metric">
             <span class="label">STATE</span>
-            <span id="state-val" class="value nominal">BOOTING</span>
+            <span id="state-val" class="value nominal">IDLE</span>
         </div>
 
         <div class="metric">
@@ -95,41 +123,50 @@
         </div>
 
         <div class="metric" style="border:none; margin:0;">
-            <span class="label">PULSE_GEN</span>
+            <span class="label">PULSE_COUNT</span>
             <span id="pulse-val" class="value">0</span>
         </div>
 
-        <div id="os-tag">SUBSTRATE // ACTIVE</div>
+        <div id="os-tag">SUBSTRATE // INTERACTIVE</div>
     </div>
+
+    <button id="pulse-trigger" onclick="FieldOS.pulse(0.125)">Pulse</button>
 
     <script>
         /**
          * FIELD_OS :: KERNEL
-         * The core logic governing the platform substrate.
+         * Core Platform Substrate Logic
          */
         const FieldOS = {
             kernel: {
                 energy: 0.0,
                 stability: 1.0,
                 pulses: 0,
-                resilience: 0.92,
-                entropy: 0.001
+                resilience: 0.88,
+                entropy: 0.002
             },
 
-            // Trigger a system-wide state change
+            // Human or System Intent
             pulse: function(magnitude = 0.1) {
                 this.kernel.pulses++;
                 this.kernel.energy += magnitude;
                 
-                // Physics: Higher energy without resilience causes instability
+                // Physics: Energy vs Resilience
                 const pressure = this.kernel.energy * (1 - this.kernel.resilience);
                 this.kernel.stability = Math.max(0, 1 - pressure);
 
-                console.log(`FIELD_OS :: PULSE_${this.kernel.pulses} :: E:${this.kernel.energy.toFixed(3)}`);
+                this.provideFeedback();
                 this.render();
             },
 
-            // Update the visual Surface (HUD)
+            // Visual confirmation of action
+            provideFeedback: function() {
+                const hud = document.getElementById('field-os-hud');
+                hud.classList.add('flash');
+                setTimeout(() => hud.classList.remove('flash'), 150);
+            },
+
+            // Update UI
             render: function() {
                 const stateEl = document.getElementById('state-val');
                 const energyEl = document.getElementById('energy-val');
@@ -140,11 +177,11 @@
                 stabilityEl.innerText = this.kernel.stability.toFixed(3);
                 pulseEl.innerText = this.kernel.pulses;
 
-                // State Logic
+                // State determination based on stability
                 if (this.kernel.stability <= 0) {
                     stateEl.innerText = "COLLAPSE";
                     stateEl.className = "value collapse";
-                } else if (this.kernel.stability < 0.75) {
+                } else if (this.kernel.stability < 0.70) {
                     stateEl.innerText = "STRAIN";
                     stateEl.className = "value strain";
                 } else {
@@ -153,19 +190,16 @@
                 }
             },
 
-            // Platform Boot Sequence
+            // Boot Sequence
             boot: function() {
                 console.log("FIELD_OS :: BOOT_SEQUENCE_INITIALIZED");
-                
-                // Initial stabilization
                 setTimeout(() => {
-                    this.pulse(0.05); // The first heartbeat
+                    this.pulse(0.05); // Initial system heartbeat
                     console.log("FIELD_OS :: KERNEL_STABILIZED");
                 }, 800);
             }
         };
 
-        // Initialize FieldOS
         window.onload = () => FieldOS.boot();
     </script>
 </body>
