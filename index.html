@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FIELD_OS // CONTROL</title>
+    <title>FIELD_OS // STRUCTURAL_BAY</title>
     <style>
         :root {
             --substrate: #050505;
@@ -24,186 +24,170 @@
             height: 100vh;
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
             overflow: hidden;
             text-transform: uppercase;
         }
 
-        /* --- SYSTEM HUD --- */
+        /* --- HUD --- */
         #field-os-hud {
-            width: 300px;
-            padding: 25px;
-            border: 1px solid var(--cyan-dim);
+            padding: 15px;
+            border-bottom: 1px solid var(--cyan-dim);
             background: rgba(0, 242, 255, 0.02);
-            box-shadow: 0 0 40px rgba(0, 0, 0, 1);
-            position: relative;
-            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            flex-shrink: 0;
         }
 
-        .metric {
+        .metric { display: flex; flex-direction: column; }
+        .label { color: var(--cyan-dim); font-size: 0.6rem; letter-spacing: 1px; }
+        .value { font-size: 0.85rem; font-weight: bold; }
+
+        /* --- STRUCTURAL BAY (INPUT) --- */
+        #structural-bay {
+            flex: 1;
             display: flex;
-            justify-content: space-between;
-            margin-bottom: 12px;
-            border-bottom: 1px solid rgba(0, 242, 255, 0.05);
-            padding-bottom: 4px;
+            flex-direction: column;
+            border-bottom: 1px solid var(--cyan-dim);
+            min-height: 30%;
         }
 
-        .label { color: var(--cyan-dim); font-size: 0.65rem; letter-spacing: 1px; }
-        .value { font-size: 0.9rem; font-weight: bold; }
+        #code-input {
+            flex: 1;
+            background: transparent;
+            color: var(--cyan);
+            border: none;
+            padding: 15px;
+            font-family: var(--font);
+            font-size: 14px;
+            resize: none;
+            outline: none;
+            text-transform: none; /* Code must remain case-sensitive */
+            caret-color: var(--cyan);
+        }
 
-        /* --- INTERACTION --- */
+        /* --- LIVE SURFACE (PREVIEW) --- */
+        #live-surface {
+            flex: 1;
+            background: #fff; /* White substrate for rendered content visibility */
+            min-height: 30%;
+        }
+
+        #preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* --- CONTROLS --- */
+        #controls {
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            border-top: 1px solid var(--cyan-dim);
+            flex-shrink: 0;
+        }
+
         #pulse-trigger {
-            margin-top: 30px;
             background: transparent;
             color: var(--cyan);
             border: 1px solid var(--cyan);
-            padding: 15px 40px;
+            padding: 10px 30px;
             font-family: var(--font);
-            font-size: 0.8rem;
-            letter-spacing: 3px;
+            font-size: 0.7rem;
+            letter-spacing: 2px;
             cursor: pointer;
-            transition: all 0.1s ease;
-            outline: none;
         }
 
         #pulse-trigger:active {
             background: var(--cyan);
             color: var(--substrate);
-            box-shadow: 0 0 20px var(--cyan);
-            transform: translateY(1px);
         }
 
-        /* --- SYSTEM STATES --- */
-        .nominal { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
-        .strain { color: var(--warning); text-shadow: 0 0 8px var(--warning); }
+        /* --- STATES --- */
+        .nominal { color: var(--cyan); text-shadow: 0 0 5px var(--cyan); }
+        .strain { color: var(--warning); text-shadow: 0 0 5px var(--warning); }
         .collapse { color: var(--critical); animation: alert 0.4s infinite; }
 
-        /* --- KINETIC FEEDBACK --- */
-        .system-flash {
-            border-color: var(--cyan) !important;
-            box-shadow: 0 0 50px var(--cyan-dim) !important;
-        }
-
         @keyframes alert {
-            0% { opacity: 1; }
+            0%, 100% { opacity: 1; }
             50% { opacity: 0.3; }
-            100% { opacity: 1; }
         }
 
-        #os-tag {
-            position: absolute;
-            bottom: -20px;
-            right: 0;
-            font-size: 0.5rem;
-            color: var(--cyan-dim);
-        }
+        .system-flash { border-color: var(--cyan) !important; }
     </style>
 </head>
 <body>
 
     <div id="field-os-hud">
         <div class="metric">
-            <span class="label">SYSTEM_IDENT</span>
-            <span class="value">FIELD_OS_v0.0.3</span>
-        </div>
-
-        <div class="metric">
             <span class="label">STATE</span>
             <span id="state-val" class="value nominal">IDLE</span>
         </div>
-
         <div class="metric">
             <span class="label">ENERGY_DENSITY</span>
             <span id="energy-val" class="value">0.000</span>
         </div>
-
         <div class="metric">
             <span class="label">STABILITY</span>
             <span id="stability-val" class="value">1.000</span>
         </div>
-
-        <div class="metric" style="border:none; margin:0;">
+        <div class="metric">
             <span class="label">PULSE_COUNT</span>
             <span id="pulse-val" class="value">0</span>
         </div>
-
-        <div id="os-tag">SUBSTRATE // INTERACTIVE</div>
     </div>
 
-    <button id="pulse-trigger" onclick="FieldOS.pulse(0.125)">Pulse</button>
+    <div id="structural-bay">
+        <textarea id="code-input" spellcheck="false" placeholder="// INJECT CODE HERE"><h1 style="color: #050505;">Reality Formed</h1></textarea>
+    </div>
+
+    <div id="live-surface">
+        <iframe id="preview-frame"></iframe>
+    </div>
+
+    <div id="controls">
+        <button id="pulse-trigger" onclick="FieldOS.pulse(0.1)">Manual Pulse</button>
+    </div>
 
     <script>
-        /**
-         * FIELD_OS :: KERNEL
-         * Primary interaction logic for the substrate.
-         */
         const FieldOS = {
             kernel: {
                 energy: 0.0,
                 stability: 1.0,
                 pulses: 0,
-                resilience: 0.88,
-                entropy: 0.002
+                resilience: 0.85
             },
 
-            // Human or System Intent
-            pulse: function(magnitude = 0.1) {
+            // Process intent and update system physics
+            inject: function(content) {
+                this.kernel.pulses++;
+                
+                // Content length drives energy density
+                const rawEnergy = content.length / 500;
+                this.kernel.energy = rawEnergy;
+
+                // Calculate stability
+                if (content.trim().length === 0) {
+                    this.kernel.stability = 0;
+                } else {
+                    // Pressure builds as energy exceeds resilience
+                    const pressure = this.kernel.energy * (1 - this.kernel.resilience);
+                    this.kernel.stability = Math.max(0, 1 - (pressure * 2));
+                }
+
+                this.render();
+                this.syncSurface(content);
+            },
+
+            // Direct manual energy injection
+            pulse: function(magnitude) {
                 this.kernel.pulses++;
                 this.kernel.energy += magnitude;
-                
-                // Physics: Pressure builds as energy exceeds resilience
-                const pressure = this.kernel.energy * (1 - this.kernel.resilience);
-                this.kernel.stability = Math.max(0, 1 - pressure);
-
                 this.kineticFeedback();
                 this.render();
-                
-                console.log(`FIELD_OS :: PULSE_${this.kernel.pulses} :: FORCE_${magnitude}`);
             },
 
-            // Visual response to interaction
             kineticFeedback: function() {
                 const hud = document.getElementById('field-os-hud');
-                hud.classList.add('system-flash');
-                setTimeout(() => hud.classList.remove('system-flash'), 100);
-            },
-
-            // Update Surface
-            render: function() {
-                const stateEl = document.getElementById('state-val');
-                const energyEl = document.getElementById('energy-val');
-                const stabilityEl = document.getElementById('stability-val');
-                const pulseEl = document.getElementById('pulse-val');
-
-                energyEl.innerText = this.kernel.energy.toFixed(3);
-                stabilityEl.innerText = this.kernel.stability.toFixed(3);
-                pulseEl.innerText = this.kernel.pulses;
-
-                // Evaluate Stability State
-                if (this.kernel.stability <= 0) {
-                    stateEl.innerText = "COLLAPSE";
-                    stateEl.className = "value collapse";
-                } else if (this.kernel.stability < 0.70) {
-                    stateEl.innerText = "STRAIN";
-                    stateEl.className = "value strain";
-                } else {
-                    stateEl.innerText = "NOMINAL";
-                    stateEl.className = "value nominal";
-                }
-            },
-
-            // Boot Protocol
-            boot: function() {
-                console.log("FIELD_OS :: INITIALIZING_SUBSTRATE");
-                setTimeout(() => {
-                    this.pulse(0.05); // The first heartbeat
-                    console.log("FIELD_OS :: CORE_STABILIZED");
-                }, 800);
-            }
-        };
-
-        window.onload = () => FieldOS.boot();
-    </script>
-</body>
-</html>
+                hud.classList.add('
