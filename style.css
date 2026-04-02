@@ -39,6 +39,7 @@ textarea {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg);
 }
 
 .topbar {
@@ -231,7 +232,7 @@ textarea[readonly] {
   min-height: 54vh;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: white;
+  background: #ffffff;
 }
 
 .preview-footer {
