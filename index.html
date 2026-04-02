@@ -1,9 +1,9 @@
-l<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FIELD_OS // STRUCTURAL_BAY</title>
+    <title>FIELD_OS // USABILITY_LIFT</title>
     <style>
         :root {
             --substrate: #050505;
@@ -68,7 +68,7 @@ l<!DOCTYPE html>
             font-size: 14px;
             resize: none;
             outline: none;
-            text-transform: none; /* Preserve code casing */
+            text-transform: none;
             caret-color: var(--cyan);
         }
 
@@ -77,14 +77,16 @@ l<!DOCTYPE html>
             flex: 1;
             display: flex;
             flex-direction: column;
-            background: #fff; /* White substrate for content clarity */
+            background: #111;
+            padding: 10px; /* Padding creates the frame effect */
         }
 
         #preview-frame {
             flex: 1;
             width: 100%;
-            border: none;
+            border: 1px solid var(--cyan-dim); /* Separation Border */
             background: white;
+            border-radius: 2px;
         }
 
         /* --- CONTROLS --- */
@@ -148,11 +150,12 @@ l<!DOCTYPE html>
 
     <div id="structural-bay">
         <div class="section-label">STRUCTURAL_BAY</div>
-        <textarea id="code-input" spellcheck="false" placeholder="// INJECT STRUCTURE HERE"><h1 style="font-family: sans-serif; color: #050505; text-align: center; margin-top: 20%;">REALITY_FORMED</h1></textarea>
+        <textarea id="code-input" spellcheck="false" placeholder="// INJECT STRUCTURE HERE"><h1>VISIBLE_REALITY</h1>
+<p>The system now ensures readability by default.</p></textarea>
     </div>
 
     <div id="live-surface">
-        <div class="section-label" style="background: #eee; color: #666;">LIVE_SURFACE</div>
+        <div class="section-label" style="background: transparent; color: var(--cyan-dim); padding-left: 5px;">LIVE_SURFACE</div>
         <iframe id="preview-frame"></iframe>
     </div>
 
@@ -169,15 +172,37 @@ l<!DOCTYPE html>
                 resilience: 0.85
             },
 
-            // Updates the live surface and the system physics
+            // Safe Injection Wrapper
+            generateVesselHTML: function(userContent) {
+                return `
+                    <html>
+                    <head>
+                        <style>
+                            body {
+                                background: #ffffff;
+                                color: #000000;
+                                font-family: sans-serif;
+                                padding: 20px;
+                                margin: 0;
+                                line-height: 1.5;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        ${userContent}
+                    </body>
+                    </html>
+                `;
+            },
+
             sync: function() {
                 const input = document.getElementById('code-input').value;
                 const preview = document.getElementById('preview-frame');
                 
-                // 1. Render to Surface
+                // 1. Render to Surface with Safety Wrapper
                 const doc = preview.contentDocument || preview.contentWindow.document;
                 doc.open();
-                doc.write(input);
+                doc.write(this.generateVesselHTML(input));
                 doc.close();
 
                 // 2. Feed Kernel
@@ -193,10 +218,7 @@ l<!DOCTYPE html>
                     this.kernel.energy = 0;
                     this.kernel.stability = 0; // Collapse
                 } else {
-                    // Energy density derived from content volume
                     this.kernel.energy = len / 400; 
-                    
-                    // Pressure builds as energy pushes against resilience
                     const pressure = this.kernel.energy * (1 - this.kernel.resilience);
                     this.kernel.stability = Math.max(0, 1 - (pressure * 2.5));
                 }
@@ -205,12 +227,9 @@ l<!DOCTYPE html>
             pulse: function(magnitude) {
                 this.kernel.pulses++;
                 this.kernel.energy += magnitude;
-                
-                // Visual feedback for manual injection
                 const hud = document.getElementById('field-os-hud');
                 hud.classList.add('kinetic-flash');
                 setTimeout(() => hud.classList.remove('kinetic-flash'), 100);
-                
                 this.renderHUD();
             },
 
@@ -224,7 +243,6 @@ l<!DOCTYPE html>
                 stabilityEl.innerText = this.kernel.stability.toFixed(3);
                 pulseEl.innerText = this.kernel.pulses;
 
-                // State logic based on stability threshold
                 if (this.kernel.stability <= 0) {
                     stateEl.innerText = "COLLAPSE";
                     stateEl.className = "value collapse";
@@ -241,10 +259,9 @@ l<!DOCTYPE html>
                 const editor = document.getElementById('code-input');
                 editor.addEventListener('input', () => this.sync());
                 
-                // Initial stabilization
                 setTimeout(() => {
                     this.sync();
-                    console.log("FIELD_OS :: STRUCTURAL_BAY_STABILIZED");
+                    console.log("FIELD_OS :: USABILITY_LAYER_NOMINAL");
                 }, 500);
             }
         };
