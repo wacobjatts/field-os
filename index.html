@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FIELD_OS // INTERACT</title>
+    <title>FIELD_OS // CONTROL</title>
     <style>
         :root {
             --substrate: #050505;
@@ -38,7 +38,7 @@
             background: rgba(0, 242, 255, 0.02);
             box-shadow: 0 0 40px rgba(0, 0, 0, 1);
             position: relative;
-            transition: all 0.2s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
         }
 
         .metric {
@@ -61,7 +61,7 @@
             padding: 15px 40px;
             font-family: var(--font);
             font-size: 0.8rem;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
             cursor: pointer;
             transition: all 0.1s ease;
             outline: none;
@@ -71,17 +71,18 @@
             background: var(--cyan);
             color: var(--substrate);
             box-shadow: 0 0 20px var(--cyan);
+            transform: translateY(1px);
         }
 
-        /* --- STATUS STATES --- */
+        /* --- SYSTEM STATES --- */
         .nominal { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
         .strain { color: var(--warning); text-shadow: 0 0 8px var(--warning); }
         .collapse { color: var(--critical); animation: alert 0.4s infinite; }
 
-        /* --- FEEDBACK ANIMATIONS --- */
-        .flash {
-            box-shadow: 0 0 50px var(--cyan-dim) !important;
+        /* --- KINETIC FEEDBACK --- */
+        .system-flash {
             border-color: var(--cyan) !important;
+            box-shadow: 0 0 50px var(--cyan-dim) !important;
         }
 
         @keyframes alert {
@@ -135,7 +136,7 @@
     <script>
         /**
          * FIELD_OS :: KERNEL
-         * Core Platform Substrate Logic
+         * Primary interaction logic for the substrate.
          */
         const FieldOS = {
             kernel: {
@@ -151,22 +152,24 @@
                 this.kernel.pulses++;
                 this.kernel.energy += magnitude;
                 
-                // Physics: Energy vs Resilience
+                // Physics: Pressure builds as energy exceeds resilience
                 const pressure = this.kernel.energy * (1 - this.kernel.resilience);
                 this.kernel.stability = Math.max(0, 1 - pressure);
 
-                this.provideFeedback();
+                this.kineticFeedback();
                 this.render();
+                
+                console.log(`FIELD_OS :: PULSE_${this.kernel.pulses} :: FORCE_${magnitude}`);
             },
 
-            // Visual confirmation of action
-            provideFeedback: function() {
+            // Visual response to interaction
+            kineticFeedback: function() {
                 const hud = document.getElementById('field-os-hud');
-                hud.classList.add('flash');
-                setTimeout(() => hud.classList.remove('flash'), 150);
+                hud.classList.add('system-flash');
+                setTimeout(() => hud.classList.remove('system-flash'), 100);
             },
 
-            // Update UI
+            // Update Surface
             render: function() {
                 const stateEl = document.getElementById('state-val');
                 const energyEl = document.getElementById('energy-val');
@@ -177,7 +180,7 @@
                 stabilityEl.innerText = this.kernel.stability.toFixed(3);
                 pulseEl.innerText = this.kernel.pulses;
 
-                // State determination based on stability
+                // Evaluate Stability State
                 if (this.kernel.stability <= 0) {
                     stateEl.innerText = "COLLAPSE";
                     stateEl.className = "value collapse";
@@ -190,12 +193,12 @@
                 }
             },
 
-            // Boot Sequence
+            // Boot Protocol
             boot: function() {
-                console.log("FIELD_OS :: BOOT_SEQUENCE_INITIALIZED");
+                console.log("FIELD_OS :: INITIALIZING_SUBSTRATE");
                 setTimeout(() => {
-                    this.pulse(0.05); // Initial system heartbeat
-                    console.log("FIELD_OS :: KERNEL_STABILIZED");
+                    this.pulse(0.05); // The first heartbeat
+                    console.log("FIELD_OS :: CORE_STABILIZED");
                 }, 800);
             }
         };
