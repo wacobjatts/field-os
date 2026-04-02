@@ -1,129 +1,45 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>FieldOS // Substrate</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FieldBuilder</title>
+
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-    <header class="os-header">
-        <div class="system-ident">
-            <span class="label">Platform</span>
-            <span class="value">FieldOS // Alpha</span>
-        </div>
-        <div class="system-metrics">
-            <div class="metric">
-                <span class="label">Stability</span>
-                <span class="value" id="val-stability">1.00</span>
-            </div>
-            <div class="metric">
-                <span class="label">Energy</span>
-                <span class="value" id="val-energy">0.00</span>
-            </div>
-        </div>
-    </header>
+  <header class="header">
+    <div>FIELDBUILDER</div>
+    <div id="status">Ready</div>
+  </header>
 
-    <main class="os-viewport">
-        
-        <section id="chamber-home" class="chamber active">
-            <div class="fr-card">
-                <header class="card-header">
-                    <span class="card-label">System // Orientation</span>
-                </header>
-                <div class="card-body">
-                    <h1 class="display-text">Vessel Nominal.</h1>
-                    <p class="meta-text">All creation layers are synchronized with the substrate. FieldBuild protocols active.</p>
-                    <button class="btn-action" onclick="FieldOS.nav('build')">Enter Build Chamber</button>
-                </div>
-            </div>
-            
-            <div class="stats-row">
-                <div class="fr-card">
-                    <header class="card-header"><span class="card-label">Pulses</span></header>
-                    <div class="card-body"><span class="stat-value" id="stat-pulses">0</span></div>
-                </div>
-                <div class="fr-card">
-                    <header class="card-header"><span class="card-label">Uptime</span></header>
-                    <div class="card-body"><span class="stat-value">02:44:02</span></div>
-                </div>
-            </div>
-        </section>
+  <main class="container">
 
-        <section id="chamber-build" class="chamber">
-            <nav class="layer-rail">
-                <button class="rail-item active" data-layer="structure" onclick="FieldOS.setLayer('structure')">Structure</button>
-                <button class="rail-item" data-layer="style" onclick="FieldOS.setLayer('style')">Style</button>
-                <button class="rail-item" data-layer="behavior" onclick="FieldOS.setLayer('behavior')">Behavior</button>
-                <button class="rail-item" data-layer="data" onclick="FieldOS.setLayer('data')">Data</button>
-            </nav>
+    <div class="card">
+      <div class="card-title">STRUCTURE (HTML)</div>
+      <textarea id="htmlInput"></textarea>
+    </div>
 
-            <div class="fr-card workspace">
-                <header class="card-header">
-                    <span class="card-label" id="active-layer-title">Layer // Structure</span>
-                    <span class="sync-status">Synced</span>
-                </header>
-                <div class="workspace-editor">
-                    <textarea id="editor-structure" class="editor-area active" spellcheck="false" placeholder="Define structure..."></textarea>
-                    <textarea id="editor-style" class="editor-area" spellcheck="false" placeholder="Define style..."></textarea>
-                    <textarea id="editor-behavior" class="editor-area" spellcheck="false" placeholder="Define behavior..."></textarea>
-                    <textarea id="editor-data" class="editor-area" spellcheck="false" placeholder="Define data..."></textarea>
-                </div>
-                <footer class="workspace-footer">
-                    <span id="char-count">0 Chars</span>
-                </div>
-            </div>
-        </section>
+    <div class="card">
+      <div class="card-title">STYLE (CSS)</div>
+      <textarea id="cssInput"></textarea>
+    </div>
 
-        <section id="chamber-preview" class="chamber full-screen">
-            <iframe id="manifest-surface"></iframe>
-            <div class="safety-rail">
-                <span class="rail-label">Manifested Surface</span>
-                <button class="btn-return" onclick="FieldOS.nav('build')">← Back to Build</button>
-            </div>
-        </section>
+    <div class="card">
+      <div class="card-title">BEHAVIOR (JS)</div>
+      <textarea id="jsInput"></textarea>
+    </div>
 
-        <section id="chamber-history" class="chamber">
-            <div class="fr-card">
-                <header class="card-header"><span class="card-label">Pulse History</span></header>
-                <div class="card-body" id="history-list">
-                    <p class="empty-msg">No temporal snapshots found.</p>
-                </div>
-            </div>
-        </section>
+    <div class="card preview-card">
+      <div class="card-title">PREVIEW</div>
+      <iframe id="preview"></iframe>
+    </div>
 
-        <section id="chamber-core" class="chamber">
-            <div class="fr-card">
-                <header class="card-header"><span class="card-label">Operational Scope</span></header>
-                <div class="card-body">
-                    <div class="segmented-control">
-                        <button class="seg-item active">Website</button>
-                        <button class="seg-item">Application</button>
-                        <button class="seg-item">Sandbox</button>
-                    </div>
-                </div>
-            </div>
-            <div class="fr-card">
-                <header class="card-header"><span class="card-label">Substrate Settings</span></header>
-                <div class="card-body">
-                    <div class="setting-row"><span>Auto-Save Pulses</span><div class="toggle active"></div></div>
-                    <div class="setting-row"><span>Haptic Feedback</span><div class="toggle"></div></div>
-                </div>
-            </div>
-            <button class="btn-danger" onclick="FieldOS.purge()">Reset Substrate</button>
-        </section>
+  </main>
 
-    </main>
+  <script src="script.js"></script>
 
-    <nav class="os-nav">
-        <button class="nav-item active" onclick="FieldOS.nav('home')">Home</button>
-        <button class="nav-item" onclick="FieldOS.nav('build')">Build</button>
-        <button class="nav-item" onclick="FieldOS.nav('preview')">Preview</button>
-        <button class="nav-item" onclick="FieldOS.nav('history')">History</button>
-        <button class="nav-item" onclick="FieldOS.nav('core')">Core</button>
-    </nav>
-
-    <script src="script.js"></script>
 </body>
 </html>
