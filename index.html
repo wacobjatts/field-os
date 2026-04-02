@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FIELD_OS // USABILITY_LIFT</title>
+    <title>FIELD_OS // SPECTRAL_TUNING</title>
     <style>
         :root {
             --substrate: #050505;
-            --cyan: #00f2ff;
-            --cyan-dim: rgba(0, 242, 255, 0.15);
+            --accent-hue: 180; /* Default Cyan */
+            --accent: hsl(var(--accent-hue), 100%, 50%);
+            --accent-dim: hsla(var(--accent-hue), 100%, 50%, 0.15);
             --warning: #ffaa00;
             --critical: #ff3300;
             --font: 'Courier New', monospace;
@@ -18,7 +19,7 @@
 
         body {
             background-color: var(--substrate);
-            color: var(--cyan);
+            color: var(--accent);
             font-family: var(--font);
             margin: 0;
             height: 100vh;
@@ -26,42 +27,44 @@
             flex-direction: column;
             overflow: hidden;
             text-transform: uppercase;
+            transition: color 0.1s linear;
         }
 
         /* --- HUD --- */
         #field-os-hud {
             padding: 15px;
-            border-bottom: 1px solid var(--cyan-dim);
-            background: rgba(0, 242, 255, 0.02);
+            border-bottom: 1px solid var(--accent-dim);
+            background: hsla(var(--accent-hue), 100%, 50%, 0.02);
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 10px;
             flex-shrink: 0;
+            transition: border-color 0.1s linear;
         }
 
         .metric { display: flex; flex-direction: column; }
-        .label { color: var(--cyan-dim); font-size: 0.6rem; letter-spacing: 1px; }
+        .label { color: var(--accent-dim); font-size: 0.6rem; letter-spacing: 1px; transition: color 0.1s linear; }
         .value { font-size: 0.85rem; font-weight: bold; }
 
-        /* --- STRUCTURAL BAY (INPUT) --- */
+        /* --- STRUCTURAL BAY --- */
         #structural-bay {
             flex: 1;
             display: flex;
             flex-direction: column;
-            border-bottom: 1px solid var(--cyan-dim);
+            border-bottom: 1px solid var(--accent-dim);
         }
 
         .section-label {
             font-size: 0.5rem;
             padding: 5px 15px;
-            color: var(--cyan-dim);
-            background: rgba(0, 242, 255, 0.05);
+            color: var(--accent-dim);
+            background: hsla(var(--accent-hue), 100%, 50%, 0.05);
         }
 
         #code-input {
             flex: 1;
             background: transparent;
-            color: var(--cyan);
+            color: var(--accent);
             border: none;
             padding: 15px;
             font-family: var(--font);
@@ -69,62 +72,97 @@
             resize: none;
             outline: none;
             text-transform: none;
-            caret-color: var(--cyan);
+            caret-color: var(--accent);
+            transition: color 0.1s linear;
         }
 
-        /* --- LIVE SURFACE (PREVIEW) --- */
+        /* --- LIVE SURFACE --- */
         #live-surface {
             flex: 1;
             display: flex;
             flex-direction: column;
             background: #111;
-            padding: 10px; /* Padding creates the frame effect */
+            padding: 10px;
         }
 
         #preview-frame {
             flex: 1;
             width: 100%;
-            border: 1px solid var(--cyan-dim); /* Separation Border */
+            border: 1px solid var(--accent-dim);
             background: white;
             border-radius: 2px;
         }
 
+        /* --- SPECTRAL TUNING RAIL --- */
+        #calibration-rail {
+            padding: 10px 20px;
+            background: var(--substrate);
+            border-top: 1px solid var(--accent-dim);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #spectral-slider {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(to right, 
+                hsl(0, 100%, 50%), hsl(60, 100%, 50%), hsl(120, 100%, 50%), 
+                hsl(180, 100%, 50%), hsl(240, 100%, 50%), hsl(300, 100%, 50%), hsl(360, 100%, 50%));
+            border-radius: 2px;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        #spectral-slider:hover { opacity: 1; }
+
+        #spectral-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--substrate);
+            border: 2px solid white;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+
         /* --- CONTROLS --- */
         #controls {
-            padding: 10px;
+            padding: 15px;
             display: flex;
             justify-content: center;
             background: var(--substrate);
-            border-top: 1px solid var(--cyan-dim);
         }
 
         #pulse-trigger {
             background: transparent;
-            color: var(--cyan);
-            border: 1px solid var(--cyan);
-            padding: 10px 30px;
+            color: var(--accent);
+            border: 1px solid var(--accent);
+            padding: 12px 40px;
             font-family: var(--font);
-            font-size: 0.7rem;
-            letter-spacing: 2px;
+            font-size: 0.75rem;
+            letter-spacing: 3px;
             cursor: pointer;
+            transition: all 0.1s ease;
         }
 
         #pulse-trigger:active {
-            background: var(--cyan);
+            background: var(--accent);
             color: var(--substrate);
+            box-shadow: 0 0 20px var(--accent);
         }
 
         /* --- STATES --- */
-        .nominal { color: var(--cyan); text-shadow: 0 0 5px var(--cyan); }
+        .nominal { color: var(--accent); text-shadow: 0 0 5px var(--accent); }
         .strain { color: var(--warning); text-shadow: 0 0 5px var(--warning); }
         .collapse { color: var(--critical); animation: alert 0.4s infinite; }
 
-        @keyframes alert {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-
-        .kinetic-flash { border-color: var(--cyan) !important; }
+        @keyframes alert { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        .kinetic-flash { border-color: var(--accent) !important; box-shadow: 0 0 30px var(--accent-dim); }
     </style>
 </head>
 <body>
@@ -149,14 +187,18 @@
     </div>
 
     <div id="structural-bay">
-        <div class="section-label">STRUCTURAL_BAY</div>
-        <textarea id="code-input" spellcheck="false" placeholder="// INJECT STRUCTURE HERE"><h1>VISIBLE_REALITY</h1>
-<p>The system now ensures readability by default.</p></textarea>
+        <div class="section-label">STRUCTURAL_BAY // WAVELENGTH_TUNING_ACTIVE</div>
+        <textarea id="code-input" spellcheck="false" placeholder="// INJECT STRUCTURE"><h1>SPECTRAL_TUNING</h1>
+<p>Shift the wavelength below to tune the vessel's energy signature.</p></textarea>
     </div>
 
     <div id="live-surface">
-        <div class="section-label" style="background: transparent; color: var(--cyan-dim); padding-left: 5px;">LIVE_SURFACE</div>
         <iframe id="preview-frame"></iframe>
+    </div>
+
+    <div id="calibration-rail">
+        <div class="label" style="min-width: 50px;">FREQ</div>
+        <input type="range" id="spectral-slider" min="0" max="360" value="180">
     </div>
 
     <div id="controls">
@@ -172,40 +214,24 @@
                 resilience: 0.85
             },
 
-            // Safe Injection Wrapper
+            // Spectral Tuning: Updates the CSS Hue variable
+            tuneWavelength: function(hue) {
+                document.documentElement.style.setProperty('--accent-hue', hue);
+                this.renderHUD(); // Update text colors if needed
+            },
+
             generateVesselHTML: function(userContent) {
-                return `
-                    <html>
-                    <head>
-                        <style>
-                            body {
-                                background: #ffffff;
-                                color: #000000;
-                                font-family: sans-serif;
-                                padding: 20px;
-                                margin: 0;
-                                line-height: 1.5;
-                            }
-                        </style>
-                    </head>
-                    <body>
-                        ${userContent}
-                    </body>
-                    </html>
-                `;
+                return `<html><head><style>body{background:#fff;color:#000;font-family:sans-serif;padding:20px;margin:0;line-height:1.5;}</style></head><body>${userContent}</body></html>`;
             },
 
             sync: function() {
                 const input = document.getElementById('code-input').value;
                 const preview = document.getElementById('preview-frame');
-                
-                // 1. Render to Surface with Safety Wrapper
                 const doc = preview.contentDocument || preview.contentWindow.document;
                 doc.open();
                 doc.write(this.generateVesselHTML(input));
                 doc.close();
 
-                // 2. Feed Kernel
                 this.kernel.pulses++;
                 this.calculatePhysics(input);
                 this.renderHUD();
@@ -213,10 +239,9 @@
 
             calculatePhysics: function(content) {
                 const len = content.trim().length;
-
                 if (len === 0) {
                     this.kernel.energy = 0;
-                    this.kernel.stability = 0; // Collapse
+                    this.kernel.stability = 0;
                 } else {
                     this.kernel.energy = len / 400; 
                     const pressure = this.kernel.energy * (1 - this.kernel.resilience);
@@ -235,13 +260,9 @@
 
             renderHUD: function() {
                 const stateEl = document.getElementById('state-val');
-                const energyEl = document.getElementById('energy-val');
-                const stabilityEl = document.getElementById('stability-val');
-                const pulseEl = document.getElementById('pulse-val');
-
-                energyEl.innerText = this.kernel.energy.toFixed(3);
-                stabilityEl.innerText = this.kernel.stability.toFixed(3);
-                pulseEl.innerText = this.kernel.pulses;
+                document.getElementById('energy-val').innerText = this.kernel.energy.toFixed(3);
+                document.getElementById('stability-val').innerText = this.kernel.stability.toFixed(3);
+                document.getElementById('pulse-val').innerText = this.kernel.pulses;
 
                 if (this.kernel.stability <= 0) {
                     stateEl.innerText = "COLLAPSE";
@@ -257,11 +278,14 @@
 
             boot: function() {
                 const editor = document.getElementById('code-input');
+                const slider = document.getElementById('spectral-slider');
+
                 editor.addEventListener('input', () => this.sync());
+                slider.addEventListener('input', (e) => this.tuneWavelength(e.target.value));
                 
                 setTimeout(() => {
                     this.sync();
-                    console.log("FIELD_OS :: USABILITY_LAYER_NOMINAL");
+                    console.log("FIELD_OS :: SPECTRAL_TUNING_READY");
                 }, 500);
             }
         };
