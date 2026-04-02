@@ -1,45 +1,181 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>FieldBuilder</title>
-
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css" />
 </head>
-
 <body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand-block">
+        <div class="eyebrow">FIELDOS / FIELDBUILDER</div>
+        <div class="title-row">
+          <h1>FieldBuilder</h1>
+          <span id="saveBadge" class="save-badge">Ready</span>
+        </div>
+      </div>
 
-  <header class="header">
-    <div>FIELDBUILDER</div>
-    <div id="status">Ready</div>
-  </header>
+      <div class="topbar-actions">
+        <button id="lockToggle" class="ghost-btn" type="button">Edit</button>
+        <button id="saveStableBtn" class="primary-btn" type="button">Save Stable</button>
+      </div>
+    </header>
 
-  <main class="container">
+    <section class="mode-bar">
+      <button class="mode-chip active" type="button">Build</button>
+      <button class="mode-chip" type="button">Preview</button>
+      <button class="mode-chip" type="button">Repair</button>
+    </section>
 
-    <div class="card">
-      <div class="card-title">STRUCTURE (HTML)</div>
-      <textarea id="htmlInput"></textarea>
-    </div>
+    <main class="main-chamber">
+      <section id="homeView" class="view-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-kicker">Workspace</div>
+              <h2>Current Project</h2>
+            </div>
+          </div>
+          <div class="home-grid">
+            <div class="stat-card">
+              <span class="stat-label">Current Tab</span>
+              <span id="homeCurrentTab" class="stat-value">HTML</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Preview State</span>
+              <span id="homePreviewState" class="stat-value">OK</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Draft Status</span>
+              <span id="homeDraftState" class="stat-value">Ready</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-label">Stable Saved</span>
+              <span id="homeStableState" class="stat-value">No</span>
+            </div>
+          </div>
+        </div>
+      </section>
 
-    <div class="card">
-      <div class="card-title">STYLE (CSS)</div>
-      <textarea id="cssInput"></textarea>
-    </div>
+      <section id="buildView" class="view-panel">
+        <div class="card build-card">
+          <div class="card-header">
+            <div>
+              <div class="card-kicker">Build Layer</div>
+              <h2 id="editorTitle">HTML</h2>
+            </div>
+            <div class="sync-status" id="syncStatus">Draft Saved</div>
+          </div>
 
-    <div class="card">
-      <div class="card-title">BEHAVIOR (JS)</div>
-      <textarea id="jsInput"></textarea>
-    </div>
+          <div class="layer-rail">
+            <button class="layer-tab active" data-layer="html" type="button">HTML</button>
+            <button class="layer-tab" data-layer="css" type="button">CSS</button>
+            <button class="layer-tab" data-layer="js" type="button">JS</button>
+          </div>
 
-    <div class="card preview-card">
-      <div class="card-title">PREVIEW</div>
-      <iframe id="preview"></iframe>
-    </div>
+          <div class="editor-wrap">
+            <textarea id="htmlEditor" class="editor active" spellcheck="false"></textarea>
+            <textarea id="cssEditor" class="editor" spellcheck="false"></textarea>
+            <textarea id="jsEditor" class="editor" spellcheck="false"></textarea>
+          </div>
+        </div>
+      </section>
 
-  </main>
+      <section id="previewView" class="view-panel hidden">
+        <div class="card preview-card">
+          <div class="card-header">
+            <div>
+              <div class="card-kicker">Manifestation</div>
+              <h2>Preview</h2>
+            </div>
+            <span id="previewStateBadge" class="preview-state ok">Preview OK</span>
+          </div>
+
+          <div class="preview-shell">
+            <iframe id="previewFrame" title="Preview"></iframe>
+          </div>
+
+          <div class="preview-footer">
+            <button id="backToBuildBtn" class="primary-btn wide-btn" type="button">Back to Build</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="historyView" class="view-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-kicker">Memory</div>
+              <h2>History</h2>
+            </div>
+          </div>
+
+          <div class="history-actions">
+            <button id="restoreStableBtn" class="ghost-btn" type="button">Restore Stable</button>
+          </div>
+
+          <div id="historyList" class="history-list"></div>
+        </div>
+      </section>
+
+      <section id="coreView" class="view-panel hidden">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <div class="card-kicker">System</div>
+              <h2>Core</h2>
+            </div>
+          </div>
+
+          <div class="core-grid">
+            <div class="setting-row">
+              <span>Editing Mode</span>
+              <strong id="coreLockState">Edit</strong>
+            </div>
+            <div class="setting-row">
+              <span>Autosave</span>
+              <strong>On</strong>
+            </div>
+            <div class="setting-row">
+              <span>Storage</span>
+              <strong>Local</strong>
+            </div>
+            <div class="setting-row">
+              <span>Export</span>
+              <button id="exportBtn" class="ghost-btn" type="button">Export Files</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <section class="quick-action-strip">
+      <button id="quickPreviewBtn" class="primary-btn" type="button">Preview</button>
+      <button id="quickSaveBtn" class="ghost-btn" type="button">Save Stable</button>
+      <button id="quickRestoreBtn" class="ghost-btn" type="button">Restore Stable</button>
+    </section>
+
+    <nav class="bottom-nav">
+      <button class="nav-btn" data-view="home" type="button">
+        <span class="nav-label">Home</span>
+      </button>
+      <button class="nav-btn active" data-view="build" type="button">
+        <span class="nav-label">Build</span>
+      </button>
+      <button class="nav-btn" data-view="preview" type="button">
+        <span class="nav-label">Preview</span>
+      </button>
+      <button class="nav-btn" data-view="history" type="button">
+        <span class="nav-label">History</span>
+      </button>
+      <button class="nav-btn" data-view="core" type="button">
+        <span class="nav-label">Core</span>
+      </button>
+    </nav>
+  </div>
 
   <script src="script.js"></script>
-
 </body>
 </html>
