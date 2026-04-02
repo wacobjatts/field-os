@@ -6,48 +6,51 @@ const STORAGE_KEYS = {
   actions: "fr_builder_actions"
 };
 
+const $ = (id) => document.getElementById(id);
+
 const views = {
-  home: document.getElementById("homeView"),
-  build: document.getElementById("buildView"),
-  preview: document.getElementById("previewView"),
-  history: document.getElementById("historyView"),
-  core: document.getElementById("coreView")
+  home: $("homeView"),
+  build: $("buildView"),
+  preview: $("previewView"),
+  history: $("historyView"),
+  core: $("coreView")
 };
 
 const navButtons = document.querySelectorAll(".nav-btn");
 const layerButtons = document.querySelectorAll(".layer-tab");
 
 const editorFrames = {
-  html: document.getElementById("htmlFrame"),
-  css: document.getElementById("cssFrame"),
-  js: document.getElementById("jsFrame")
+  html: $("htmlFrame"),
+  css: $("cssFrame"),
+  js: $("jsFrame")
 };
 
 const editors = {
-  html: document.getElementById("htmlEditor"),
-  css: document.getElementById("cssEditor"),
-  js: document.getElementById("jsEditor")
+  html: $("htmlEditor"),
+  css: $("cssEditor"),
+  js: $("jsEditor")
 };
 
 const els = {
-  workspaceTitle: document.getElementById("workspaceTitle"),
-  backToBuildBtn: document.getElementById("backToBuildBtn"),
-  previewFrame: document.getElementById("previewFrame"),
-  previewBadge: document.getElementById("previewBadge"),
-  saveBadge: document.getElementById("saveBadge"),
-  syncStatus: document.getElementById("syncStatus"),
-  homePreviewState: document.getElementById("homePreviewState"),
-  homeSaveState: document.getElementById("homeSaveState"),
-  homeCurrentMode: document.getElementById("homeCurrentMode"),
-  lockToggle: document.getElementById("lockToggle"),
-  coreLockState: document.getElementById("coreLockState"),
-  saveStableBtn: document.getElementById("saveStableBtn"),
-  quickSaveStableBtn: document.getElementById("quickSaveStableBtn"),
-  restoreStableBtn: document.getElementById("restoreStableBtn"),
-  previewBtn: document.getElementById("previewBtn"),
-  modePreviewBtn: document.getElementById("modePreviewBtn"),
-  exportBtn: document.getElementById("exportBtn"),
-  historyList: document.getElementById("historyList")
+  workspaceTitle: $("workspaceTitle"),
+  backToBuildBtn: $("backToBuildBtn"),
+  previewFrame: $("previewFrame"),
+  previewBadge: $("previewBadge"),
+  saveBadge: $("saveBadge"),
+  syncStatus: $("syncStatus"),
+  homePreviewState: $("homePreviewState"),
+  homeSaveState: $("homeSaveState"),
+  homeCurrentMode: $("homeCurrentMode"),
+  lockToggle: $("lockToggle"),
+  coreLockState: $("coreLockState"),
+  saveStableBtn: $("saveStableBtn"),
+  quickSaveStableBtn: $("quickSaveStableBtn"),
+  restoreStableBtn: $("restoreStableBtn"),
+  previewBtn: $("previewBtn"),
+  modePreviewBtn: $("modePreviewBtn"),
+  exportBtn: $("exportBtn"),
+  historyList: $("historyList"),
+  fullScreenPreviewBtn: $("fullScreenPreviewBtn")
 };
 
 const state = {
@@ -57,7 +60,7 @@ const state = {
 };
 
 const starter = {
-  html: `<main style="padding: 32px; font-family: Arial, sans-serif;">
+  html: `<main style="padding:32px;font-family:Arial,sans-serif;">
   <h1>Hello FieldBuilder</h1>
   <p>Your preview is connected.</p>
   <button onclick="document.body.style.background='#f3f7ff'">Click Me</button>
@@ -70,23 +73,33 @@ const starter = {
   js: `console.log("FieldBuilder preview connected");`
 };
 
+function exists(el) {
+  return !!el;
+}
+
 function getEditorValues() {
   return {
-    html: editors.html.value,
-    css: editors.css.value,
-    js: editors.js.value
+    html: exists(editors.html) ? editors.html.value : "",
+    css: exists(editors.css) ? editors.css.value : "",
+    js: exists(editors.js) ? editors.js.value : ""
   };
 }
 
+function setText(el, text) {
+  if (exists(el)) el.textContent = text;
+}
+
 function setSaveState(text) {
-  els.saveBadge.textContent = text;
-  els.syncStatus.textContent = text;
-  els.homeSaveState.textContent = text;
+  setText(els.saveBadge, text);
+  setText(els.syncStatus, text);
+  setText(els.homeSaveState, text);
 }
 
 function switchView(name) {
   Object.keys(views).forEach((key) => {
-    views[key].classList.toggle("hidden", key !== name);
+    if (exists(views[key])) {
+      views[key].classList.toggle("hidden", key !== name);
+    }
   });
 
   navButtons.forEach((btn) => {
@@ -94,19 +107,21 @@ function switchView(name) {
   });
 
   state.activeView = name;
-  els.homeCurrentMode.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+  setText(els.homeCurrentMode, name.charAt(0).toUpperCase() + name.slice(1));
 }
 
 function switchLayer(name) {
   Object.keys(editorFrames).forEach((key) => {
-    editorFrames[key].classList.toggle("active", key === name);
+    if (exists(editorFrames[key])) {
+      editorFrames[key].classList.toggle("active", key === name);
+    }
   });
 
   layerButtons.forEach((btn) => {
     btn.classList.toggle("active", btn.dataset.layer === name);
   });
 
-  els.workspaceTitle.textContent = name.toUpperCase();
+  setText(els.workspaceTitle, name.toUpperCase());
   state.activeLayer = name;
 }
 
@@ -114,11 +129,11 @@ function setLock(locked) {
   state.locked = locked;
 
   Object.values(editors).forEach((editor) => {
-    editor.readOnly = locked;
+    if (exists(editor)) editor.readOnly = locked;
   });
 
-  els.lockToggle.textContent = locked ? "Locked" : "Edit";
-  els.coreLockState.textContent = locked ? "Locked" : "Edit";
+  setText(els.lockToggle, locked ? "Locked" : "Edit");
+  setText(els.coreLockState, locked ? "Locked" : "Edit");
 }
 
 function saveDraft() {
@@ -130,9 +145,15 @@ function saveDraft() {
 }
 
 function loadDraft() {
-  editors.html.value = localStorage.getItem(STORAGE_KEYS.html) || starter.html;
-  editors.css.value = localStorage.getItem(STORAGE_KEYS.css) || starter.css;
-  editors.js.value = localStorage.getItem(STORAGE_KEYS.js) || starter.js;
+  if (exists(editors.html)) {
+    editors.html.value = localStorage.getItem(STORAGE_KEYS.html) || starter.html;
+  }
+  if (exists(editors.css)) {
+    editors.css.value = localStorage.getItem(STORAGE_KEYS.css) || starter.css;
+  }
+  if (exists(editors.js)) {
+    editors.js.value = localStorage.getItem(STORAGE_KEYS.js) || starter.js;
+  }
 }
 
 function addHistory(type, note = "") {
@@ -142,11 +163,13 @@ function addHistory(type, note = "") {
     note,
     timestamp: new Date().toISOString()
   });
-  localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(current.slice(0, 20)));
+  localStorage.setItem(STORAGE_KEYS.actions, JSON.stringify(current.slice(0, 30)));
   renderHistory();
 }
 
 function renderHistory() {
+  if (!exists(els.historyList)) return;
+
   const actions = JSON.parse(localStorage.getItem(STORAGE_KEYS.actions) || "[]");
 
   if (!actions.length) {
@@ -165,12 +188,21 @@ function renderHistory() {
   els.historyList.innerHTML = actions.map((item) => `
     <div class="history-item">
       <div class="history-top">
-        <span class="history-type">${item.type}</span>
+        <span class="history-type">${escapeHtml(item.type)}</span>
         <span class="history-time">${formatTime(item.timestamp)}</span>
       </div>
-      <div class="history-note">${item.note || "No note"}</div>
+      <div class="history-note">${escapeHtml(item.note || "No note")}</div>
     </div>
   `).join("");
+}
+
+function escapeHtml(str) {
+  return String(str)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
 }
 
 function formatTime(iso) {
@@ -183,15 +215,17 @@ function formatTime(iso) {
   });
 }
 
-function updatePreview() {
+function buildPreviewDocument() {
   const { html, css, js } = getEditorValues();
 
-  const fullDocument = `<!DOCTYPE html>
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<style>${css}</style>
+<style>
+${css}
+</style>
 </head>
 <body>
 ${html}
@@ -199,30 +233,36 @@ ${html}
 try {
 ${js}
 } catch (error) {
-  const errorBox = document.createElement('pre');
-  errorBox.style.color = 'red';
-  errorBox.style.padding = '16px';
-  errorBox.style.whiteSpace = 'pre-wrap';
+  const errorBox = document.createElement("pre");
+  errorBox.style.color = "red";
+  errorBox.style.padding = "16px";
+  errorBox.style.whiteSpace = "pre-wrap";
+  errorBox.style.fontFamily = "monospace";
   errorBox.textContent = error.message;
   document.body.appendChild(errorBox);
 }
 <\/script>
 </body>
 </html>`;
+}
+
+function updatePreview() {
+  if (!exists(els.previewFrame)) return;
 
   try {
+    const fullDocument = buildPreviewDocument();
     const frameDoc = els.previewFrame.contentDocument || els.previewFrame.contentWindow.document;
     frameDoc.open();
     frameDoc.write(fullDocument);
     frameDoc.close();
 
-    els.previewBadge.textContent = "Preview OK";
-    els.previewBadge.classList.remove("broken");
-    els.homePreviewState.textContent = "OK";
+    setText(els.previewBadge, "Preview OK");
+    if (exists(els.previewBadge)) els.previewBadge.classList.remove("broken");
+    setText(els.homePreviewState, "OK");
   } catch (error) {
-    els.previewBadge.textContent = "Preview Broken";
-    els.previewBadge.classList.add("broken");
-    els.homePreviewState.textContent = "Broken";
+    setText(els.previewBadge, "Preview Broken");
+    if (exists(els.previewBadge)) els.previewBadge.classList.add("broken");
+    setText(els.homePreviewState, "Broken");
   }
 }
 
@@ -248,9 +288,10 @@ function restoreStable() {
   if (!confirmed) return;
 
   const stable = JSON.parse(raw);
-  editors.html.value = stable.html || "";
-  editors.css.value = stable.css || "";
-  editors.js.value = stable.js || "";
+
+  if (exists(editors.html)) editors.html.value = stable.html || "";
+  if (exists(editors.css)) editors.css.value = stable.css || "";
+  if (exists(editors.js)) editors.js.value = stable.js || "";
 
   saveDraft();
   updatePreview();
@@ -276,6 +317,24 @@ function downloadFile(filename, content) {
   URL.revokeObjectURL(url);
 }
 
+async function openPreviewFullscreen() {
+  if (!exists(els.previewFrame)) return;
+
+  switchView("preview");
+
+  const target = els.previewFrame;
+
+  try {
+    if (target.requestFullscreen) {
+      await target.requestFullscreen();
+    } else if (target.webkitRequestFullscreen) {
+      target.webkitRequestFullscreen();
+    }
+  } catch (err) {
+    console.log("Fullscreen not available", err);
+  }
+}
+
 function bindEvents() {
   navButtons.forEach((btn) => {
     btn.addEventListener("click", () => switchView(btn.dataset.view));
@@ -286,6 +345,8 @@ function bindEvents() {
   });
 
   Object.values(editors).forEach((editor) => {
+    if (!exists(editor)) return;
+
     editor.addEventListener("input", () => {
       setSaveState("Unsaved Changes");
       saveDraft();
@@ -293,14 +354,41 @@ function bindEvents() {
     });
   });
 
-  els.backToBuildBtn.addEventListener("click", () => switchView("build"));
-  els.lockToggle.addEventListener("click", () => setLock(!state.locked));
-  els.saveStableBtn.addEventListener("click", saveStable);
-  els.quickSaveStableBtn.addEventListener("click", saveStable);
-  els.restoreStableBtn.addEventListener("click", restoreStable);
-  els.previewBtn.addEventListener("click", () => switchView("preview"));
-  els.modePreviewBtn.addEventListener("click", () => switchView("preview"));
-  els.exportBtn.addEventListener("click", exportFiles);
+  if (exists(els.backToBuildBtn)) {
+    els.backToBuildBtn.addEventListener("click", () => switchView("build"));
+  }
+
+  if (exists(els.lockToggle)) {
+    els.lockToggle.addEventListener("click", () => setLock(!state.locked));
+  }
+
+  if (exists(els.saveStableBtn)) {
+    els.saveStableBtn.addEventListener("click", saveStable);
+  }
+
+  if (exists(els.quickSaveStableBtn)) {
+    els.quickSaveStableBtn.addEventListener("click", saveStable);
+  }
+
+  if (exists(els.restoreStableBtn)) {
+    els.restoreStableBtn.addEventListener("click", restoreStable);
+  }
+
+  if (exists(els.previewBtn)) {
+    els.previewBtn.addEventListener("click", () => switchView("preview"));
+  }
+
+  if (exists(els.modePreviewBtn)) {
+    els.modePreviewBtn.addEventListener("click", () => switchView("preview"));
+  }
+
+  if (exists(els.exportBtn)) {
+    els.exportBtn.addEventListener("click", exportFiles);
+  }
+
+  if (exists(els.fullScreenPreviewBtn)) {
+    els.fullScreenPreviewBtn.addEventListener("click", openPreviewFullscreen);
+  }
 }
 
 function init() {
@@ -314,4 +402,4 @@ function init() {
   setSaveState("Draft Saved");
 }
 
-init();
+document.addEventListener("DOMContentLoaded", init);
