@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+l<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -49,7 +49,13 @@
             display: flex;
             flex-direction: column;
             border-bottom: 1px solid var(--cyan-dim);
-            min-height: 30%;
+        }
+
+        .section-label {
+            font-size: 0.5rem;
+            padding: 5px 15px;
+            color: var(--cyan-dim);
+            background: rgba(0, 242, 255, 0.05);
         }
 
         #code-input {
@@ -62,21 +68,23 @@
             font-size: 14px;
             resize: none;
             outline: none;
-            text-transform: none; /* Code must remain case-sensitive */
+            text-transform: none; /* Preserve code casing */
             caret-color: var(--cyan);
         }
 
         /* --- LIVE SURFACE (PREVIEW) --- */
         #live-surface {
             flex: 1;
-            background: #fff; /* White substrate for rendered content visibility */
-            min-height: 30%;
+            display: flex;
+            flex-direction: column;
+            background: #fff; /* White substrate for content clarity */
         }
 
         #preview-frame {
+            flex: 1;
             width: 100%;
-            height: 100%;
             border: none;
+            background: white;
         }
 
         /* --- CONTROLS --- */
@@ -84,8 +92,8 @@
             padding: 10px;
             display: flex;
             justify-content: center;
+            background: var(--substrate);
             border-top: 1px solid var(--cyan-dim);
-            flex-shrink: 0;
         }
 
         #pulse-trigger {
@@ -114,7 +122,7 @@
             50% { opacity: 0.3; }
         }
 
-        .system-flash { border-color: var(--cyan) !important; }
+        .kinetic-flash { border-color: var(--cyan) !important; }
     </style>
 </head>
 <body>
@@ -139,10 +147,12 @@
     </div>
 
     <div id="structural-bay">
-        <textarea id="code-input" spellcheck="false" placeholder="// INJECT CODE HERE"><h1 style="color: #050505;">Reality Formed</h1></textarea>
+        <div class="section-label">STRUCTURAL_BAY</div>
+        <textarea id="code-input" spellcheck="false" placeholder="// INJECT STRUCTURE HERE"><h1 style="font-family: sans-serif; color: #050505; text-align: center; margin-top: 20%;">REALITY_FORMED</h1></textarea>
     </div>
 
     <div id="live-surface">
+        <div class="section-label" style="background: #eee; color: #666;">LIVE_SURFACE</div>
         <iframe id="preview-frame"></iframe>
     </div>
 
@@ -159,35 +169,87 @@
                 resilience: 0.85
             },
 
-            // Process intent and update system physics
-            inject: function(content) {
-                this.kernel.pulses++;
+            // Updates the live surface and the system physics
+            sync: function() {
+                const input = document.getElementById('code-input').value;
+                const preview = document.getElementById('preview-frame');
                 
-                // Content length drives energy density
-                const rawEnergy = content.length / 500;
-                this.kernel.energy = rawEnergy;
+                // 1. Render to Surface
+                const doc = preview.contentDocument || preview.contentWindow.document;
+                doc.open();
+                doc.write(input);
+                doc.close();
 
-                // Calculate stability
-                if (content.trim().length === 0) {
-                    this.kernel.stability = 0;
-                } else {
-                    // Pressure builds as energy exceeds resilience
-                    const pressure = this.kernel.energy * (1 - this.kernel.resilience);
-                    this.kernel.stability = Math.max(0, 1 - (pressure * 2));
-                }
-
-                this.render();
-                this.syncSurface(content);
+                // 2. Feed Kernel
+                this.kernel.pulses++;
+                this.calculatePhysics(input);
+                this.renderHUD();
             },
 
-            // Direct manual energy injection
+            calculatePhysics: function(content) {
+                const len = content.trim().length;
+
+                if (len === 0) {
+                    this.kernel.energy = 0;
+                    this.kernel.stability = 0; // Collapse
+                } else {
+                    // Energy density derived from content volume
+                    this.kernel.energy = len / 400; 
+                    
+                    // Pressure builds as energy pushes against resilience
+                    const pressure = this.kernel.energy * (1 - this.kernel.resilience);
+                    this.kernel.stability = Math.max(0, 1 - (pressure * 2.5));
+                }
+            },
+
             pulse: function(magnitude) {
                 this.kernel.pulses++;
                 this.kernel.energy += magnitude;
-                this.kineticFeedback();
-                this.render();
+                
+                // Visual feedback for manual injection
+                const hud = document.getElementById('field-os-hud');
+                hud.classList.add('kinetic-flash');
+                setTimeout(() => hud.classList.remove('kinetic-flash'), 100);
+                
+                this.renderHUD();
             },
 
-            kineticFeedback: function() {
-                const hud = document.getElementById('field-os-hud');
-                hud.classList.add('
+            renderHUD: function() {
+                const stateEl = document.getElementById('state-val');
+                const energyEl = document.getElementById('energy-val');
+                const stabilityEl = document.getElementById('stability-val');
+                const pulseEl = document.getElementById('pulse-val');
+
+                energyEl.innerText = this.kernel.energy.toFixed(3);
+                stabilityEl.innerText = this.kernel.stability.toFixed(3);
+                pulseEl.innerText = this.kernel.pulses;
+
+                // State logic based on stability threshold
+                if (this.kernel.stability <= 0) {
+                    stateEl.innerText = "COLLAPSE";
+                    stateEl.className = "value collapse";
+                } else if (this.kernel.stability < 0.7) {
+                    stateEl.innerText = "STRAIN";
+                    stateEl.className = "value strain";
+                } else {
+                    stateEl.innerText = "NOMINAL";
+                    stateEl.className = "value nominal";
+                }
+            },
+
+            boot: function() {
+                const editor = document.getElementById('code-input');
+                editor.addEventListener('input', () => this.sync());
+                
+                // Initial stabilization
+                setTimeout(() => {
+                    this.sync();
+                    console.log("FIELD_OS :: STRUCTURAL_BAY_STABILIZED");
+                }, 500);
+            }
+        };
+
+        window.onload = () => FieldOS.boot();
+    </script>
+</body>
+</html>
