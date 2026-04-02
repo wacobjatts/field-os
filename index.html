@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FIELD_OS // CORE</title>
+    <style>
+        :root {
+            --substrate: #050505;
+            --cyan: #00f2ff;
+            --cyan-dim: rgba(0, 242, 255, 0.15);
+            --warning: #ffaa00;
+            --critical: #ff3300;
+            --font: 'Courier New', monospace;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--substrate);
+            color: var(--cyan);
+            font-family: var(--font);
+            margin: 0;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            text-transform: uppercase;
+        }
+
+        /* --- SYSTEM HUD --- */
+        #field-os-hud {
+            width: 280px;
+            padding: 20px;
+            border: 1px solid var(--cyan-dim);
+            background: rgba(0, 242, 255, 0.02);
+            box-shadow: 0 0 30px rgba(0, 0, 0, 1);
+            position: relative;
+        }
+
+        .metric {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            border-bottom: 1px solid rgba(0, 242, 255, 0.05);
+            padding-bottom: 4px;
+        }
+
+        .label { color: var(--cyan-dim); font-size: 0.65rem; letter-spacing: 1px; }
+        .value { font-size: 0.9rem; font-weight: bold; }
+
+        /* --- STATUS GLOWS --- */
+        .nominal { color: var(--cyan); text-shadow: 0 0 8px var(--cyan); }
+        .strain { color: var(--warning); text-shadow: 0 0 8px var(--warning); }
+        .collapse { color: var(--critical); animation: alert 0.4s infinite; }
+
+        @keyframes alert {
+            0% { opacity: 1; }
+            50% { opacity: 0.3; }
+            100% { opacity: 1; }
+        }
+
+        #os-tag {
+            position: absolute;
+            bottom: -20px;
+            right: 0;
+            font-size: 0.5rem;
+            color: var(--cyan-dim);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="field-os-hud">
+        <div class="metric">
+            <span class="label">SYSTEM_IDENT</span>
+            <span class="value">FIELD_OS_v0.0.1</span>
+        </div>
+
+        <div class="metric">
+            <span class="label">STATE</span>
+            <span id="state-val" class="value nominal">BOOTING</span>
+        </div>
+
+        <div class="metric">
+            <span class="label">ENERGY_DENSITY</span>
+            <span id="energy-val" class="value">0.000</span>
+        </div>
+
+        <div class="metric">
+            <span class="label">STABILITY</span>
+            <span id="stability-val" class="value">1.000</span>
+        </div>
+
+        <div class="metric" style="border:none; margin:0;">
+            <span class="label">PULSE_GEN</span>
+            <span id="pulse-val" class="value">0</span>
+        </div>
+
+        <div id="os-tag">SUBSTRATE // ACTIVE</div>
+    </div>
+
+    <script>
+        /**
+         * FIELD_OS :: KERNEL
+         * The core logic governing the platform substrate.
+         */
+        const FieldOS = {
+            kernel: {
+                energy: 0.0,
+                stability: 1.0,
+                pulses: 0,
+                resilience: 0.92,
+                entropy: 0.001
+            },
+
+            // Trigger a system-wide state change
+            pulse: function(magnitude = 0.1) {
+                this.kernel.pulses++;
+                this.kernel.energy += magnitude;
+                
+                // Physics: Higher energy without resilience causes instability
+                const pressure = this.kernel.energy * (1 - this.kernel.resilience);
+                this.kernel.stability = Math.max(0, 1 - pressure);
+
+                console.log(`FIELD_OS :: PULSE_${this.kernel.pulses} :: E:${this.kernel.energy.toFixed(3)}`);
+                this.render();
+            },
+
+            // Update the visual Surface (HUD)
+            render: function() {
+                const stateEl = document.getElementById('state-val');
+                const energyEl = document.getElementById('energy-val');
+                const stabilityEl = document.getElementById('stability-val');
+                const pulseEl = document.getElementById('pulse-val');
+
+                energyEl.innerText = this.kernel.energy.toFixed(3);
+                stabilityEl.innerText = this.kernel.stability.toFixed(3);
+                pulseEl.innerText = this.kernel.pulses;
+
+                // State Logic
+                if (this.kernel.stability <= 0) {
+                    stateEl.innerText = "COLLAPSE";
+                    stateEl.className = "value collapse";
+                } else if (this.kernel.stability < 0.75) {
+                    stateEl.innerText = "STRAIN";
+                    stateEl.className = "value strain";
+                } else {
+                    stateEl.innerText = "NOMINAL";
+                    stateEl.className = "value nominal";
+                }
+            },
+
+            // Platform Boot Sequence
+            boot: function() {
+                console.log("FIELD_OS :: BOOT_SEQUENCE_INITIALIZED");
+                
+                // Initial stabilization
+                setTimeout(() => {
+                    this.pulse(0.05); // The first heartbeat
+                    console.log("FIELD_OS :: KERNEL_STABILIZED");
+                }, 800);
+            }
+        };
+
+        // Initialize FieldOS
+        window.onload = () => FieldOS.boot();
+    </script>
+</body>
+</html>
 
