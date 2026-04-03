@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
   'https://gagivrinhxdlygvjxthg.supabase.co',
-  'YOUR_ANON_KEY'
+  'sb_publishable_HKdBK_fko9nwrpTXywBrXA_MdsuAUZY'
 );
 
 async function runTest() {
