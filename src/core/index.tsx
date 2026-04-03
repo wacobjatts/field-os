@@ -1,7 +1,15 @@
-export * from './types';
-export * from './constants';
-export * from './errors';
-export * from './supabase';
-export * from './storage';
-export * from './history';
-export * from './ai';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import SentinelTerminal from './Component/SentinelTerminal'; 
+
+// FieldOS Ignition
+const rootElement = document.getElementById('root');
+
+if (rootElement) {
+  const root = ReactDOM.createRoot(rootElement);
+  root.render(
+    <React.StrictMode>
+      <SentinelTerminal />
+    </React.StrictMode>
+  );
+}
