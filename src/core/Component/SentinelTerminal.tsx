@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Governor } from '../engine/governor'; // Our Zen Master
+import { Tenzo } from '../engine/tenzo'; // UPDATED: Points to Tenzo now
 import { createClient } from '@supabase/supabase-js';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
 
-// --- THE DUAL HEMISPHERES (Fill these with your keys ASAP) ---
-const supabaseA = createClient('URL_A', 'KEY_A'); // The Memory
-const supabaseB = createClient('URL_B', 'KEY_B'); // The Forge
+// --- THE DUAL HEMISPHERES (Plug your keys here later) ---
+const supabaseA = createClient('URL_A', 'KEY_A'); 
+const supabaseB = createClient('URL_B', 'KEY_B'); 
 
 export default function SentinelTerminal() {
   const [state, setState] = useState<any>(null);
@@ -15,7 +15,11 @@ export default function SentinelTerminal() {
   // 1. Ignition: Initializing the Manifold
   useEffect(() => {
     const initialState = {
-      manifold: { beliefs: { "truth_01": { mean: 100, precision: 10, lastUpdate: Date.now() } } },
+      manifold: { 
+        beliefs: { 
+          "truth_01": { mean: 100, precision: 10, lastUpdate: Date.now() } 
+        } 
+      },
       sources: { "narrator_01": { id: "narrator_01", credibility: 1.0 } },
       lastAssessment: { command: 'GATHER', systemStress: 0, confidence: 1.0 },
       latestResults: [],
@@ -24,7 +28,7 @@ export default function SentinelTerminal() {
     setState(initialState);
   }, []);
 
-  // 2. The Heartbeat Loop: Facilitating Truth
+  // 2. The Heartbeat Loop: Facilitating Truth via the Tenzo
   useEffect(() => {
     if (!state) return;
     const interval = setInterval(() => {
@@ -40,7 +44,8 @@ export default function SentinelTerminal() {
         timestamp: Date.now()
       }];
 
-      const nextState = Governor.facilitate(state, signals, Date.now());
+      // UPDATED: Calling the Tenzo instead of Governor
+      const nextState = Tenzo.facilitate(state, signals, Date.now());
       
       setHistory(prev => [...prev.slice(-40), {
         time: new Date().toLocaleTimeString(),
@@ -111,11 +116,10 @@ export default function SentinelTerminal() {
 
           <div style={{ background: '#0a0a0a', padding: '20px', border: '1px solid #00d4ff33', borderRadius: '8px', textAlign: 'center' }}>
              <p style={{ fontSize: '0.8rem', color: '#00d4ff' }}>HEMISPHERE B: ACTIVE</p>
-             <small style={{ opacity: 0.3 }}>Monitoring Code Mirror...</small>
+             <small style={{ opacity: 0.3 }}>Monitoring Tenzo Forge...</small>
           </div>
         </div>
       </div>
     </div>
   );
 }
-
