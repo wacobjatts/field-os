@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 
 const supabase = createClient(
-  'YOUR_URL',
+  'https://gagivrinhxdlygvjxthg.supabase.co',
   'YOUR_ANON_KEY'
 );
 
