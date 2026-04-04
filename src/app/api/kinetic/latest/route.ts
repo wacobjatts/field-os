@@ -7,6 +7,7 @@ const DATA_FILE = path.join(process.cwd(), 'data', 'kinetic-live-binance.jsonl')
 async function readLatestJsonLine(filePath: string): Promise<Record<string, unknown> | null> {
   try {
     const content = await fs.readFile(filePath, 'utf8');
+
     const lines = content
       .split('\n')
       .map((line) => line.trim())
