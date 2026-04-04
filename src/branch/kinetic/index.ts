@@ -7,6 +7,9 @@ export * from './types';
 export * from './errors';
 export * from './orchestrator';
 export * from './history';
+export * from './dimensions';
+export * from './translator';
+export * from './trunkbridge';
 
 // --- calculators ---
 export * from './calculators/absorption';
@@ -43,3 +46,6 @@ export * from './runcollectlivedata';
 // --- stress test ---
 export * from './stresstest/blackhole';
 export * from './stresstest/runblackhole';
+
+// --- trunk test runner ---
+export * from './runtrunkbridge';
