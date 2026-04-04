@@ -23,6 +23,40 @@ export interface SystemState {
   timestamp: number;
 }
 
+// Instance-based orchestrator for event-driven signal processing
+type SignalHandler = (evidence: unknown) => PreparedSignal;
+
+class TenzoInstance {
+  private readonly handlers = new Map<string, SignalHandler>();
+  private currentState: SystemState | null = null;
+
+  loadState(state: SystemState): void {
+    this.currentState = state;
+  }
+
+  register(name: string, handler: SignalHandler): void {
+    if (!this.handlers.has(name)) {
+      this.handlers.set(name, handler);
+    }
+  }
+
+  processEvent(name: string, evidence: unknown): SystemState {
+    if (!this.currentState) {
+      throw new Error(`[Tenzo] State not initialized. Call loadState() before processEvent().`);
+    }
+    const handler = this.handlers.get(name);
+    if (!handler) {
+      throw new Error(`[Tenzo] No handler registered for event '${name}'.`);
+    }
+    const signal = handler(evidence);
+    const newState = Tenzo.facilitate(this.currentState, [signal], Date.now());
+    this.currentState = newState;
+    return newState;
+  }
+}
+
+export const tenzo = new TenzoInstance();
+
 // RENAMED TO TENZO FOR CONSISTENCY
 export class Tenzo {
 

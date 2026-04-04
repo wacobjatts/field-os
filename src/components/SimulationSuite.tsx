@@ -9,14 +9,60 @@
  */
 
 import React, { useState } from 'react';
-import { Tenzo } from '../core/engine/tenzo';
+import { tenzo } from '../core/engine/tenzo';
 import { WhaleWatcher } from '../core/services/WhaleWatcher';
 // Authoritative Imports
 import type { SystemState } from '../core/engine/tenzo';
+import type { WhaleWatcherEvidence } from '../core/services/WhaleWatcher';
 import type { PreparedSignal } from '../core/engine/signal';
 
 const DIM_ID = "truth_01";
 const SOURCE_ID = "specialist_whale_watcher";
+
+const INITIAL_STATE: SystemState = {
+  manifold: {
+    id: "manifold_alpha",
+    label: "Primary Market Manifold",
+    topology: {
+      [DIM_ID]: { 
+        id: DIM_ID, 
+        kind: "observed", // Corrected from 'currency' to Trunk-aligned kind
+        units: "USD", 
+        tags: ["core", "market"] 
+      } 
+    },
+    beliefs: { 
+      [DIM_ID]: { mean: 100.00, precision: 10.0, lastUpdated: Date.now() } 
+    }
+  },
+  sources: {
+    [SOURCE_ID]: {
+      id: SOURCE_ID,
+      label: "Whale Watcher Alpha",
+      kind: 'instrument', 
+      credibility: 0.90,
+      sampleCount: 0,
+      trustMode: 'learned',
+      baselineBias: 0,
+      reliabilityVariance: 0.1,
+      lastUpdated: Date.now()
+    }
+  },
+  lastAssessment: {
+    command: "GATHER", 
+    urgency: 0.1,
+    resourceAllocation: 1.0,
+    systemStress: 0.05,
+    totalEntropy: 1.2,
+    totalSurprise: 0,
+    confidence: 0.95
+  },
+  latestResults: [],
+  timestamp: Date.now()
+};
+
+tenzo.register('WHALE_WATCHER', (ev) => WhaleWatcher.analyze(ev as WhaleWatcherEvidence));
+tenzo.loadState(INITIAL_STATE);
 
 /** * Local interface for UI casting to ensure the compiler understands 
  * the 'unknown' Record contains our specific market physics.
@@ -39,47 +85,7 @@ const SCENARIOS = {
 
 export const SimulationSuite = () => {
   // 1. INITIALIZE TRUNK-BINDING SYSTEM STATE (Strict Semantic Lock)
-  const [state, setState] = useState<SystemState>({
-    manifold: {
-      id: "manifold_alpha",
-      label: "Primary Market Manifold",
-      topology: {
-        [DIM_ID]: { 
-          id: DIM_ID, 
-          kind: "observed", // Corrected from 'currency' to Trunk-aligned kind
-          units: "USD", 
-          tags: ["core", "market"] 
-        } 
-      },
-      beliefs: { 
-        [DIM_ID]: { mean: 100.00, precision: 10.0, lastUpdated: Date.now() } 
-      }
-    },
-    sources: {
-      [SOURCE_ID]: {
-        id: SOURCE_ID,
-        label: "Whale Watcher Alpha",
-        kind: 'instrument', 
-        credibility: 0.90,
-        sampleCount: 0,
-        trustMode: 'learned',
-        baselineBias: 0,
-        reliabilityVariance: 0.1,
-        lastUpdated: Date.now()
-      }
-    },
-    lastAssessment: {
-      command: "GATHER", 
-      urgency: 0.1,
-      resourceAllocation: 1.0,
-      systemStress: 0.05,
-      totalEntropy: 1.2,
-      totalSurprise: 0,
-      confidence: 0.95
-    },
-    latestResults: [],
-    timestamp: Date.now()
-  });
+  const [state, setState] = useState<SystemState>(INITIAL_STATE);
 
   const [activeSignal, setActiveSignal] = useState<PreparedSignal | null>(null);
 
@@ -96,10 +102,15 @@ export const SimulationSuite = () => {
       orderBookDepth: s.work
     });
 
-    const nextState = Tenzo.facilitate(state, [signal], Date.now());
-    
+    const newState = tenzo.processEvent('WHALE_WATCHER', {
+      dimensionId: DIM_ID,
+      price: injectedPrice,
+      priceChangeFraction: s.dV,
+      orderBookDepth: s.work
+    });
+
     setActiveSignal(signal);
-    setState(nextState);
+    setState(newState);
   };
 
   const currentPrice = state.manifold.beliefs[DIM_ID].mean;
