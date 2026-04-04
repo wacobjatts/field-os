@@ -9,7 +9,7 @@
  */
 
 import React, { useState } from 'react';
-import { Tenzo } from '../core/engine/tenzo';
+import { tenzo } from '../core/engine/tenzo';
 import { WhaleWatcher } from '../core/services/WhaleWatcher';
 // Authoritative Imports
 import type { SystemState } from '../core/engine/tenzo';
@@ -192,4 +192,3 @@ export const SimulationSuite = () => {
     </div>
   );
 };
-
