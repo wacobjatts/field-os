@@ -1,27 +1,45 @@
-import { KineticBridge } from './modules/kineticbridge';
+limport { KineticBridge } from './modules/kineticbridge';
 import { KineticSnapshot } from './branch/kinetic/types';
+import { initializeRecorder, recordSlice } from './branch/kinetic/recorder';
 
-// --- FAKE DATA GENERATOR (replace later with real feed) ---
+/**
+ * REALISTIC FAKE DATA (continuous movement)
+ */
+let currentMid = 100;
+
 function generateSnapshot(): KineticSnapshot {
-  const mid = 100 + (Math.random() - 0.5) * 2;
+  const drift = (Math.random() - 0.5) * 0.2;
+  currentMid += drift;
 
   return {
-    bid: mid - 0.1,
-    ask: mid + 0.1,
-    mid,
-    volume: Math.random() * 1000,
+    bid: currentMid - 0.1,
+    ask: currentMid + 0.1,
+    mid: currentMid,
+    volume: 100 + Math.random() * 200,
     timestamp: Date.now()
   };
 }
 
-// --- MAIN LOOP ---
+/**
+ * ENGINE + BRIDGE
+ */
 const bridge = new KineticBridge();
 
 let previousMid = 100;
 let anchorMid = 100;
 
-console.log('Kinetic system started...\n');
+/**
+ * RECORDER SETUP
+ */
+const OUTPUT_PATH = 'data/kinetic-live-loop.jsonl';
 
+initializeRecorder(OUTPUT_PATH);
+
+console.log('Kinetic system + recorder started...\n');
+
+/**
+ * MAIN LOOP
+ */
 setInterval(() => {
   const snapshot = generateSnapshot();
 
@@ -33,10 +51,33 @@ setInterval(() => {
 
   previousMid = snapshot.mid;
 
+  /**
+   * RECORD DATA (this is the new piece)
+   */
+  recordSlice(
+    {
+      timestamp: snapshot.timestamp,
+      symbol: 'SIM-LIVE',
+      midPrice: snapshot.mid,
+      output: {
+        signals: [],
+        raw: result.raw,
+        precision: result.precision
+      }
+    },
+    {
+      filePath: OUTPUT_PATH
+    }
+  );
+
+  /**
+   * CONSOLE OUTPUT (same as before)
+   */
   console.log('--- STEP ---');
   console.log('MID:', snapshot.mid.toFixed(4));
   console.log('RAW:', result.raw);
   console.log('PRECISION:', result.precision);
+  console.log('RECORDED TO:', OUTPUT_PATH);
   console.log('\n');
 
 }, 2000);
