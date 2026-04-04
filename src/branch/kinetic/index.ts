@@ -2,15 +2,15 @@
  * Kinetic branch public entry point
  */
 
-// core
+// --- core ---
 export * from './types';
 export * from './errors';
 export * from './orchestrator';
 
-// normalization
+// --- normalization ---
 export * from './normalization/normalize';
 
-// precision
+// --- precision ---
 export * from './precision/absorptionprecision';
 export * from './precision/mismatchprecision';
 export * from './precision/realitygapprecision';
@@ -18,14 +18,18 @@ export * from './precision/tensionprecision';
 export * from './precision/liarindexprecision';
 export * from './precision/entropyprecision';
 
-// recorder
+// --- recorder ---
 export * from './recorder';
 export * from './recordblackhole';
 export * from './runrecorder';
 
-// loop
+// --- loop ---
 export * from './looprecorder';
 export * from './runlooprecorder';
 
-// stresstest
+// --- live data ---
+export * from './collectlivedata';
+export * from './runcollectlivedata';
+
+// --- stress test ---
 export * from './stresstest/blackhole';
