@@ -12,23 +12,13 @@ export * from './translator';
 export * from './trunkbridge';
 
 // --- calculators ---
-export * from './calculators/absorption';
-export * from './calculators/mismatch';
-export * from './calculators/realitygap';
-export * from './calculators/tension';
-export * from './calculators/liarindex';
-export * from './calculators/entropy';
+export * from './calculators';
 
 // --- normalization ---
-export * from './normalization/normalize';
+export * from './normalization';
 
 // --- precision ---
-export * from './precision/absorptionprecision';
-export * from './precision/mismatchprecision';
-export * from './precision/realitygapprecision';
-export * from './precision/tensionprecision';
-export * from './precision/liarindexprecision';
-export * from './precision/entropyprecision';
+export * from './precision';
 
 // --- recorder ---
 export * from './recorder';
