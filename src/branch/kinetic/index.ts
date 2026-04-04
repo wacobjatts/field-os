@@ -6,6 +6,15 @@
 export * from './types';
 export * from './errors';
 export * from './orchestrator';
+export * from './history';
+
+// --- calculators ---
+export * from './calculators/absorption';
+export * from './calculators/mismatch';
+export * from './calculators/realitygap';
+export * from './calculators/tension';
+export * from './calculators/liarindex';
+export * from './calculators/entropy';
 
 // --- normalization ---
 export * from './normalization/normalize';
@@ -33,3 +42,4 @@ export * from './runcollectlivedata';
 
 // --- stress test ---
 export * from './stresstest/blackhole';
+export * from './stresstest/runblackhole';
