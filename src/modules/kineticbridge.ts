@@ -67,18 +67,10 @@ export class KineticBridge {
     };
   }
 
-  /**
-   * Optional persistence hook.
-   * Safe to leave unused for now.
-   */
   public async saveProjectRecord(project: Record<string, unknown>) {
     return createProject(project);
   }
 
-  /**
-   * Optional read hook.
-   * Safe to leave unused for now.
-   */
   public async readProjects() {
     return getProjects();
   }
