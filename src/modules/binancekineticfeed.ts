@@ -1,18 +1,23 @@
 import WebSocket from 'ws';
-import { KineticSnapshot, OrderBookSnapshot, TradeBufferState, TradePrint } from '../branch/kinetic/types';
+import {
+  KineticSnapshot,
+  OrderBookSnapshot,
+  TradeBufferState,
+  TradePrint
+} from '../branch/kinetic/types';
 
 const STREAM_URL =
   'wss://stream.binance.com:9443/stream?streams=btcusdt@aggTrade/btcusdt@depth@100ms';
 
 const MAX_TRADES = 200;
 
-export interface BinanceKineticFeedHandle {
-  stop: () => void;
-}
-
 export interface BinanceKineticFeedOptions {
   onSnapshot: (snapshot: KineticSnapshot) => void;
   reconnectDelayMs?: number;
+}
+
+export interface BinanceKineticFeedHandle {
+  stop: () => void;
 }
 
 function calculateVwap(trades: TradePrint[]): number {
@@ -31,20 +36,19 @@ function calculateVwap(trades: TradePrint[]): number {
 function calculateVolatility(trades: TradePrint[]): number {
   if (trades.length < 2) return 0;
 
-  const prices = trades.map((t) => t.price);
-  const mean = prices.reduce((sum, p) => sum + p, 0) / prices.length;
+  const prices = trades.map((trade) => trade.price);
+  const mean = prices.reduce((sum, price) => sum + price, 0) / prices.length;
 
   if (mean === 0) return 0;
 
   const variance =
-    prices.reduce((sum, p) => sum + Math.pow(p - mean, 2), 0) / prices.length;
+    prices.reduce((sum, price) => sum + Math.pow(price - mean, 2), 0) /
+    prices.length;
 
-  const stdDev = Math.sqrt(variance);
-
-  return stdDev / mean;
+  return Math.sqrt(variance) / mean;
 }
 
-function buildTradeBufferState(trades: TradePrint[]): TradeBufferState {
+function buildTradeState(trades: TradePrint[]): TradeBufferState {
   let buyWork = 0;
   let sellWork = 0;
   let totalBuyVolume = 0;
@@ -113,7 +117,7 @@ export function startBinanceKineticFeed(
       isSynced
     };
 
-    const tradeState = buildTradeBufferState(trades);
+    const tradeState = buildTradeState(trades);
 
     const snapshot: KineticSnapshot = {
       book,
@@ -140,11 +144,19 @@ export function startBinanceKineticFeed(
         const stream = parsed.stream;
         const data = parsed.data;
 
+        if (typeof stream !== 'string' || !data) {
+          return;
+        }
+
         if (stream.includes('@aggTrade')) {
           const price = Number(data.p);
           const size = Number(data.q);
           const timestamp = Number(data.T);
           const isBuyerMaker = Boolean(data.m);
+
+          if (!Number.isFinite(price) || !Number.isFinite(size)) {
+            return;
+          }
 
           const trade: TradePrint = {
             price,
