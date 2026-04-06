@@ -1,241 +1,212 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>KINETIC // TERMINAL</title>
-    <style>
-        :root {
-            --bg: #05070a;
-            --panel: #0a0e14;
-            --cyan: #00ffff;
-            --yellow: #ffff00;
-            --red: #ff4d4d;
-            --green: #00ff88;
-            --border: rgba(0, 255, 255, 0.15);
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>field-os</title>
 
-        body, html { 
-            margin: 0; padding: 0; background: var(--bg); color: #d7e6ff; 
-            font-family: 'Inter', -apple-system, sans-serif; overflow: hidden; height: 100vh; 
-        }
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
 
-        /* WEBULL-STYLE GRID LAYOUT */
-        .app-container {
-            display: grid;
-            grid-template-columns: 60px 260px 1fr 300px; /* Sidebar, Watchlist, Main, Order Entry */
-            grid-template-rows: 40px 1fr 200px; /* Topbar, Main Content, Bottom Panels */
-            height: 100vh;
-        }
+body {
+  background:#020305;
+  color:#cfe6ff;
+  font-family: Arial, sans-serif;
+}
 
-        /* TOP NAVIGATION */
-        .top-bar {
-            grid-column: 1 / -1;
-            background: var(--panel);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            padding: 0 15px;
-            font-size: 11px;
-            justify-content: space-between;
-        }
+/* MOBILE FIRST */
+.app {
+  display:flex;
+  flex-direction:column;
+  height:100vh;
+}
 
-        /* VERTICAL ICON BAR */
-        .side-nav {
-            grid-row: 2 / -1;
-            background: #020406;
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding-top: 20px;
-            gap: 25px;
-        }
+/* LEFT (ticker) */
+.left {
+  display:flex;
+  overflow-x:auto;
+  border-bottom:1px solid rgba(255,255,255,0.08);
+}
 
-        .nav-icon { width: 24px; height: 24px; background: var(--border); border-radius: 4px; cursor: pointer; }
-        .nav-icon.active { background: var(--cyan); box-shadow: 0 0 10px var(--cyan); }
+.ticker {
+  min-width:80px;
+  padding:10px;
+  text-align:center;
+  border-right:1px solid rgba(255,255,255,0.08);
+}
 
-        /* WATCHLIST PANEL */
-        .watchlist {
-            background: var(--panel);
-            border-right: 1px solid var(--border);
-            display: flex;
-            flex-direction: column;
-        }
+/* CENTER (chart) */
+.center {
+  flex:1;
+  position:relative;
+}
 
-        .panel-header {
-            padding: 10px;
-            font-size: 10px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            border-bottom: 1px solid var(--border);
-            color: var(--cyan);
-        }
+/* CHART AREA */
+.chart {
+  position:absolute;
+  inset:0;
+}
 
-        .list-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.03);
-            font-size: 13px;
-            cursor: pointer;
-        }
+/* BASELINE */
+.baseline {
+  position:absolute;
+  top:50%;
+  left:0;
+  right:0;
+  height:1px;
+  background:rgba(255,255,255,0.25);
+}
 
-        .list-item:hover { background: rgba(0,255,255,0.05); }
+/* TOP / BOTTOM LINES */
+.line {
+  position:absolute;
+  left:0;
+  right:0;
+  height:1px;
+  background:rgba(255,255,255,0.1);
+}
 
-        /* MAIN CHART AREA */
-        .main-content {
-            display: flex;
-            flex-direction: column;
-            position: relative;
-        }
+.top { top:20%; }
+.bottom { top:80%; }
 
-        .chart-window {
-            flex: 1;
-            background: #000;
-            position: relative;
-            border-bottom: 1px solid var(--border);
-        }
+/* NUMBERS */
+.num {
+  position:absolute;
+  left:6px;
+  color:#ffd84d;
+  font-size:11px;
+}
 
-        #price-hud {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            z-index: 10;
-        }
+.n1 { top:18%; }
+.n2 { top:48%; }
+.n3 { top:78%; }
 
-        .big-price { font-size: 32px; font-weight: 800; color: var(--yellow); text-shadow: 0 0 15px var(--yellow); }
+/* VALUE */
+.value {
+  position:absolute;
+  right:10px;
+  top:10px;
+  color:#ffd84d;
+  font-size:22px;
+  font-weight:bold;
+}
 
-        /* ORDER ENTRY PANEL */
-        .order-panel {
-            background: var(--panel);
-            border-left: 1px solid var(--border);
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
+/* LINE */
+svg {
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+}
 
-        .input-group { display: flex; flex-direction: column; gap: 5px; }
-        label { font-size: 9px; opacity: 0.6; }
-        input { 
-            background: #151a21; border: 1px solid var(--border); 
-            color: white; padding: 10px; border-radius: 4px; outline: none;
-        }
+/* RIGHT PANEL (HIDDEN ON MOBILE) */
+.right {
+  display:none;
+}
 
-        .btn-buy { background: var(--green); color: black; padding: 12px; border: none; font-weight: 800; border-radius: 4px; cursor: pointer; }
-        .btn-sell { background: var(--red); color: white; padding: 12px; border: none; font-weight: 800; border-radius: 4px; cursor: pointer; }
+/* BOTTOM INSTRUMENT STACK */
+.bottom {
+  height:110px;
+  border-top:1px solid rgba(255,255,255,0.08);
+  display:flex;
+  overflow-x:auto;
+}
 
-        /* BOTTOM DATA PANEL */
-        .bottom-shelf {
-            grid-column: 2 / 4;
-            background: var(--panel);
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            padding: 10px;
-            gap: 10px;
-        }
+.card {
+  min-width:140px;
+  border-right:1px solid rgba(255,255,255,0.08);
+  padding:12px;
+  text-align:center;
+  color:#1e7bff;
+}
 
-        .data-card {
-            border: 1px solid var(--border);
-            padding: 10px;
-            font-size: 11px;
-        }
+/* DESKTOP */
+@media (min-width:900px) {
+  .app {
+    display:grid;
+    grid-template-columns:180px 1fr 220px;
+    grid-template-rows:1fr 140px;
+  }
 
-        /* MOBILE OVERRIDES */
-        @media (max-width: 900px) {
-            .app-container {
-                grid-template-columns: 1fr;
-                grid-template-rows: 40px 350px 1fr;
-            }
-            .side-nav, .watchlist, .order-panel { display: none; }
-            .bottom-shelf { grid-column: 1; grid-template-columns: 1fr; }
-        }
+  .left {
+    flex-direction:column;
+    overflow:auto;
+    grid-row:1 / span 2;
+    border-right:1px solid rgba(255,255,255,0.08);
+    border-bottom:none;
+  }
 
-        svg { width: 100%; height: 100%; filter: drop-shadow(0 0 5px var(--cyan)); }
-    </style>
+  .center {
+    grid-column:2;
+  }
+
+  .right {
+    display:block;
+    padding:10px;
+    border-left:1px solid rgba(255,255,255,0.08);
+  }
+
+  .bottom {
+    grid-column:2 / span 2;
+  }
+}
+</style>
 </head>
+
 <body>
 
-<div class="app-container">
-    <header class="top-bar">
-        <div>FIELD-OS // KINETIC TERMINAL v1.0</div>
-        <div style="color: var(--green)">● CONNECTION: STABLE</div>
-    </header>
+<div class="app">
 
-    <nav class="side-nav">
-        <div class="nav-icon active"></div>
-        <div class="nav-icon"></div>
-        <div class="nav-icon"></div>
-        <div class="nav-icon"></div>
-    </nav>
+  <!-- LEFT -->
+  <div class="left">
+    <div class="ticker">TSLA</div>
+    <div class="ticker">NVDA</div>
+    <div class="ticker">SPY</div>
+  </div>
 
-    <aside class="watchlist">
-        <div class="panel-header">Watchlist / Standard</div>
-        <div class="list-item"><span>TSLA</span><span style="color:var(--green)">+2.41%</span></div>
-        <div class="list-item"><span>NVDA</span><span style="color:var(--green)">+4.12%</span></div>
-        <div class="list-item"><span>BTC</span><span style="color:var(--red)">-0.84%</span></div>
-        <div class="list-item"><span>SPY</span><span style="color:var(--green)">+0.15%</span></div>
-    </aside>
+  <!-- CENTER -->
+  <div class="center">
+    <div class="chart">
 
-    <section class="main-content">
-        <div class="chart-window">
-            <div id="price-hud">
-                <div class="big-price" id="live-price">248.12</div>
-                <div style="font-size: 11px; color: var(--cyan)">ABSORPTION_CORE: ACTIVE</div>
-            </div>
-            <svg viewBox="0 0 1000 400" preserveAspectRatio="none">
-                <path id="kinetic-path" d="" fill="none" stroke="#00ffff" stroke-width="2" />
-            </svg>
-        </div>
-        
-        <div class="bottom-shelf">
-            <div class="data-card"><div class="panel-header">Position</div>No Open Orders</div>
-            <div class="data-card"><div class="panel-header">Orders</div>0 Filled</div>
-            <div class="data-card"><div class="panel-header">News</div>[KINETIC] Market Decay slowing...</div>
-        </div>
-    </section>
+      <div class="line top"></div>
+      <div class="baseline"></div>
+      <div class="line bottom"></div>
 
-    <aside class="order-panel">
-        <div class="panel-header">Place Order</div>
-        <div class="input-group">
-            <label>LIMIT PRICE</label>
-            <input type="text" value="248.12">
-        </div>
-        <div class="input-group">
-            <label>QUANTITY</label>
-            <input type="number" value="10">
-        </div>
-        <button class="btn-buy">BUY / LONG</button>
-        <button class="btn-sell">SELL / SHORT</button>
-    </aside>
+      <div class="num n1">80</div>
+      <div class="num n2">50</div>
+      <div class="num n3">20</div>
+
+      <svg viewBox="0 0 1000 400">
+        <path
+          d="M0 200 C200 260 350 180 500 220
+             C650 260 800 180 1000 210"
+          stroke="#1e7bff"
+          stroke-width="2"
+          fill="none"
+        />
+      </svg>
+
+      <div class="value">63</div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    ASK / BID
+  </div>
+
+  <!-- BOTTOM -->
+  <div class="bottom">
+    <div class="card">volume</div>
+    <div class="card">transmission</div>
+    <div class="card">decay</div>
+    <div class="card">tension</div>
+    <div class="card">oscillator</div>
+    <div class="card">compression</div>
+  </div>
+
 </div>
-
-<script>
-    const path = document.getElementById('kinetic-path');
-    const priceDisplay = document.getElementById('live-price');
-    let t = 0;
-
-    function animate() {
-        t += 0.03;
-        // Wiggle the chart line
-        let d = "M 0 200 ";
-        for (let x = 0; x <= 1000; x += 50) {
-            let y = 200 + Math.sin(t + x/100) * 40 + Math.cos(t * 0.5 + x/50) * 20;
-            d += `L ${x} ${y} `;
-        }
-        path.setAttribute('d', d);
-
-        // Random price flicker
-        if (Math.random() > 0.9) {
-            let current = parseFloat(priceDisplay.innerText);
-            priceDisplay.innerText = (current + (Math.random() - 0.5)).toFixed(2);
-        }
-
-        requestAnimationFrame(animate);
-    }
-    animate();
-</script>
 
 </body>
 </html>
