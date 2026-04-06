@@ -1,260 +1,183 @@
-export default function Page() {
-  return (
-    <main style={styles.page}>
-      <div style={styles.grid} />
+'use client'; // CRITICAL: Tells the browser to run the JavaScript
 
-      <aside style={styles.leftPanel}>
-        <div style={styles.panelTitle}>tickers</div>
-        <div style={styles.searchBox}>search</div>
-        <div style={styles.listItem}>tsla</div>
-        <div style={styles.listItem}>nvda</div>
-        <div style={styles.listItem}>spy</div>
-        <div style={styles.listItem}>qqq</div>
+import React, { useState, useEffect } from 'react';
+
+// --- THEME CONSTANTS (Electric Space Aesthetic) ---
+const COLORS = {
+  bg: '#05070a',           // Deep Space Black
+  panel: '#0a0e14',        // Industrial Hull
+  border: 'rgba(0, 255, 255, 0.15)', // Faint Cyan Glow
+  electricCyan: '#00ffff', // The "Neon" Primary
+  neonYellow: '#ffd84d',   // High-Precision Accents
+  text: '#d7e6ff',         // Soft HUD Blue
+};
+
+export default function FieldOS() {
+  const [value, setValue] = useState(62);
+
+  // Simulated Live Data Trace
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setValue(prev => Math.floor(Math.random() * (65 - 58 + 1) + 58));
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  return (
+    <main style={s.page}>
+      {/* 1. BACKGROUND GRID SYSTEM */}
+      <div style={s.gridOverlay} />
+
+      {/* 2. LEFT PANEL: TICKERS */}
+      <aside style={s.sidePanel}>
+        <div style={s.label}>system.tickers</div>
+        <div style={s.searchBox}>search_instrument...</div>
+        {['tsla', 'nvda', 'spy', 'qqq'].map(ticker => (
+          <div key={ticker} style={s.listItem}>{ticker}</div>
+        ))}
       </aside>
 
-      <section style={styles.centerPanel}>
-        <div style={styles.chartHeader}>
-          <span style={styles.symbol}>tsla</span>
-          <span style={styles.timeframe}>5m</span>
-        </div>
+      {/* 3. CENTER PANEL: MAIN HUD */}
+      <section style={s.centerSection}>
+        <header style={s.header}>
+          <span style={{ color: COLORS.electricCyan, fontWeight: 800 }}>TSLA // KINETIC.BRANCH</span>
+          <span style={{ color: COLORS.neonYellow }}>5M_TIMEFRAME</span>
+        </header>
 
-        <div style={styles.chartArea}>
-          <div style={styles.chartGrid} />
+        <div style={s.chartContainer}>
+          {/* THE 3D INDICATOR / CHART */}
+          <div style={s.innerGrid} />
+          
+          <div style={s.priceLabel}>80</div>
+          <div style={s.priceLabelMid}>50</div>
+          <div style={s.priceLabelLow}>20</div>
 
-          <div style={{ ...styles.hLine, top: '18%' }} />
-          <div style={{ ...styles.hLine, top: '50%' }} />
-          <div style={{ ...styles.hLine, top: '82%' }} />
-
-          <div style={{ ...styles.sideNumber, top: '14%' }}>80</div>
-          <div style={{ ...styles.sideNumber, top: '46%' }}>50</div>
-          <div style={{ ...styles.sideNumber, top: '78%' }}>20</div>
-
-          <svg viewBox="0 0 1000 420" preserveAspectRatio="none" style={styles.svg}>
+          <svg viewBox="0 0 1000 400" preserveAspectRatio="none" style={s.svg}>
+            {/* The "Electric" Glow Path */}
             <path
-              d="M 0 210
-                 C 80 210, 120 260, 180 280
-                 C 250 300, 320 250, 390 265
-                 C 470 282, 540 330, 620 300
-                 C 700 270, 760 190, 835 225
-                 C 900 255, 955 240, 1000 230"
+              d="M 0 200 C 150 180, 300 300, 500 200 C 700 100, 850 250, 1000 220"
               fill="none"
-              stroke="#1e7bff"
+              stroke={COLORS.electricCyan}
               strokeWidth="3"
-              strokeLinecap="round"
+              style={{ filter: 'drop-shadow(0 0 12px #00ffff)' }} 
             />
           </svg>
 
-          <div style={styles.valueBadge}>62</div>
+          <div style={s.glowBadge}>{value}</div>
         </div>
 
-        <div style={styles.bottomDock}>
-          <div style={styles.instrumentCard}>absorption field</div>
-          <div style={styles.instrumentCard}>volume</div>
-          <div style={styles.instrumentCard}>transmission</div>
+        {/* BOTTOM INSTRUMENT STACK */}
+        <div style={s.bottomDock}>
+          {['absorption', 'volume', 'transmission', 'decay'].map(inst => (
+            <div key={inst} style={s.instrumentCard}>
+              <div style={{fontSize: '10px', opacity: 0.5}}>inst_type</div>
+              {inst}
+            </div>
+          ))}
         </div>
       </section>
 
-      <aside style={styles.rightPanel}>
-        <div style={styles.panelTitle}>ask / bid</div>
-        <div style={styles.bookRow}><span>ask</span><span>248.22</span></div>
-        <div style={styles.bookRow}><span>ask</span><span>248.18</span></div>
-        <div style={styles.bookRow}><span>bid</span><span>248.10</span></div>
-        <div style={styles.bookRow}><span>bid</span><span>248.06</span></div>
+      {/* 4. RIGHT PANEL: ORDER FLOW */}
+      <aside style={s.sidePanelRight}>
+        <div style={s.label}>ask_bid.memory</div>
+        <div style={s.orderRow}><span style={{color: '#ff4d4d'}}>ASK</span> 248.22</div>
+        <div style={s.orderRow}><span style={{color: '#ff4d4d'}}>ASK</span> 248.18</div>
+        <div style={{height: '2px', background: COLORS.border, margin: '5px 0'}} />
+        <div style={s.orderRow}><span style={{color: '#4dff88'}}>BID</span> 248.10</div>
+        <div style={s.orderRow}><span style={{color: '#4dff88'}}>BID</span> 248.06</div>
       </aside>
     </main>
   );
 }
 
-const bg = '#05070a';
-const panel = '#0a0e14';
-const border = 'rgba(30,123,255,0.22)';
-const blue = '#1e7bff';
-const yellow = '#ffd84d';
-const text = '#d7e6ff';
-const subtle = 'rgba(215,230,255,0.08)';
-
-const styles: Record<string, React.CSSProperties> = {
+// --- HUD STYLING ENGINE ---
+const s: Record<string, React.CSSProperties> = {
   page: {
-    position: 'relative',
-    minHeight: '100vh',
-    background: bg,
-    color: text,
+    backgroundColor: COLORS.bg,
+    color: COLORS.text,
+    height: '100vh',
     display: 'grid',
-    gridTemplateColumns: '220px 1fr 260px',
-    gridTemplateRows: '1fr',
+    gridTemplateColumns: '220px 1fr 240px',
+    fontFamily: 'monospace',
     overflow: 'hidden',
-    fontFamily: 'Arial, Helvetica, sans-serif',
   },
-
-  grid: {
+  gridOverlay: {
     position: 'absolute',
     inset: 0,
-    backgroundImage: `
-      linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px)
-    `,
-    backgroundSize: '40px 40px',
+    backgroundImage: `radial-gradient(${COLORS.border} 1px, transparent 1px)`,
+    backgroundSize: '30px 30px',
     pointerEvents: 'none',
   },
-
-  leftPanel: {
-    position: 'relative',
-    zIndex: 1,
-    background: panel,
-    borderRight: `1px solid ${border}`,
-    padding: '14px',
+  sidePanel: {
+    background: COLORS.panel,
+    borderRight: `1px solid ${COLORS.border}`,
+    padding: '20px',
     display: 'flex',
     flexDirection: 'column',
     gap: '10px',
+    zIndex: 10,
   },
-
-  centerPanel: {
-    position: 'relative',
-    zIndex: 1,
+  sidePanelRight: {
+    background: COLORS.panel,
+    borderLeft: `1px solid ${COLORS.border}`,
+    padding: '20px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '8px',
+    zIndex: 10,
+  },
+  centerSection: {
     display: 'grid',
-    gridTemplateRows: '56px 1fr 140px',
-    minWidth: 0,
+    gridTemplateRows: '60px 1fr 140px',
+    padding: '10px',
+    zIndex: 5,
   },
-
-  rightPanel: {
-    position: 'relative',
-    zIndex: 1,
-    background: panel,
-    borderLeft: `1px solid ${border}`,
-    padding: '14px',
+  header: {
     display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
-  },
-
-  chartHeader: {
-    display: 'flex',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: '0 18px',
-    borderBottom: `1px solid ${border}`,
-    background: 'rgba(10,14,20,0.9)',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
+    padding: '0 20px',
+    borderBottom: `1px solid ${COLORS.border}`,
   },
-
-  symbol: {
-    color: blue,
-    fontWeight: 700,
-  },
-
-  timeframe: {
-    color: yellow,
-    fontWeight: 700,
-  },
-
-  chartArea: {
+  chartContainer: {
     position: 'relative',
-    margin: '14px',
-    background: '#060a10',
-    border: `1px solid ${border}`,
-    borderRadius: '12px',
+    margin: '15px',
+    background: '#040608',
+    border: `1px solid ${COLORS.border}`,
+    borderRadius: '4px',
     overflow: 'hidden',
   },
-
-  chartGrid: {
+  innerGrid: {
     position: 'absolute',
     inset: 0,
-    backgroundImage: `
-      linear-gradient(${subtle} 1px, transparent 1px),
-      linear-gradient(90deg, ${subtle} 1px, transparent 1px)
-    `,
-    backgroundSize: '60px 60px',
-    pointerEvents: 'none',
+    backgroundImage: `linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px)`,
+    backgroundSize: '50px 50px',
   },
-
-  hLine: {
+  svg: { width: '100%', height: '100%', position: 'absolute' },
+  glowBadge: {
     position: 'absolute',
-    left: 0,
-    right: 0,
-    height: '1px',
-    background: 'rgba(255,255,255,0.12)',
+    top: '20px',
+    right: '20px',
+    fontSize: '42px',
+    fontWeight: 900,
+    color: COLORS.neonYellow,
+    textShadow: `0 0 15px ${COLORS.neonYellow}`,
   },
-
-  sideNumber: {
-    position: 'absolute',
-    left: '12px',
-    color: yellow,
-    fontSize: '12px',
-    fontWeight: 700,
-  },
-
-  svg: {
-    position: 'absolute',
-    inset: 0,
-    width: '100%',
-    height: '100%',
-  },
-
-  valueBadge: {
-    position: 'absolute',
-    right: '14px',
-    top: '14px',
-    color: yellow,
-    fontSize: '28px',
-    fontWeight: 800,
-    letterSpacing: '0.04em',
-  },
-
-  bottomDock: {
-    display: 'flex',
-    gap: '10px',
-    padding: '0 14px 14px 14px',
-    overflowX: 'auto',
-  },
-
+  bottomDock: { display: 'flex', gap: '12px', padding: '10px' },
   instrumentCard: {
-    minWidth: '180px',
-    background: panel,
-    border: `1px solid ${border}`,
-    borderRadius: '12px',
-    padding: '14px',
-    color: blue,
-    textTransform: 'lowercase',
-    fontWeight: 700,
-  },
-
-  panelTitle: {
-    color: blue,
-    fontSize: '12px',
-    fontWeight: 800,
+    flex: 1,
+    background: 'rgba(10, 14, 20, 0.8)',
+    border: `1px solid ${COLORS.border}`,
+    padding: '15px',
+    borderRadius: '4px',
     textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    marginBottom: '4px',
+    color: COLORS.electricCyan,
   },
-
-  searchBox: {
-    border: `1px solid ${border}`,
-    background: '#060a10',
-    borderRadius: '10px',
-    padding: '10px 12px',
-    color: 'rgba(215,230,255,0.55)',
-    textTransform: 'lowercase',
-  },
-
-  listItem: {
-    border: `1px solid ${border}`,
-    background: '#060a10',
-    borderRadius: '10px',
-    padding: '10px 12px',
-    color: text,
-    textTransform: 'uppercase',
-  },
-
-  bookRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    border: `1px solid ${border}`,
-    background: '#060a10',
-    borderRadius: '10px',
-    padding: '10px 12px',
-    color: text,
-    textTransform: 'uppercase',
-    fontSize: '12px',
-  },
+  label: { fontSize: '10px', color: COLORS.electricCyan, marginBottom: '10px', opacity: 0.7 },
+  searchBox: { border: `1px solid ${COLORS.border}`, padding: '8px', fontSize: '12px', marginBottom: '10px' },
+  listItem: { padding: '8px', border: `1px solid rgba(255,255,255,0.05)`, marginBottom: '5px', fontSize: '13px' },
+  orderRow: { display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px' },
+  priceLabel: { position: 'absolute', left: '10px', top: '20%', fontSize: '10px', opacity: 0.5 },
+  priceLabelMid: { position: 'absolute', left: '10px', top: '50%', fontSize: '10px', opacity: 0.5 },
+  priceLabelLow: { position: 'absolute', left: '10px', top: '80%', fontSize: '10px', opacity: 0.5 },
 };
