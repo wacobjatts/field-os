@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Field-OS | Kinetic Branch</title>
+    <style>
+        /* The "Void" - Necessary for the Neon Glow to pop */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000000; /* Pure Black */
+            color: #00ffff; /* Electric Cyan Default */
+            overflow: hidden; /* Prevents scroll bounce on Jacob's mobile */
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #ui-root {
+            position: absolute;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* This is where the 3D Viewport lives */
+        #viewport-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1; /* Sits behind the text UI */
+        }
+    </style>
+</head>
+<body>
+
+    <div id="viewport-container"></div>
+
+    <div id="ui-root">
+        </div>
+
+    <script type="module" src="./dist/app.js"></script>
+    
+</body>
+</html>
 
