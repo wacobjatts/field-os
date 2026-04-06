@@ -13,7 +13,7 @@
     }
 
     body {
-      background: #05070a;
+      background: #030507;
       color: #cfe6ff;
       font-family: Arial, sans-serif;
       height: 100vh;
@@ -21,19 +21,20 @@
     }
 
     .app {
-      display: flex;
+      display: grid;
+      grid-template-columns: 220px 1fr 260px;
+      grid-template-rows: 1fr 160px;
       height: 100vh;
       width: 100vw;
-      position: relative;
     }
 
-    /* subtle grid */
+    /* GRID BACKGROUND */
     .grid {
-      position: absolute;
+      position: fixed;
       inset: 0;
       background-image:
-        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
       background-size: 40px 40px;
       pointer-events: none;
       z-index: 0;
@@ -41,25 +42,31 @@
 
     /* LEFT PANEL */
     .left {
-      width: 90px;
+      grid-row: 1 / span 2;
       border-right: 1px solid rgba(30,123,255,0.2);
-      padding: 10px;
+      padding: 12px;
       z-index: 1;
+    }
+
+    .left h3 {
+      color: #1e7bff;
+      margin-bottom: 10px;
+      font-size: 12px;
+      letter-spacing: 2px;
     }
 
     .ticker {
       border: 1px solid rgba(30,123,255,0.3);
-      padding: 10px;
+      padding: 12px;
       margin-bottom: 10px;
-      color: #1e7bff;
       text-align: center;
+      color: #1e7bff;
     }
 
-    /* CENTER */
+    /* CENTER CHART */
     .center {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
+      position: relative;
+      border-bottom: 1px solid rgba(30,123,255,0.2);
       z-index: 1;
     }
 
@@ -71,39 +78,45 @@
     }
 
     .chart {
-      flex: 1;
       position: relative;
-      margin: 10px;
-      border: 1px solid rgba(30,123,255,0.2);
-      overflow: hidden;
+      height: calc(100% - 40px);
     }
 
-    /* horizontal lines */
+    /* BASELINE */
+    .baseline {
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 1px;
+      background: rgba(255,255,255,0.25);
+    }
+
+    /* OTHER LINES */
     .line {
       position: absolute;
       left: 0;
       right: 0;
       height: 1px;
-      background: rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.1);
     }
 
-    .l1 { top: 20%; }
-    .l2 { top: 50%; }
-    .l3 { top: 80%; }
+    .top { top: 20%; }
+    .bottom { top: 80%; }
 
-    /* side numbers */
+    /* NUMBERS */
     .num {
       position: absolute;
-      left: 5px;
+      left: 10px;
       color: #ffd84d;
       font-size: 12px;
     }
 
-    .n1 { top: 17%; }
-    .n2 { top: 47%; }
-    .n3 { top: 77%; }
+    .n1 { top: 18%; }
+    .n2 { top: 48%; }
+    .n3 { top: 78%; }
 
-    /* svg line */
+    /* LINE */
     svg {
       position: absolute;
       inset: 0;
@@ -111,47 +124,81 @@
       height: 100%;
     }
 
-    /* value */
+    /* VALUE */
     .value {
       position: absolute;
-      right: 10px;
-      top: 10px;
+      right: 15px;
+      top: 15px;
       color: #ffd84d;
-      font-size: 26px;
+      font-size: 28px;
       font-weight: bold;
     }
 
-    /* bottom dock */
+    /* RIGHT PANEL */
+    .right {
+      border-left: 1px solid rgba(30,123,255,0.2);
+      padding: 12px;
+      z-index: 1;
+    }
+
+    .right h3 {
+      color: #ffd84d;
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .order {
+      border: 1px solid rgba(30,123,255,0.3);
+      padding: 12px;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .ask { color: #ff6b6b; }
+    .bid { color: #5cff9d; }
+
+    /* BOTTOM */
     .bottom {
-      height: 100px;
-      border-top: 1px solid rgba(30,123,255,0.2);
+      grid-column: 2 / span 2;
       display: flex;
       gap: 10px;
       padding: 10px;
+      border-top: 1px solid rgba(30,123,255,0.2);
+      overflow-x: auto;
+      z-index: 1;
     }
 
     .card {
+      min-width: 160px;
       border: 1px solid rgba(30,123,255,0.3);
-      padding: 10px;
+      padding: 12px;
       color: #1e7bff;
-      min-width: 120px;
+      text-align: center;
     }
 
-    /* MOBILE FIX */
-    @media (max-width: 768px) {
-      .left {
-        width: 70px;
+    /* MOBILE */
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 70px 1fr;
+        grid-template-rows: 1fr 140px;
+      }
+
+      .right {
+        display: none;
       }
     }
   </style>
 </head>
 
 <body>
+  <div class="grid"></div>
+
   <div class="app">
-    <div class="grid"></div>
 
     <!-- LEFT -->
     <div class="left">
+      <h3>SYSTEM</h3>
       <div class="ticker">TSLA</div>
       <div class="ticker">NVDA</div>
       <div class="ticker">SPY</div>
@@ -160,14 +207,14 @@
     <!-- CENTER -->
     <div class="center">
       <div class="header">
-        <div style="color:#1e7bff;">branch::kinetic</div>
-        <div style="color:#ffd84d;">5m</div>
+        <div style="color:#1e7bff;">KINETIC</div>
+        <div style="color:#ffd84d;">5M</div>
       </div>
 
       <div class="chart">
-        <div class="line l1"></div>
-        <div class="line l2"></div>
-        <div class="line l3"></div>
+        <div class="line top"></div>
+        <div class="baseline"></div>
+        <div class="line bottom"></div>
 
         <div class="num n1">80</div>
         <div class="num n2">50</div>
@@ -175,24 +222,41 @@
 
         <svg viewBox="0 0 1000 400">
           <path
-            d="M0 200 C150 260 250 180 350 220
-               C450 260 550 140 650 180
-               C750 220 850 180 1000 200"
+            d="M0 200 C200 260 350 180 500 220
+               C650 260 800 180 1000 210"
             stroke="#1e7bff"
             stroke-width="2"
             fill="none"
           />
         </svg>
 
-        <div class="value">62</div>
-      </div>
-
-      <div class="bottom">
-        <div class="card">volume</div>
-        <div class="card">absorption</div>
-        <div class="card">transmission</div>
+        <div class="value">63</div>
       </div>
     </div>
+
+    <!-- RIGHT -->
+    <div class="right">
+      <h3>ORDER FLOW</h3>
+      <div class="order ask">
+        <span>ASK</span>
+        <span>248.22</span>
+      </div>
+      <div class="order bid">
+        <span>BID</span>
+        <span>248.10</span>
+      </div>
+    </div>
+
+    <!-- BOTTOM -->
+    <div class="bottom">
+      <div class="card">VOLUME</div>
+      <div class="card">TRANSMISSION</div>
+      <div class="card">DECAY</div>
+      <div class="card">TENSION</div>
+      <div class="card">OSCILLATOR</div>
+      <div class="card">COMPRESSION</div>
+    </div>
+
   </div>
 </body>
 </html>
