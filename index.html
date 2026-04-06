@@ -3,69 +3,127 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Field-OS | Kinetic</title>
+    <title>Field-OS | Mobile Kinetic</title>
     <style>
-        body, html { margin: 0; padding: 0; background: #00050a; color: #00ffff; font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; }
-        .hud-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
-        .main-layout { display: grid; grid-template-columns: 200px 1fr 220px; height: 100vh; position: relative; z-index: 2; }
-        .panel { background: rgba(10, 15, 25, 0.85); border: 1px solid rgba(0, 255, 255, 0.2); padding: 15px; display: flex; flex-direction: column; gap: 10px; }
-        .center-display { display: grid; grid-template-rows: 50px 1fr 120px; padding: 10px; }
-        .viewport { position: relative; border: 1px solid rgba(0, 255, 255, 0.3); background: rgba(0,0,0,0.4); overflow: hidden; }
-        .data-badge { position: absolute; top: 20px; right: 25px; font-size: 48px; font-weight: 900; color: #ffff00; text-shadow: 0 0 15px #ffff00; }
-        .ticker-item { padding: 10px; border: 1px solid rgba(0, 255, 255, 0.2); font-size: 13px; text-shadow: 0 0 5px #00ffff; }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 255, 255, 0.2); padding-bottom: 5px; font-size: 12px; }
-        .order-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; }
+        /* THE VOID: Deep Space Theme */
+        body, html { 
+            margin: 0; padding: 0; background: #00050a; color: #00ffff; 
+            font-family: 'Courier New', monospace; overflow-x: hidden; height: 100%; 
+        }
+
+        /* BACKGROUND SCANNER GRID */
+        .hud-grid { 
+            position: fixed; inset: 0; 
+            background-image: linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px), 
+                              linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px); 
+            background-size: 25px 25px; pointer-events: none; z-index: 1;
+        }
+
+        /* FLEXIBLE MOBILE STACK */
+        .main-layout { 
+            display: flex; flex-direction: column; 
+            min-height: 100vh; position: relative; z-index: 2; 
+        }
+
+        /* 1. THE VIEWPORT (Top Half) */
+        .viewport-section {
+            height: 45vh; padding: 10px; display: flex; flex-direction: column;
+        }
+        .header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 5px 10px; font-size: 11px; font-weight: 900; 
+            border-bottom: 1px solid rgba(0,255,255,0.2);
+        }
+        .chart-box { 
+            flex: 1; position: relative; border: 1px solid rgba(0, 255, 255, 0.3); 
+            background: rgba(0,0,0,0.6); overflow: hidden; margin-top: 5px;
+        }
+        .data-badge { 
+            position: absolute; top: 10px; right: 15px; font-size: 38px; 
+            font-weight: 900; color: #ffff00; text-shadow: 0 0 12px #ffff00; 
+        }
         svg { width: 100%; height: 100%; filter: drop-shadow(0 0 8px #00ffff); }
+
+        /* 2. THE TICKERS & INSTRUMENTS (Bottom Half) */
+        .controls-section {
+            flex: 1; background: rgba(10, 15, 25, 0.9); 
+            border-top: 1px solid rgba(0, 255, 255, 0.3); padding: 15px;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .label { font-size: 9px; opacity: 0.6; letter-spacing: 2px; }
+        .ticker-grid { 
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; 
+        }
+        .ticker-item { 
+            padding: 12px; border: 1px solid rgba(0, 255, 255, 0.2); 
+            font-size: 12px; text-align: center; background: rgba(0,255,255,0.03);
+            text-shadow: 0 0 5px #00ffff;
+        }
+        .stats-row { 
+            display: flex; justify-content: space-between; 
+            font-size: 11px; padding: 8px; border: 1px solid rgba(0, 255, 255, 0.1);
+        }
+
+        /* Desktop Fix (If you open on PC later) */
+        @media (min-width: 800px) {
+            .main-layout { flex-direction: row; }
+            .viewport-section { flex: 1; height: 100vh; }
+            .controls-section { width: 300px; height: 100vh; }
+            .ticker-grid { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
     <div class="hud-grid"></div>
     <div class="main-layout">
-        <aside class="panel">
-            <div style="font-size: 10px; opacity: 0.6;">SYSTEM.INSTRUMENTS</div>
-            <div class="ticker-item">TSLA</div>
-            <div class="ticker-item">NVDA</div>
-            <div class="ticker-item">SPY</div>
-        </aside>
-
-        <section class="center-display">
+        
+        <section class="viewport-section">
             <header class="header">
-                <span style="font-weight: 900;">BRANCH::KINETIC_TRACER</span>
-                <span style="color: #ffff00;">5M_INTERVAL</span>
+                <span>BRANCH::KINETIC_TRACER [TSLA]</span>
+                <span style="color: #ffff00;">LIVE_FEED</span>
             </header>
-            <div class="viewport">
+            <div class="chart-box">
                 <div class="data-badge" id="live-val">62</div>
-                <svg viewBox="0 0 1000 400">
-                    <path id="glow-path" d="M0 200 Q 250 150, 500 200 T 1000 200" fill="none" stroke="#00ffff" stroke-width="3" />
+                <svg viewBox="0 0 1000 400" preserveAspectRatio="none">
+                    <path id="glow-path" d="M0 200 Q 250 150, 500 200 T 1000 200" fill="none" stroke="#00ffff" stroke-width="4" />
                 </svg>
-            </div>
-            <div style="display: flex; gap: 10px; padding-top: 10px;">
-                <div class="panel" style="flex: 1; text-align: center;">VOLUME</div>
-                <div class="panel" style="flex: 1; text-align: center;">ABSORPTION</div>
             </div>
         </section>
 
-        <aside class="panel">
-            <div style="font-size: 10px; opacity: 0.6;">ORDER_FLOW.L2</div>
-            <div class="order-row"><span style="color: #ff4d4d;">ASK</span> 248.22</div>
-            <div class="order-row"><span style="color: #00ff88;">BID</span> 248.10</div>
+        <aside class="controls-section">
+            <div class="label">SYSTEM.INSTRUMENTS</div>
+            <div class="ticker-grid">
+                <div class="ticker-item">TSLA</div>
+                <div class="ticker-item">NVDA</div>
+                <div class="ticker-item">SPY</div>
+                <div class="ticker-item">BTC</div>
+            </div>
+
+            <div style="margin-top: 10px;" class="label">ORDER_FLOW.L2</div>
+            <div class="stats-row"><span style="color: #ff4d4d;">ASK_ZONE</span> 248.22</div>
+            <div class="stats-row"><span style="color: #00ff88;">BID_ZONE</span> 248.10</div>
+            
+            <div style="margin-top: 10px;" class="label">ABSORPTION_CORE</div>
+            <div class="ticker-item" style="color: #ffff00; border-color: #ffff00;">ACTIVE_SCAN</div>
         </aside>
+
     </div>
 
     <script>
-        // Simple animation for the "Kinetic" look
         const path = document.getElementById('glow-path');
         const badge = document.getElementById('live-val');
         let offset = 0;
 
         function animate() {
-            offset += 0.05;
-            const y1 = 150 + Math.sin(offset) * 20;
-            const y2 = 250 + Math.cos(offset) * 20;
+            offset += 0.04;
+            // The "Kinetic Wiggle" Logic
+            const y1 = 150 + Math.sin(offset) * 30;
+            const y2 = 250 + Math.cos(offset * 0.8) * 40;
             path.setAttribute('d', `M0 200 Q 250 ${y1}, 500 200 T 1000 ${y2}`);
             
-            if (Math.random() > 0.8) {
-                badge.innerText = Math.floor(Math.random() * 5) + 60;
+            // Random value jitter
+            if (Math.random() > 0.95) {
+                badge.innerText = Math.floor(Math.random() * 6) + 60;
             }
             requestAnimationFrame(animate);
         }
