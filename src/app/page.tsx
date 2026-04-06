@@ -1,183 +1,212 @@
-'use client'; // CRITICAL: Tells the browser to run the JavaScript
+l'use client';
 
 import React, { useState, useEffect } from 'react';
 
-// --- THEME CONSTANTS (Electric Space Aesthetic) ---
-const COLORS = {
-  bg: '#05070a',           // Deep Space Black
-  panel: '#0a0e14',        // Industrial Hull
-  border: 'rgba(0, 255, 255, 0.15)', // Faint Cyan Glow
-  electricCyan: '#00ffff', // The "Neon" Primary
-  neonYellow: '#ffd84d',   // High-Precision Accents
-  text: '#d7e6ff',         // Soft HUD Blue
+// --- THEME ENGINE (Electric Cyan & High-Contrast Black) ---
+const THEME = {
+  bg: '#00050a',           // True Black-Blue
+  panel: 'rgba(10, 15, 25, 0.8)', 
+  electricCyan: '#00ffff', // Neon Cyan
+  neonYellow: '#ffff00',   // High-Visibility Yellow
+  dangerRed: '#ff4d4d',    // Ask/Bid Stress
+  grid: 'rgba(0, 255, 255, 0.05)',
+  border: 'rgba(0, 255, 255, 0.2)',
 };
 
-export default function FieldOS() {
-  const [value, setValue] = useState(62);
+export default function FieldOS_Unified() {
+  const [trace, setTrace] = useState(62);
+  const [pulse, setPulse] = useState(0);
 
-  // Simulated Live Data Trace
+  // Live "Kinetic" Animation Loop
   useEffect(() => {
     const interval = setInterval(() => {
-      setValue(prev => Math.floor(Math.random() * (65 - 58 + 1) + 58));
-    }, 1000);
+      setTrace(prev => Math.floor(Math.random() * (64 - 60 + 1) + 60));
+      setPulse(p => (p + 1) % 100);
+    }, 800);
     return () => clearInterval(interval);
   }, []);
 
   return (
     <main style={s.page}>
-      {/* 1. BACKGROUND GRID SYSTEM */}
-      <div style={s.gridOverlay} />
-
-      {/* 2. LEFT PANEL: TICKERS */}
-      <aside style={s.sidePanel}>
-        <div style={s.label}>system.tickers</div>
-        <div style={s.searchBox}>search_instrument...</div>
-        {['tsla', 'nvda', 'spy', 'qqq'].map(ticker => (
-          <div key={ticker} style={s.listItem}>{ticker}</div>
+      {/* BACKGROUND SCANNERS */}
+      <div style={s.scanGrid} />
+      
+      {/* LEFT: TICKER HUD */}
+      <aside style={s.leftPanel}>
+        <div style={s.tag}>SYSTEM.INSTRUMENTS</div>
+        <div style={s.searchField}>SCANNING_MARKET...</div>
+        {['TSLA', 'NVDA', 'SPY', 'QQQ', 'BTC'].map((ticker) => (
+          <div key={ticker} style={s.tickerItem}>
+            {ticker} <span style={{fontSize: '9px', opacity: 0.5}}>ACTIVE</span>
+          </div>
         ))}
       </aside>
 
-      {/* 3. CENTER PANEL: MAIN HUD */}
-      <section style={s.centerSection}>
-        <header style={s.header}>
-          <span style={{ color: COLORS.electricCyan, fontWeight: 800 }}>TSLA // KINETIC.BRANCH</span>
-          <span style={{ color: COLORS.neonYellow }}>5M_TIMEFRAME</span>
-        </header>
+      {/* CENTER: MAIN TACTICAL DISPLAY */}
+      <section style={s.centerDisplay}>
+        <div style={s.displayHeader}>
+          <div style={{color: THEME.electricCyan, fontWeight: 900, letterSpacing: '2px'}}>
+            BRANCH::KINETIC_TRACER [TSLA]
+          </div>
+          <div style={{color: THEME.neonYellow}}>5M_INTERVAL</div>
+        </div>
 
-        <div style={s.chartContainer}>
-          {/* THE 3D INDICATOR / CHART */}
-          <div style={s.innerGrid} />
+        <div style={s.viewportContainer}>
+          {/* 3D-STYLE CHART LAYER */}
+          <div style={s.viewportGrid} />
           
-          <div style={s.priceLabel}>80</div>
-          <div style={s.priceLabelMid}>50</div>
-          <div style={s.priceLabelLow}>20</div>
+          {/* SCALE NUMBERS */}
+          <div style={{...s.scaleNum, top: '20%'}}>80</div>
+          <div style={{...s.scaleNum, top: '50%'}}>50</div>
+          <div style={{...s.scaleNum, top: '80%'}}>20</div>
 
-          <svg viewBox="0 0 1000 400" preserveAspectRatio="none" style={s.svg}>
-            {/* The "Electric" Glow Path */}
+          {/* THE ELECTRIC PATH */}
+          <svg viewBox="0 0 1000 400" preserveAspectRatio="none" style={s.svgLayer}>
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3.5" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
             <path
-              d="M 0 200 C 150 180, 300 300, 500 200 C 700 100, 850 250, 1000 220"
+              d={`M 0 200 C 150 ${180 + pulse/2}, 300 ${250 - pulse}, 500 200 C 700 150, 850 250, 1000 220`}
               fill="none"
-              stroke={COLORS.electricCyan}
+              stroke={THEME.electricCyan}
               strokeWidth="3"
-              style={{ filter: 'drop-shadow(0 0 12px #00ffff)' }} 
+              filter="url(#glow)"
+              style={{ transition: 'd 0.8s ease-in-out' }}
             />
           </svg>
 
-          <div style={s.glowBadge}>{value}</div>
+          {/* REAL-TIME DATA BADGE */}
+          <div style={s.dataBadge}>
+            <div style={{fontSize: '12px', color: THEME.electricCyan, opacity: 0.6}}>ABSORPTION_V1</div>
+            {trace}
+          </div>
         </div>
 
-        {/* BOTTOM INSTRUMENT STACK */}
-        <div style={s.bottomDock}>
-          {['absorption', 'volume', 'transmission', 'decay'].map(inst => (
-            <div key={inst} style={s.instrumentCard}>
-              <div style={{fontSize: '10px', opacity: 0.5}}>inst_type</div>
-              {inst}
+        {/* BOTTOM: SUB-INSTRUMENT STACK */}
+        <div style={s.instrumentDock}>
+          {['VOLUME', 'DECAY', 'TENSION', 'SPARK'].map(name => (
+            <div key={name} style={s.miniCard}>
+              <div style={s.miniLabel}>{name}</div>
+              <div style={{color: THEME.electricCyan, fontSize: '14px'}}>0.842</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* 4. RIGHT PANEL: ORDER FLOW */}
-      <aside style={s.sidePanelRight}>
-        <div style={s.label}>ask_bid.memory</div>
-        <div style={s.orderRow}><span style={{color: '#ff4d4d'}}>ASK</span> 248.22</div>
-        <div style={s.orderRow}><span style={{color: '#ff4d4d'}}>ASK</span> 248.18</div>
-        <div style={{height: '2px', background: COLORS.border, margin: '5px 0'}} />
-        <div style={s.orderRow}><span style={{color: '#4dff88'}}>BID</span> 248.10</div>
-        <div style={s.orderRow}><span style={{color: '#4dff88'}}>BID</span> 248.06</div>
+      {/* RIGHT: ORDER FLOW MEMORY */}
+      <aside style={s.rightPanel}>
+        <div style={s.tag}>ORDER_FLOW.L2</div>
+        <div style={s.orderRow}><span style={{color: THEME.dangerRed}}>ASK</span> 248.22</div>
+        <div style={s.orderRow}><span style={{color: THEME.dangerRed}}>ASK</span> 248.18</div>
+        <div style={{height: '1px', background: THEME.border, margin: '10px 0'}} />
+        <div style={s.orderRow}><span style={{color: '#00ff88'}}>BID</span> 248.10</div>
+        <div style={s.orderRow}><span style={{color: '#00ff88'}}>BID</span> 248.06</div>
       </aside>
     </main>
   );
 }
 
-// --- HUD STYLING ENGINE ---
+// --- CSS-IN-JS ENGINE ---
 const s: Record<string, React.CSSProperties> = {
   page: {
-    backgroundColor: COLORS.bg,
-    color: COLORS.text,
+    backgroundColor: THEME.bg,
+    color: '#d7e6ff',
     height: '100vh',
+    width: '100vw',
     display: 'grid',
-    gridTemplateColumns: '220px 1fr 240px',
-    fontFamily: 'monospace',
+    gridTemplateColumns: '200px 1fr 220px',
+    fontFamily: '"Courier New", monospace',
     overflow: 'hidden',
   },
-  gridOverlay: {
+  scanGrid: {
     position: 'absolute',
     inset: 0,
-    backgroundImage: `radial-gradient(${COLORS.border} 1px, transparent 1px)`,
-    backgroundSize: '30px 30px',
+    backgroundImage: `linear-gradient(${THEME.grid} 1px, transparent 1px), linear-gradient(90deg, ${THEME.grid} 1px, transparent 1px)`,
+    backgroundSize: '40px 40px',
     pointerEvents: 'none',
   },
-  sidePanel: {
-    background: COLORS.panel,
-    borderRight: `1px solid ${COLORS.border}`,
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '10px',
+  leftPanel: {
+    background: THEME.panel,
+    borderRight: `1px solid ${THEME.border}`,
+    padding: '15px',
     zIndex: 10,
   },
-  sidePanelRight: {
-    background: COLORS.panel,
-    borderLeft: `1px solid ${COLORS.border}`,
-    padding: '20px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: '8px',
+  rightPanel: {
+    background: THEME.panel,
+    borderLeft: `1px solid ${THEME.border}`,
+    padding: '15px',
     zIndex: 10,
   },
-  centerSection: {
+  centerDisplay: {
     display: 'grid',
-    gridTemplateRows: '60px 1fr 140px',
+    gridTemplateRows: '50px 1fr 120px',
     padding: '10px',
-    zIndex: 5,
   },
-  header: {
+  displayHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '0 20px',
-    borderBottom: `1px solid ${COLORS.border}`,
+    padding: '0 15px',
+    borderBottom: `1px solid ${THEME.border}`,
+    fontSize: '12px',
   },
-  chartContainer: {
+  viewportContainer: {
     position: 'relative',
-    margin: '15px',
-    background: '#040608',
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: '4px',
+    margin: '10px',
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    border: `1px solid ${THEME.border}`,
+    borderRadius: '2px',
     overflow: 'hidden',
   },
-  innerGrid: {
+  viewportGrid: {
     position: 'absolute',
     inset: 0,
-    backgroundImage: `linear-gradient(rgba(0,255,255,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.03) 1px, transparent 1px)`,
-    backgroundSize: '50px 50px',
+    backgroundImage: `linear-gradient(rgba(0,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.02) 1px, transparent 1px)`,
+    backgroundSize: '100px 100px',
   },
-  svg: { width: '100%', height: '100%', position: 'absolute' },
-  glowBadge: {
+  svgLayer: { width: '100%', height: '100%', position: 'absolute', top: 0 },
+  dataBadge: {
     position: 'absolute',
     top: '20px',
-    right: '20px',
-    fontSize: '42px',
+    right: '25px',
+    fontSize: '48px',
     fontWeight: 900,
-    color: COLORS.neonYellow,
-    textShadow: `0 0 15px ${COLORS.neonYellow}`,
+    color: THEME.neonYellow,
+    textShadow: `0 0 15px ${THEME.neonYellow}`,
+    textAlign: 'right',
   },
-  bottomDock: { display: 'flex', gap: '12px', padding: '10px' },
-  instrumentCard: {
+  scaleNum: { position: 'absolute', left: '10px', fontSize: '10px', color: THEME.electricCyan, opacity: 0.4 },
+  instrumentDock: { display: 'flex', gap: '10px', padding: '10px' },
+  miniCard: {
     flex: 1,
-    background: 'rgba(10, 14, 20, 0.8)',
-    border: `1px solid ${COLORS.border}`,
-    padding: '15px',
-    borderRadius: '4px',
-    textTransform: 'uppercase',
-    color: COLORS.electricCyan,
+    background: 'rgba(0, 255, 255, 0.05)',
+    border: `1px solid ${THEME.border}`,
+    padding: '12px',
+    textAlign: 'center',
   },
-  label: { fontSize: '10px', color: COLORS.electricCyan, marginBottom: '10px', opacity: 0.7 },
-  searchBox: { border: `1px solid ${COLORS.border}`, padding: '8px', fontSize: '12px', marginBottom: '10px' },
-  listItem: { padding: '8px', border: `1px solid rgba(255,255,255,0.05)`, marginBottom: '5px', fontSize: '13px' },
-  orderRow: { display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '4px' },
-  priceLabel: { position: 'absolute', left: '10px', top: '20%', fontSize: '10px', opacity: 0.5 },
-  priceLabelMid: { position: 'absolute', left: '10px', top: '50%', fontSize: '10px', opacity: 0.5 },
-  priceLabelLow: { position: 'absolute', left: '10px', top: '80%', fontSize: '10px', opacity: 0.5 },
+  miniLabel: { fontSize: '9px', color: THEME.electricCyan, opacity: 0.6, marginBottom: '4px' },
+  tag: { fontSize: '10px', color: THEME.electricCyan, marginBottom: '15px', fontWeight: 'bold' },
+  searchField: { 
+    border: `1px solid ${THEME.border}`, 
+    padding: '8px', 
+    fontSize: '10px', 
+    marginBottom: '20px',
+    color: THEME.electricCyan,
+  },
+  tickerItem: {
+    padding: '12px',
+    border: `1px solid ${THEME.border}`,
+    marginBottom: '8px',
+    fontSize: '13px',
+    color: THEME.electricCyan,
+    textShadow: '0 0 5px rgba(0,255,255,0.5)',
+    display: 'flex',
+    justifyContent: 'space-between',
+  },
+  orderRow: { display: 'flex', justifyContent: 'space-between', fontSize: '11px', padding: '6px 0' },
 };
