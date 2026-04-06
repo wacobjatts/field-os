@@ -1,423 +1,58 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>FieldOS / Kinetic</title>
-  <style>
-    /* GLOBAL STYLES */
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000000; color: #e8e8e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+<script type="module">
+import { computeKinetics } from "./src/kinetic/system/computeKinetics";
 
-    .app-shell { position: fixed; inset: 0; display: grid; grid-template-rows: 1fr auto; padding: env(safe-area-inset-top) 10px env(safe-area-inset-bottom) 10px; }
-    .workspace-shell { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; min-height: 0; overflow: hidden; }
+const watchlists = {
+  'Main': [['AAPL', '214.43', '+1.2%'], ['NVDA', '132.17', '-0.5%'], ['TSLA', '176.80', '+2.4%']],
+  'Tech': [['MSFT', '420.10', '+0.8%'], ['GOOGL', '180.20', '+0.3%']],
+  'Alts': [['BTC', '64,231', '-1.1%'], ['ETH', '3,450', '+0.9%']]
+};
 
-    /* CURTAINS */
-    .curtain { height: 100%; overflow: hidden; transition: width 0.2s ease; display: flex; }
-    .left-curtain { width: 130px; }
-    .right-curtain { width: 120px; }
-    .curtain.is-collapsed { width: 20px !important; }
+const categories = [
+  { name: '1. Structural Field', items: [['Phase Boundaries', 'Architectural thresholds.'], ['Compression Zones', 'Market squeezing.']] },
+  { name: '2. Force Field', items: [['Momentum Vector', 'Directional force.'], ['Acceleration Gradient', 'Speed change.']] },
+  { name: '3. Resistance Field', items: [['Cost-to-Move Curve', 'Friction vs liquidity.'], ['Liquidity Density', 'Order book pockets.']] },
+  { name: '4. Inertia Field', items: [['Move Inertia', 'Difficulty of stopping.'], ['Mass Class', 'Move classification.']] },
+  { name: '5. Interpretation Field', items: [['Truth Field', 'Signal vs Noise.'], ['Confidence Metrics', 'System conviction.']] },
+  { name: '6. Decision Field', items: [['Alignment Score', 'System aggregate.'], ['Entry Readiness', 'Action state.']] }
+];
 
-    .curtain-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 8px; background: #050505; }
-    .curtain.is-collapsed .curtain-content { display: none; }
-    .curtain-handle { width: 20px; background: #0a0a0a; color: #e8e8e8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: none; }
+let stackItems = [
+  { id: 'instr-initial', type: 'instrument', name: 'Kinetic Manifold', desc: 'Combines force and truth into a single live view.' }
+];
 
-    /* TICKER / WATCHLIST */
-    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .panel-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0; }
-    .list-selector { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 10px; scrollbar-width: none; }
-    .list-tab { background: transparent; border: none; color: #666; font-size: 9px; padding: 3px 6px; cursor: pointer; white-space: nowrap; }
-    .list-tab.is-active { color: #00ffff; }
+let rightModules = [];
 
-    .ticker-search { width: 100%; background: #111; border: none; color: #fff; padding: 6px; margin-bottom: 10px; font-size: 11px; outline: none; }
-    .ticker-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-    .ticker-row { display: grid; grid-template-columns: 1fr auto; padding: 6px; cursor: pointer; font-size: 10px; background: #0a0a0a; }
-    .ticker-row.is-active { background: #001515; color: #00ffff; }
-    .t-price { color: #00ff00; text-align: right; }
-    .t-delta { font-size: 8px; color: #666; display: block; }
+/* 🔥 ADD THIS (your system running) */
+const data = {
+  book: { bestBid: 50000, bestBidSize: 2, bestAsk: 50010, bestAskSize: 3 },
+  trades: { buyWork: 100000, sellWork: 50000 },
+  previousMid: 50000,
+  anchorMid: 50000
+};
 
-    /* CENTER WORKSPACE */
-    .center-workspace { display: flex; flex-direction: column; overflow-y: auto; gap: 6px; scrollbar-width: none; }
-    .center-workspace::-webkit-scrollbar { display: none; }
-    
-    /* CHART BOX */
-    .chart-box { position: sticky; top: 0; z-index: 20; background: #000; width: 100%; aspect-ratio: 1.1 / 1; border: none; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+const result = computeKinetics(data);
+console.log("KINETIC:", result);
 
-    /* REORDERABLE STACK */
-    .middle-stack { display: flex; flex-direction: column; gap: 6px; }
-    .stack-card { border: none; background: #000; display: flex; flex-direction: column; }
-    
-    /* INSTRUMENT VISUAL */
-    .card-visual { min-height: 90px; background: #050505; display: flex; align-items: center; justify-content: center; color: #00ffff; font-weight: bold; font-size: 14px; text-align: center; padding: 10px; border: none; }
-    
-    /* CARD HEADER */
-    .card-header { padding: 6px; display: flex; justify-content: space-between; align-items: center; background: #000; }
-    .card-info { flex: 1; }
-    .card-title { font-size: 12px; font-weight: bold; margin: 0; color: #ccc; }
-    .card-controls { display: flex; gap: 4px; align-items: center; }
+/* everything else unchanged */
 
-    /* VOLUME SPECIFIC OVERRIDES */
-    .stack-card.is-volume .card-header { padding: 3px 6px; }
-    .stack-card.is-volume .card-title { font-size: 11px; color: #00ffff; text-transform: uppercase; letter-spacing: 1px; }
-    .stack-card.is-volume .icon-btn { width: 18px; height: 18px; font-size: 10px; }
-    
-    /* COLLAPSED VOLUME */
-    .stack-card.is-volume.is-collapsed { height: 20px; overflow: hidden; opacity: 0.7; }
-    .stack-card.is-volume.is-collapsed .card-header { padding: 1px 6px; min-height: 20px; }
-    .stack-card.is-volume.is-collapsed .card-title { font-size: 9px; line-height: 18px; }
-    .stack-card.is-volume.is-collapsed .icon-btn { width: 16px; height: 16px; font-size: 9px; }
-
-    /* CHOOSER */
-    .chooser-panel { border: none; display: flex; flex-direction: column; background: #050505; }
-    .chooser-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #111; }
-    .chooser-section-label { font-size: 9px; color: #444; text-transform: uppercase; padding: 10px 10px 4px 10px; letter-spacing: 1px; font-weight: bold; }
-    
-    .quick-access-list { padding: 4px 10px 10px 10px; display: flex; flex-direction: column; gap: 4px; }
-    .quick-btn { background: #0a0a0a; border: none; color: #ccc; padding: 10px; text-align: left; cursor: pointer; font-size: 11px; }
-    .quick-btn:disabled { color: #333; cursor: default; }
-
-    .category-card { border: none; background: #000; }
-    .category-head { width: 100%; background: transparent; border: none; color: #fff; padding: 10px; text-align: left; display: flex; justify-content: space-between; cursor: pointer; font-size: 11px; }
-    .category-content { display: none; flex-direction: column; background: #050505; }
-    .category-card.is-expanded .category-content { display: flex; }
-    .sub-item { padding: 10px; background: transparent; border: none; color: #aaa; text-align: left; font-size: 10px; cursor: pointer; }
-
-    /* RIGHT MODULES */
-    .module-stack { display: grid; gap: 8px; height: 100%; }
-    .module-card { border: none; display: flex; flex-direction: column; min-height: 0; background: #0a0a0a; }
-    .module-head { padding: 4px 8px; border: none; display: flex; justify-content: space-between; align-items: center; background: #111; font-size: 9px; font-weight: bold; }
-    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; color: #444; font-size: 10px; }
-    
-    .module-picker-overlay { border: none; padding: 8px; display: flex; flex-direction: column; gap: 4px; background: #111; margin-bottom: 10px; }
-    .picker-btn { background: #000; border: none; color: #ccc; font-size: 9px; padding: 6px; cursor: pointer; display: block; width: 100%; text-align: left; }
-
-    /* BOTTOM MENU */
-    .bottom-menu-wrap { border: none; height: 54px; display: grid; grid-template-columns: repeat(6, 1fr) 40px; background: #000; }
-    .menu-item { background: transparent; border: none; color: #fff; font-size: 8px; text-transform: uppercase; cursor: pointer; }
-    .reopen-menu { position: fixed; bottom: 10px; right: 10px; background: #000; border: none; color: #fff; padding: 6px 10px; font-size: 10px; z-index: 100; display: none; border-radius: 2px; }
-
-    /* UTILS */
-    .is-hidden { display: none !important; }
-    .ghost-btn { background: #0a0a0a; border: none; color: #fff; padding: 4px 8px; font-size: 10px; cursor: pointer; }
-    .icon-btn { background: transparent; border: none; color: #fff; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-  </style>
-</head>
-<body>
-
-<div class="app-shell">
-  <div class="workspace-shell">
-    
-    <aside class="curtain left-curtain" id="leftCurtain">
-      <div class="curtain-content">
-        <div class="panel-header"><span class="panel-title">Watchlists</span><button class="icon-btn">+</button></div>
-        <div class="list-selector" id="listSelector">
-          <button class="list-tab is-active" onclick="switchList(this, 'Main')">Main</button>
-          <button class="list-tab" onclick="switchList(this, 'Tech')">Tech</button>
-          <button class="list-tab" onclick="switchList(this, 'Alts')">Alts</button>
-        </div>
-        <input type="text" class="ticker-search" placeholder="Find symbol...">
-        <div class="ticker-list" id="tickerList"></div>
+function init() {
+  renderTickers('Main');
+  renderStack();
+  const container = document.getElementById('categoryContainer');
+  categories.forEach(cat => {
+    const card = document.createElement('div');
+    card.className = 'category-card';
+    card.innerHTML = `
+      <button class="category-head" onclick="toggleCategory(this)"><span>${cat.name}</span><span>▾</span></button>
+      <div class="category-content">
+        ${cat.items.map(i => `<button class="sub-item" onclick="addModuleToStack('instrument', '${i[0]}','${i[1]}')">${i[0]}</button>`).join('')}
       </div>
-      <button class="curtain-handle" id="leftHandle" onclick="toggleCurtain('leftCurtain')">‹</button>
-    </aside>
+    `;
+    container.appendChild(card);
+  });
+}
 
-    <main class="center-workspace">
-      <section class="chart-box" id="chartBox">CHART: <span id="activeTickerDisplay">AAPL</span></section>
+/* keep all your existing functions exactly the same below */
 
-      <div class="middle-stack" id="middleStack"></div>
-
-      <section class="instrument-chooser-area">
-        <button class="ghost-btn" id="addInstrBtn" onclick="openChooser()" style="margin: 0 auto; display: block; padding: 10px 20px;">+ Add Tool</button>
-
-        <div class="chooser-panel is-hidden" id="chooserPanel">
-          <div class="chooser-top-bar">
-            <span class="panel-title" style="color:#fff">Tools</span>
-            <button class="ghost-btn" onclick="closeChooser()">Hide</button>
-          </div>
-          
-          <div class="chooser-section-label">Quick Access</div>
-          <div class="quick-access-list">
-            <button class="quick-btn" id="volQuickBtn" onclick="addModuleToStack('volume', 'Relative Cloud', 'Deep structural volume analysis.')">Volume (Relative Cloud)</button>
-            <button class="quick-btn" onclick="addModuleToStack('instrument', 'Kinetic Manifold', 'Combines force and truth into a single live view.')">Kinetic Manifold</button>
-            <button class="quick-btn" onclick="addModuleToStack('instrument', 'Compression / Expansion', 'Tracks the breathing cycle of market compression.')">Compression / Expansion</button>
-          </div>
-
-          <div class="chooser-section-label">Categories</div>
-          <div id="categoryContainer"></div>
-        </div>
-      </section>
-      <div style="min-height: 20px;"></div>
-    </main>
-
-    <aside class="curtain right-curtain" id="rightCurtain">
-      <button class="curtain-handle" id="rightHandle" onclick="toggleCurtain('rightCurtain')">›</button>
-      <div class="curtain-content">
-        <div class="panel-header">
-          <span class="panel-title">Info</span>
-          <button class="icon-btn" onclick="toggleModulePicker()">+</button>
-        </div>
-
-        <div class="module-picker-overlay is-hidden" id="modulePicker">
-          <button class="picker-btn" onclick="addRightModule('Order Book')">Order Book</button>
-          <button class="picker-btn" onclick="addRightModule('Notes')">Notes</button>
-          <button class="picker-btn" onclick="addRightModule('Signals')">Signals</button>
-        </div>
-
-        <div class="empty-state" id="rightEmpty">
-          <span>Workspace Empty</span>
-          <button class="ghost-btn" onclick="toggleModulePicker()">+ Add</button>
-        </div>
-        <div class="module-stack is-hidden" id="rightModuleStack"></div>
-      </div>
-    </aside>
-  </div>
-
-  <footer class="bottom-menu-wrap" id="bottomMenu">
-    <button class="menu-item" onclick="toggleVolumeCollapseAll()">Volume</button>
-    <button class="menu-item">Chart</button>
-    <button class="menu-item">Instr</button>
-    <button class="menu-item">Book</button>
-    <button class="menu-item">Sig</button>
-    <button class="menu-item">News</button>
-    <button class="menu-item" style="border:none; color:#666;" onclick="toggleBottomMenu(false)">⌄</button>
-  </footer>
-</div>
-
-<button class="reopen-menu" id="reopenMenu" onclick="toggleBottomMenu(true)">OPEN MENU</button>
-
-<script>
-  const watchlists = {
-    'Main': [['AAPL', '214.43', '+1.2%'], ['NVDA', '132.17', '-0.5%'], ['TSLA', '176.80', '+2.4%']],
-    'Tech': [['MSFT', '420.10', '+0.8%'], ['GOOGL', '180.20', '+0.3%']],
-    'Alts': [['BTC', '64,231', '-1.1%'], ['ETH', '3,450', '+0.9%']]
-  };
-
-  const categories = [
-    { name: '1. Structural Field', items: [['Phase Boundaries', 'Architectural thresholds.'], ['Compression Zones', 'Market squeezing.']] },
-    { name: '2. Force Field', items: [['Momentum Vector', 'Directional force.'], ['Acceleration Gradient', 'Speed change.']] },
-    { name: '3. Resistance Field', items: [['Cost-to-Move Curve', 'Friction vs liquidity.'], ['Liquidity Density', 'Order book pockets.']] },
-    { name: '4. Inertia Field', items: [['Move Inertia', 'Difficulty of stopping.'], ['Mass Class', 'Move classification.']] },
-    { name: '5. Interpretation Field', items: [['Truth Field', 'Signal vs Noise.'], ['Confidence Metrics', 'System conviction.']] },
-    { name: '6. Decision Field', items: [['Alignment Score', 'System aggregate.'], ['Entry Readiness', 'Action state.']] }
-  ];
-
-  let stackItems = [
-    { id: 'instr-initial', type: 'instrument', name: 'Kinetic Manifold', desc: 'Combines force and truth into a single live view.' }
-  ];
-  
-  let rightModules = [];
-
-  function init() {
-    renderTickers('Main');
-    renderStack();
-    const container = document.getElementById('categoryContainer');
-    categories.forEach(cat => {
-      const card = document.createElement('div');
-      card.className = 'category-card';
-      card.innerHTML = `
-        <button class="category-head" onclick="toggleCategory(this)"><span>${cat.name}</span><span>▾</span></button>
-        <div class="category-content">
-          ${cat.items.map(i => `<button class="sub-item" onclick="addModuleToStack('instrument', '${i[0]}','${i[1]}')">${i[0]}</button>`).join('')}
-        </div>
-      `;
-      container.appendChild(card);
-    });
-  }
-
-  /* CURTAINS */
-  function toggleCurtain(id) {
-    const curtain = document.getElementById(id);
-    const handle = curtain.querySelector('.curtain-handle');
-    const isCollapsed = curtain.classList.toggle('is-collapsed');
-    if (id === 'leftCurtain') handle.innerText = isCollapsed ? '›' : '‹';
-    else handle.innerText = isCollapsed ? '‹' : '›';
-  }
-  
-  function toggleBottomMenu(show) {
-    document.getElementById('bottomMenu').classList.toggle('is-hidden', !show);
-    document.getElementById('reopenMenu').style.display = show ? 'none' : 'block';
-  }
-
-  /* WATCHLIST */
-  function switchList(btn, name) {
-    document.querySelectorAll('#listSelector .list-tab').forEach(t => t.classList.remove('is-active'));
-    btn.classList.add('is-active');
-    renderTickers(name);
-  }
-
-  function renderTickers(name) {
-    const list = document.getElementById('tickerList');
-    const activeTicker = document.getElementById('activeTickerDisplay').innerText;
-    list.innerHTML = '';
-    watchlists[name].forEach(t => {
-      const row = document.createElement('div');
-      row.className = 'ticker-row';
-      if (t[0] === activeTicker) row.classList.add('is-active');
-      row.innerHTML = `<span>${t[0]}</span><span class="t-price">${t[1]}<span class="t-delta">${t[2]}</span></span>`;
-      row.onclick = () => {
-        document.querySelectorAll('.ticker-row').forEach(r => r.classList.remove('is-active'));
-        row.classList.add('is-active');
-        document.getElementById('activeTickerDisplay').innerText = t[0];
-      };
-      list.appendChild(row);
-    });
-  }
-
-  /* STACK LOGIC */
-  function addModuleToStack(type, name, desc) {
-    if (type === 'volume' && stackItems.some(i => i.type === 'volume')) return;
-    stackItems.push({ id: type === 'volume' ? 'vol-01' : Date.now(), type, name, desc, collapsed: false });
-    renderStack();
-    closeChooser();
-  }
-
-  function moveItem(index, dir) {
-    const newIndex = index + dir;
-    if (newIndex < 0 || newIndex >= stackItems.length) return;
-    const item = stackItems.splice(index, 1)[0];
-    stackItems.splice(newIndex, 0, item);
-    renderStack();
-  }
-
-  function removeItem(index) {
-    stackItems.splice(index, 1);
-    renderStack();
-  }
-
-  function toggleVolumeCollapse(index) {
-    stackItems[index].collapsed = !stackItems[index].collapsed;
-    renderStack();
-  }
-
-  function toggleVolumeCollapseAll() {
-    let changed = false;
-    stackItems.forEach((item) => {
-      if (item.type === 'volume') {
-        item.collapsed = !item.collapsed;
-        changed = true;
-      }
-    });
-    if (changed) renderStack();
-  }
-
-  function renderStack() {
-    const stack = document.getElementById('middleStack');
-    stack.innerHTML = '';
-    
-    const hasVol = stackItems.some(i => i.type === 'volume');
-    const volBtn = document.getElementById('volQuickBtn');
-    volBtn.disabled = hasVol;
-    volBtn.innerText = hasVol ? "Volume Strip (Active)" : "Volume (Relative Cloud)";
-
-    stackItems.forEach((item, i) => {
-      const card = document.createElement('section');
-      const isVol = item.type === 'volume';
-      const isCollapsed = isVol && item.collapsed;
-      
-      let cardClasses = isVol ? 'stack-card is-volume' : 'stack-card';
-      if (isCollapsed) cardClasses += ' is-collapsed';
-      card.className = cardClasses;
-      
-      const titleText = isVol ? `Volume: ${item.name}` : item.name;
-      const infoButton = isVol ? '' : '<button class="icon-btn" style="color:#666;">?</button>';
-      const toggleIcon = isCollapsed ? '▸' : '▾';
-      const volToggle = isVol ? `<button class="icon-btn" onclick="toggleVolumeCollapse(${i})">${toggleIcon}</button>` : '';
-
-      // Conditional Controls: Hide move/remove if volume is collapsed
-      const showStandardControls = !isCollapsed;
-      const standardControls = showStandardControls ? `
-        <button class="icon-btn" onclick="moveItem(${i}, -1)">▲</button>
-        <button class="icon-btn" onclick="moveItem(${i}, 1)">▼</button>
-        <button class="icon-btn" style="color:#ff4444;" onclick="removeItem(${i})">×</button>
-      ` : '';
-      
-      card.innerHTML = `
-        ${(!isVol) ? `<div class="card-visual">${item.name}</div>` : ''}
-        <div class="card-header">
-          <div class="card-info">
-            <h3 class="card-title">${titleText}</h3>
-          </div>
-          <div class="card-controls">
-            ${standardControls}
-            ${volToggle}
-            ${infoButton}
-          </div>
-        </div>
-      `;
-      stack.appendChild(card);
-    });
-  }
-
-  /* CHOOSER */
-  function openChooser() {
-    document.getElementById('chooserPanel').classList.remove('is-hidden');
-    document.getElementById('addInstrBtn').classList.add('is-hidden');
-    collapseAllCategories();
-  }
-
-  function closeChooser() {
-    document.getElementById('chooserPanel').classList.add('is-hidden');
-    document.getElementById('addInstrBtn').classList.remove('is-hidden');
-    collapseAllCategories();
-  }
-
-  function toggleCategory(btn) {
-    const card = btn.parentElement;
-    const isExpanded = card.classList.contains('is-expanded');
-    collapseAllCategories();
-    if(!isExpanded) card.classList.add('is-expanded');
-  }
-
-  function collapseAllCategories() { 
-    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('is-expanded')); 
-  }
-
-  /* RIGHT SIDE MODULES */
-  function toggleModulePicker() { 
-    document.getElementById('modulePicker').classList.toggle('is-hidden'); 
-  }
-
-  function addRightModule(type) {
-    rightModules.push(type);
-    document.getElementById('modulePicker').classList.add('is-hidden');
-    renderRightModules();
-  }
-
-  function removeRightModule(index) {
-    rightModules.splice(index, 1);
-    renderRightModules();
-  }
-
-  function renderRightModules() {
-    const stack = document.getElementById('rightModuleStack');
-    const empty = document.getElementById('rightEmpty');
-    if (rightModules.length === 0) {
-      stack.classList.add('is-hidden');
-      empty.classList.remove('is-hidden');
-      return;
-    }
-    empty.classList.add('is-hidden');
-    stack.classList.remove('is-hidden');
-    stack.style.gridTemplateRows = `repeat(${rightModules.length}, minmax(0, 1fr))`;
-    stack.innerHTML = '';
-    rightModules.forEach((m, i) => {
-      const card = document.createElement('div');
-      card.className = 'module-card';
-      card.innerHTML = `
-        <div class="module-head">
-          <span>${m}</span>
-          <button class="icon-btn" style="height:auto; width:auto; font-size:14px;" onclick="removeRightModule(${i})">×</button>
-        </div>
-        <div style="flex:1;padding:8px;font-size:9px;color:#666">
-          ${m === 'Notes' ? '<textarea style="width:100%;height:100%;background:transparent;color:#fff;border:none;outline:none;resize:none;"></textarea>' : 'Live data feed...'}
-        </div>`;
-      stack.appendChild(card);
-    });
-  }
-
-  init();
+init();
 </script>
-
-</body>
-</html>
-
