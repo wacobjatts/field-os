@@ -1,53 +1,83 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>field-os</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Field UI</title>
 
 <style>
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
-  background:#020305;
-  color:#cfe6ff;
   font-family: Arial, sans-serif;
+  background:#0b0f14;
+  color:#e6edf3;
 }
 
-/* MOBILE FIRST */
+/* ===== LAYOUT ===== */
 .app {
-  display:flex;
-  flex-direction:column;
+  display:grid;
+  grid-template-columns:220px 1fr 260px;
+  grid-template-rows:60px 1fr 160px;
   height:100vh;
 }
 
-/* LEFT (ticker) */
-.left {
+/* ===== TOP BAR ===== */
+.top {
+  grid-column:1 / span 3;
   display:flex;
-  overflow-x:auto;
-  border-bottom:1px solid rgba(255,255,255,0.08);
+  justify-content:space-between;
+  align-items:center;
+  padding:0 20px;
+  background:#11161d;
+  border-bottom:1px solid #222;
+}
+
+.symbol {
+  font-weight:bold;
+  font-size:18px;
+}
+
+.timeframe {
+  color:#ffd84d;
+}
+
+/* ===== LEFT ===== */
+.left {
+  background:#11161d;
+  border-right:1px solid #222;
+  padding:10px;
 }
 
 .ticker {
-  min-width:80px;
   padding:10px;
-  text-align:center;
-  border-right:1px solid rgba(255,255,255,0.08);
+  margin-bottom:6px;
+  background:#1a212b;
+  cursor:pointer;
 }
 
-/* CENTER (chart) */
+.ticker:hover {
+  background:#222c39;
+}
+
+/* ===== CENTER (CHART) ===== */
 .center {
-  flex:1;
   position:relative;
+  background:#070b12;
 }
 
-/* CHART AREA */
-.chart {
+/* grid */
+.center::before {
+  content:'';
   position:absolute;
   inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+  background-size:40px 40px;
 }
 
-/* BASELINE */
+/* baseline */
 .baseline {
   position:absolute;
   top:50%;
@@ -57,7 +87,7 @@ body {
   background:rgba(255,255,255,0.25);
 }
 
-/* TOP / BOTTOM LINES */
+/* lines */
 .line {
   position:absolute;
   left:0;
@@ -66,13 +96,13 @@ body {
   background:rgba(255,255,255,0.1);
 }
 
-.top { top:20%; }
-.bottom { top:80%; }
+.topline { top:20%; }
+.bottomline { top:80%; }
 
-/* NUMBERS */
+/* numbers */
 .num {
   position:absolute;
-  left:6px;
+  left:8px;
   color:#ffd84d;
   font-size:11px;
 }
@@ -81,17 +111,7 @@ body {
 .n2 { top:48%; }
 .n3 { top:78%; }
 
-/* VALUE */
-.value {
-  position:absolute;
-  right:10px;
-  top:10px;
-  color:#ffd84d;
-  font-size:22px;
-  font-weight:bold;
-}
-
-/* LINE */
+/* main line */
 svg {
   position:absolute;
   inset:0;
@@ -99,55 +119,62 @@ svg {
   height:100%;
 }
 
-/* RIGHT PANEL (HIDDEN ON MOBILE) */
-.right {
-  display:none;
+.value {
+  position:absolute;
+  top:10px;
+  right:10px;
+  font-size:28px;
+  color:#ffd84d;
 }
 
-/* BOTTOM INSTRUMENT STACK */
-.bottom {
-  height:110px;
-  border-top:1px solid rgba(255,255,255,0.08);
+/* ===== RIGHT ===== */
+.right {
+  background:#11161d;
+  border-left:1px solid #222;
+  padding:10px;
+}
+
+.order {
   display:flex;
+  justify-content:space-between;
+  padding:8px;
+  margin-bottom:6px;
+  background:#1a212b;
+}
+
+.ask { color:#ff6b6b; }
+.bid { color:#4ade80; }
+
+/* ===== BOTTOM ===== */
+.bottom {
+  grid-column:2 / span 2;
+  display:flex;
+  background:#0f141b;
+  border-top:1px solid #222;
   overflow-x:auto;
 }
 
 .card {
-  min-width:140px;
-  border-right:1px solid rgba(255,255,255,0.08);
+  min-width:160px;
   padding:12px;
+  border-right:1px solid #222;
   text-align:center;
-  color:#1e7bff;
+  color:#4da3ff;
 }
 
-/* DESKTOP */
-@media (min-width:900px) {
+/* ===== MOBILE ===== */
+@media (max-width:900px) {
   .app {
-    display:grid;
-    grid-template-columns:180px 1fr 220px;
-    grid-template-rows:1fr 140px;
+    grid-template-columns:1fr;
+    grid-template-rows:60px 1fr 120px;
   }
 
-  .left {
-    flex-direction:column;
-    overflow:auto;
-    grid-row:1 / span 2;
-    border-right:1px solid rgba(255,255,255,0.08);
-    border-bottom:none;
-  }
-
-  .center {
-    grid-column:2;
-  }
-
-  .right {
-    display:block;
-    padding:10px;
-    border-left:1px solid rgba(255,255,255,0.08);
+  .left, .right {
+    display:none;
   }
 
   .bottom {
-    grid-column:2 / span 2;
+    grid-column:1;
   }
 }
 </style>
@@ -157,53 +184,54 @@ svg {
 
 <div class="app">
 
-  <!-- LEFT -->
+  <div class="top">
+    <div class="symbol">TSLA</div>
+    <div class="timeframe">5m</div>
+  </div>
+
   <div class="left">
     <div class="ticker">TSLA</div>
     <div class="ticker">NVDA</div>
     <div class="ticker">SPY</div>
+    <div class="ticker">QQQ</div>
   </div>
 
-  <!-- CENTER -->
   <div class="center">
-    <div class="chart">
 
-      <div class="line top"></div>
-      <div class="baseline"></div>
-      <div class="line bottom"></div>
+    <div class="baseline"></div>
+    <div class="line topline"></div>
+    <div class="line bottomline"></div>
 
-      <div class="num n1">80</div>
-      <div class="num n2">50</div>
-      <div class="num n3">20</div>
+    <div class="num n1">80</div>
+    <div class="num n2">50</div>
+    <div class="num n3">20</div>
 
-      <svg viewBox="0 0 1000 400">
-        <path
-          d="M0 200 C200 260 350 180 500 220
-             C650 260 800 180 1000 210"
-          stroke="#1e7bff"
-          stroke-width="2"
-          fill="none"
-        />
-      </svg>
+    <svg viewBox="0 0 1000 400">
+      <path
+        d="M0 200 C200 260 350 180 500 220
+           C650 260 800 180 1000 210"
+        stroke="#4da3ff"
+        stroke-width="2"
+        fill="none"
+      />
+    </svg>
 
-      <div class="value">63</div>
+    <div class="value">63</div>
 
-    </div>
   </div>
 
-  <!-- RIGHT -->
   <div class="right">
-    ASK / BID
+    <div class="order ask"><span>Ask</span><span>248.22</span></div>
+    <div class="order bid"><span>Bid</span><span>248.10</span></div>
   </div>
 
-  <!-- BOTTOM -->
   <div class="bottom">
-    <div class="card">volume</div>
-    <div class="card">transmission</div>
-    <div class="card">decay</div>
-    <div class="card">tension</div>
-    <div class="card">oscillator</div>
-    <div class="card">compression</div>
+    <div class="card">Volume</div>
+    <div class="card">Transmission</div>
+    <div class="card">Decay</div>
+    <div class="card">Tension</div>
+    <div class="card">Oscillator</div>
+    <div class="card">Compression</div>
   </div>
 
 </div>
