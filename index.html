@@ -1,18 +1,75 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Field-OS | Kinetic</title>
     <style>
-        body { margin: 0; background: #000; color: #00ffff; overflow: hidden; font-family: monospace; }
-        #canvas-container { position: absolute; width: 100vw; height: 100vh; }
-        #ui-layer { position: relative; z-index: 10; pointer-events: none; }
+        body, html { margin: 0; padding: 0; background: #00050a; color: #00ffff; font-family: 'Courier New', monospace; overflow: hidden; height: 100vh; }
+        .hud-grid { position: absolute; inset: 0; background-image: linear-gradient(rgba(0,255,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0,255,255,0.05) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; }
+        .main-layout { display: grid; grid-template-columns: 200px 1fr 220px; height: 100vh; position: relative; z-index: 2; }
+        .panel { background: rgba(10, 15, 25, 0.85); border: 1px solid rgba(0, 255, 255, 0.2); padding: 15px; display: flex; flex-direction: column; gap: 10px; }
+        .center-display { display: grid; grid-template-rows: 50px 1fr 120px; padding: 10px; }
+        .viewport { position: relative; border: 1px solid rgba(0, 255, 255, 0.3); background: rgba(0,0,0,0.4); overflow: hidden; }
+        .data-badge { position: absolute; top: 20px; right: 25px; font-size: 48px; font-weight: 900; color: #ffff00; text-shadow: 0 0 15px #ffff00; }
+        .ticker-item { padding: 10px; border: 1px solid rgba(0, 255, 255, 0.2); font-size: 13px; text-shadow: 0 0 5px #00ffff; }
+        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0, 255, 255, 0.2); padding-bottom: 5px; font-size: 12px; }
+        .order-row { display: flex; justify-content: space-between; font-size: 11px; padding: 4px 0; }
+        svg { width: 100%; height: 100%; filter: drop-shadow(0 0 8px #00ffff); }
     </style>
 </head>
 <body>
-    <div id="canvas-container"></div> <div id="ui-layer">
-        <h1>SYSTEM ACTIVE: FIELD-OS</h1>
+    <div class="hud-grid"></div>
+    <div class="main-layout">
+        <aside class="panel">
+            <div style="font-size: 10px; opacity: 0.6;">SYSTEM.INSTRUMENTS</div>
+            <div class="ticker-item">TSLA</div>
+            <div class="ticker-item">NVDA</div>
+            <div class="ticker-item">SPY</div>
+        </aside>
+
+        <section class="center-display">
+            <header class="header">
+                <span style="font-weight: 900;">BRANCH::KINETIC_TRACER</span>
+                <span style="color: #ffff00;">5M_INTERVAL</span>
+            </header>
+            <div class="viewport">
+                <div class="data-badge" id="live-val">62</div>
+                <svg viewBox="0 0 1000 400">
+                    <path id="glow-path" d="M0 200 Q 250 150, 500 200 T 1000 200" fill="none" stroke="#00ffff" stroke-width="3" />
+                </svg>
+            </div>
+            <div style="display: flex; gap: 10px; padding-top: 10px;">
+                <div class="panel" style="flex: 1; text-align: center;">VOLUME</div>
+                <div class="panel" style="flex: 1; text-align: center;">ABSORPTION</div>
+            </div>
+        </section>
+
+        <aside class="panel">
+            <div style="font-size: 10px; opacity: 0.6;">ORDER_FLOW.L2</div>
+            <div class="order-row"><span style="color: #ff4d4d;">ASK</span> 248.22</div>
+            <div class="order-row"><span style="color: #00ff88;">BID</span> 248.10</div>
+        </aside>
     </div>
-    
-    <script type="module" src="app.js"></script> 
+
+    <script>
+        // Simple animation for the "Kinetic" look
+        const path = document.getElementById('glow-path');
+        const badge = document.getElementById('live-val');
+        let offset = 0;
+
+        function animate() {
+            offset += 0.05;
+            const y1 = 150 + Math.sin(offset) * 20;
+            const y2 = 250 + Math.cos(offset) * 20;
+            path.setAttribute('d', `M0 200 Q 250 ${y1}, 500 200 T 1000 ${y2}`);
+            
+            if (Math.random() > 0.8) {
+                badge.innerText = Math.floor(Math.random() * 5) + 60;
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+    </script>
 </body>
 </html>
