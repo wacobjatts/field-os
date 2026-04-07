@@ -4,10 +4,10 @@
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface StressFieldPoint {
-  stress: number;        // internal imbalance
-  compression: number;   // how concentrated the imbalance is
-  instability: number;   // how unstable the field appears
-  precision: number;
+  stress: number;        // 0 → 100
+  compression: number;   // 0 → 100
+  instability: number;   // 0 → 100
+  precision: number;     // 0 → 1
 }
 
 export interface StressFieldOutput {
@@ -26,14 +26,14 @@ export function buildStressField(
   const compression = Math.min(1, stress * 1.2);
   const instability = Math.max(0, stress - precision * 0.3);
 
-  const point: StressFieldPoint = {
-    stress,
-    compression,
-    instability,
-    precision
-  };
-
   return {
-    field: [point]
+    field: [
+      {
+        stress: stress * 100,
+        compression: compression * 100,
+        instability: instability * 100,
+        precision
+      }
+    ]
   };
 }
