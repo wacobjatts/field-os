@@ -4,10 +4,10 @@
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface TensionPoint {
-  tension: number;      // valid stored pressure
-  regime: number;       // simplified state strength
-  stability: number;    // how intact the pressure looks
-  precision: number;
+  tension: number;      // 0 → 100
+  regime: number;       // 0 → 100
+  stability: number;    // 0 → 100
+  precision: number;    // 0 → 1
 }
 
 export interface TensionLineOutput {
@@ -26,14 +26,14 @@ export function buildTensionLine(
   const regime = tension;
   const stability = Math.min(1, precision * (0.5 + norm * 0.5));
 
-  const point: TensionPoint = {
-    tension,
-    regime,
-    stability,
-    precision
-  };
-
   return {
-    field: [point]
+    field: [
+      {
+        tension: tension * 100,
+        regime: regime * 100,
+        stability: stability * 100,
+        precision
+      }
+    ]
   };
 }
