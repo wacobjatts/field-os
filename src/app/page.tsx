@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../branch/kinetic/frontendbridge';
 
 declare global {
@@ -45,35 +45,14 @@ export default function KineticPage() {
   // --- ENGINE BRIDGE ---
   useEffect(() => {
     if (typeof window !== 'undefined' && window.computeKinetics && window.buildKineticUIModel) {
-      const snapshot = {
-        book: {
-          bestBid: 100,
-          bestAsk: 101,
-          bestBidSize: 50,
-          bestAskSize: 60,
-          localUpdateTime: Date.now(),
-        },
-        trades: {
-          tradeCount: 12,
-        },
-        timestamp: Date.now(),
-      };
+      // 1. ENGINE RUNS ON TICKER CHANGE
+      const result = window.computeKinetics(activeTicker);
 
-      const result = window.computeKinetics({
-        snapshot,
-        previousMid: 100,
-        anchorMid: 100,
-        source: {
-          name: 'demo',
-          reliability: 1,
-        },
-        previousDecayEvents: [],
-      });
-
-      const ui = window.buildKineticUIModel('TEST', result);
+      // 2. MODEL BUILT USING activeTicker
+      const ui = window.buildKineticUIModel(activeTicker, result);
       setKineticUI(ui);
     }
-  }, []);
+  }, [activeTicker]);
 
   // --- HANDLERS ---
   const addModuleToStack = (type: string, name: string, desc: string) => {
@@ -173,66 +152,65 @@ export default function KineticPage() {
         {/* CENTER WORKSPACE */}
         <main className="center-workspace" style={styles.centerWorkspace}>
           <section className="chart-box" style={styles.chartBox}>
-             <div style={{textAlign: 'center'}}>
-                <div style={{color: '#00ffff', fontSize: '24px', fontWeight: 'bold'}}>{activeTicker}</div>
-                <div style={{color: '#444', fontSize: '10px', marginTop: '4px'}}>KINETIC CORE VISUALIZATION</div>
-             </div>
+            {/* 4. CHART PLACEHOLDER RESTORED */}
+            <div id="chartContainer" style={{ width: '100%', height: '100%' }} />
           </section>
 
           <div className="middle-stack" style={styles.middleStack}>
-            {/* INJECT ENGINE UI STACK FIRST IF LOADED */}
-            {kineticUI && kineticUI.stack.map((item: any, idx: number) => (
-              <section key={`engine-${idx}`} className="stack-card" style={styles.stackCard}>
-                <div className="card-visual" style={styles.cardVisual}>{item.title}</div>
-                <div className="card-header" style={styles.cardHeader}>
-                  <div className="card-info"><h3 className="card-title" style={styles.cardTitle}>{item.title}</h3></div>
-                  <div className="card-controls" style={styles.cardControls}>
-                    <button className="icon-btn" style={{...styles.iconBtn, color: '#666'}}>?</button>
-                  </div>
-                </div>
-              </section>
-            ))}
-
-            {/* THEN MANUALLY ADDED ITEMS */}
-            {stackItems.map((item, i) => {
-              const isVol = item.type === 'volume';
-              const isCollapsed = isVol && item.collapsed;
-              return (
-                <section 
-                  key={item.id} 
-                  className={`stack-card ${isVol ? 'is-volume' : ''} ${isCollapsed ? 'is-collapsed' : ''}`} 
-                  style={{...styles.stackCard, ...(isVol ? styles.stackCardVolume : {}), ...(isCollapsed ? styles.stackCardCollapsed : {})}}
-                >
-                  {!isCollapsed && (
-                    <div className="card-visual" style={isVol ? styles.volumeChart : styles.cardVisual}>
-                      {isVol ? "[ VOLUME GRADIENT ]" : item.name}
-                    </div>
-                  )}
+            {/* 5. STACK RENDERING EXCLUSIVE & GUARDED */}
+            {Array.isArray(kineticUI?.stack) && kineticUI.stack.length > 0 ? (
+              kineticUI.stack.map((item: any, idx: number) => (
+                <section key={`engine-${idx}`} className="stack-card" style={styles.stackCard}>
+                  <div className="card-visual" style={styles.cardVisual}>{item.title}</div>
                   <div className="card-header" style={styles.cardHeader}>
-                    <div className="card-info">
-                      <h3 className="card-title" style={{...styles.cardTitle, ...(isVol ? styles.cardTitleVolume : {}), ...(isCollapsed ? styles.cardTitleCollapsed : {})}}>
-                        {isVol ? `Volume: ${item.name}` : item.name}
-                      </h3>
-                    </div>
+                    <div className="card-info"><h3 className="card-title" style={styles.cardTitle}>{item.title}</h3></div>
                     <div className="card-controls" style={styles.cardControls}>
-                      {!isCollapsed && (
-                        <>
-                          <button className="icon-btn" style={styles.iconBtn} onClick={() => moveItem(i, -1)}>▲</button>
-                          <button className="icon-btn" style={styles.iconBtn} onClick={() => moveItem(i, 1)}>▼</button>
-                          <button className="icon-btn" style={{...styles.iconBtn, color: '#ff4444'}} onClick={() => removeItem(i)}>×</button>
-                        </>
-                      )}
-                      {isVol && (
-                        <button className="icon-btn" style={styles.iconBtn} onClick={() => toggleVolumeCollapse(i)}>
-                          {isCollapsed ? '▸' : '▾'}
-                        </button>
-                      )}
-                      {!isVol && <button className="icon-btn" style={{...styles.iconBtn, color: '#666'}}>?</button>}
+                      <button className="icon-btn" style={{...styles.iconBtn, color: '#666'}}>?</button>
                     </div>
                   </div>
                 </section>
-              );
-            })}
+              ))
+            ) : (
+              stackItems.map((item, i) => {
+                const isVol = item.type === 'volume';
+                const isCollapsed = isVol && item.collapsed;
+                return (
+                  <section 
+                    key={item.id} 
+                    className={`stack-card ${isVol ? 'is-volume' : ''} ${isCollapsed ? 'is-collapsed' : ''}`} 
+                    style={{...styles.stackCard, ...(isVol ? styles.stackCardVolume : {}), ...(isCollapsed ? styles.stackCardCollapsed : {})}}
+                  >
+                    {!isCollapsed && (
+                      <div className="card-visual" style={isVol ? styles.volumeChart : styles.cardVisual}>
+                        {isVol ? "[ VOLUME GRADIENT ]" : item.name}
+                      </div>
+                    )}
+                    <div className="card-header" style={styles.cardHeader}>
+                      <div className="card-info">
+                        <h3 className="card-title" style={{...styles.cardTitle, ...(isVol ? styles.cardTitleVolume : {}), ...(isCollapsed ? styles.cardTitleCollapsed : {})}}>
+                          {isVol ? `Volume: ${item.name}` : item.name}
+                        </h3>
+                      </div>
+                      <div className="card-controls" style={styles.cardControls}>
+                        {!isCollapsed && (
+                          <>
+                            <button className="icon-btn" style={styles.iconBtn} onClick={() => moveItem(i, -1)}>▲</button>
+                            <button className="icon-btn" style={styles.iconBtn} onClick={() => moveItem(i, 1)}>▼</button>
+                            <button className="icon-btn" style={{...styles.iconBtn, color: '#ff4444'}} onClick={() => removeItem(i)}>×</button>
+                          </>
+                        )}
+                        {isVol && (
+                          <button className="icon-btn" style={styles.iconBtn} onClick={() => toggleVolumeCollapse(i)}>
+                            {isCollapsed ? '▸' : '▾'}
+                          </button>
+                        )}
+                        {!isVol && <button className="icon-btn" style={{...styles.iconBtn, color: '#666'}}>?</button>}
+                      </div>
+                    </div>
+                  </section>
+                );
+              })
+            )}
           </div>
 
           <section className="instrument-chooser-area">
@@ -284,7 +262,7 @@ export default function KineticPage() {
           </button>
           <div className="curtain-content" style={styles.curtainContent}>
             <div className="panel-header" style={styles.panelHeader}>
-              <span className="panel-title" style={styles.panelTitle}>Info</span>
+              <span className="panel-title">Info</span>
               <button className="icon-btn" style={styles.iconBtn} onClick={() => setModulePickerOpen(!modulePickerOpen)}>+</button>
             </div>
 
@@ -313,7 +291,7 @@ export default function KineticPage() {
                       {m === 'Notes' ? (
                         <textarea style={{width:'100%', height:'100%', background:'transparent', color:'#fff', border:'none', outline:'none', resize:'none'}}></textarea>
                       ) : (
-                        <pre style={{margin:0, whiteSpace:'pre-wrap', color: '#00ffff'}}>{kineticUI ? JSON.stringify(kineticUI.config || {}, null, 2) : 'Awaiting data...'}</pre>
+                        <pre style={{margin:0, whiteSpace:'pre-wrap', color: '#00ffff'}}>{kineticUI ? JSON.stringify(kineticUI.rightPanel || {}, null, 2) : 'Awaiting data...'}</pre>
                       )}
                     </div>
                   </div>
