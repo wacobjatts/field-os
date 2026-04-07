@@ -12,7 +12,7 @@ import { buildAbsorptionTension } from './tension';
 import { buildTensionLine } from './tensionpoints';
 import { buildCompressionSpark } from './compressionspark';
 import { buildKineticAnchor } from './kineticanchor';
-import { buildDisplacementField } from './liarindex';
+import { buildDisplacementField } from './displacementfield';
 import { buildRealityGapField } from './realitygap';
 
 export interface WiredInstrumentOutput {
@@ -70,7 +70,6 @@ export function wireInstruments(
         break;
 
       case 'entropy':
-        // deferred for later
         break;
 
       default:
@@ -78,8 +77,6 @@ export function wireInstruments(
     }
   }
 
-  // Transmission is currently best driven from absorption until a dedicated
-  // routed transmission signal is added to the system.
   const absorptionSignal = signals.find((s) => s.dimensionId === 'absorption');
   if (absorptionSignal) {
     output.transmissionField = buildTransmissionField(absorptionSignal);
