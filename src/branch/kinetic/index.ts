@@ -39,3 +39,4 @@ export * from './stresstest/runblackhole';
 
 // --- trunk test runner ---
 export * from './runtrunkbridge';
+import './frontendbridge';
