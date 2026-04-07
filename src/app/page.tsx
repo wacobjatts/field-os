@@ -3,6 +3,19 @@
 import React, { useEffect, useState } from 'react';
 import '../branch/kinetic/frontendbridge';
 
+function generateWavePath(freq: number, amp: number) {
+  let path = '';
+  for (let x = 0; x <= 100; x += 2) {
+    const y =
+      50 +
+      Math.sin((x / 100) * Math.PI * 2 * freq + Date.now() / 500) *
+        (amp * 30);
+
+    path += x === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
+  }
+  return path;
+}
+
 declare global {
   interface Window {
     computeKinetics: any;
@@ -193,7 +206,37 @@ export default function KineticPage() {
             {Array.isArray(kineticUI?.stack) && kineticUI.stack.length > 0 ? (
               kineticUI.stack.map((item: any, idx: number) => (
                 <section key={`engine-${idx}`} className="stack-card" style={styles.stackCard}>
-                  <div className="card-visual" style={styles.cardVisual}>{item.title}</div>
+                  <div style={{
+                    height: '100px',
+                    background: '#050505',
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}>
+                    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
+
+                      {/* Absorption (slow wave / macro field) */}
+                      <path
+                        d={generateWavePath(0.5, 0.8)}
+                        stroke="#00ffff"
+                        strokeWidth="1.5"
+                        fill="none"
+                        opacity="0.7"
+                      />
+
+                      {/* Compression (fast wave / micro pressure) */}
+                      <path
+                        d={generateWavePath(2, 0.4)}
+                        stroke="#bf00ff"
+                        strokeWidth="1"
+                        fill="none"
+                        opacity="0.9"
+                      />
+
+                      {/* Midline */}
+                      <line x1="0" y1="50" x2="100" y2="50" stroke="#222" strokeWidth="0.5" />
+
+                    </svg>
+                  </div>
                   <div className="card-header" style={styles.cardHeader}>
                     <div className="card-info"><h3 className="card-title" style={styles.cardTitle}>{item.title}</h3></div>
                     <div className="card-controls" style={styles.cardControls}>
