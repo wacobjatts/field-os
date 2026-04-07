@@ -4,10 +4,10 @@
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface KineticAnchorPoint {
-  anchorStrength: number;  // structural pressure origin strength
-  persistence: number;     // how much the anchor holds
-  significance: number;    // usefulness of the anchor
-  precision: number;
+  anchorStrength: number;  // 0 → 100
+  persistence: number;     // 0 → 100
+  significance: number;    // 0 → 100
+  precision: number;       // 0 → 1
 }
 
 export interface KineticAnchorOutput {
@@ -26,14 +26,14 @@ export function buildKineticAnchor(
   const persistence = Math.min(1, 0.4 + anchorStrength * 0.6);
   const significance = anchorStrength * precision;
 
-  const point: KineticAnchorPoint = {
-    anchorStrength,
-    persistence,
-    significance,
-    precision
-  };
-
   return {
-    field: [point]
+    field: [
+      {
+        anchorStrength: anchorStrength * 100,
+        persistence: persistence * 100,
+        significance: significance * 100,
+        precision
+      }
+    ]
   };
 }
