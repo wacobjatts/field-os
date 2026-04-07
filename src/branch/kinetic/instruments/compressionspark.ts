@@ -4,10 +4,10 @@
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface CompressionSparkPoint {
-  spark: number;        // release intensity
-  activation: number;   // whether pressure is firing
-  impulse: number;      // sharpness of release
-  precision: number;
+  spark: number;        // 0 → 100
+  activation: number;   // 0 or 100
+  impulse: number;      // 0 → 100
+  precision: number;    // 0 → 1
 }
 
 export interface CompressionSparkOutput {
@@ -26,14 +26,14 @@ export function buildCompressionSpark(
   const activation = spark > 0.2 ? 1 : 0;
   const impulse = Math.min(1, spark * 1.5);
 
-  const point: CompressionSparkPoint = {
-    spark,
-    activation,
-    impulse,
-    precision
-  };
-
   return {
-    field: [point]
+    field: [
+      {
+        spark: spark * 100,
+        activation: activation * 100,
+        impulse: impulse * 100,
+        precision
+      }
+    ]
   };
 }
