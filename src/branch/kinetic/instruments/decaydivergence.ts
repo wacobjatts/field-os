@@ -1,48 +1,39 @@
-// src/branch/kinetic/instruments/decaydivergence.ts
+// instruments/decaydivergence.ts
+// Coil Decay Oscillator
+
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface CoilDecayPoint {
-  health: number;       // 0 → 100 (Coil Integrity)
-  decay: number;        // 0 → 100 (Breakdown Pressure)
-  divergence: number;   // 0 → 100 (Instability Gap)
-  precision: number;    // 0 → 1   (Confidence)
-  timestamp: number;    // Unix ms
+  decay: number;        // 0 → 100
+  health: number;       // 0 → 100
+  divergence: number;   // 0 → 100
+  precision: number;    // 0 → 1
 }
 
 export interface CoilDecayOutput {
-  field: CoilDecayPoint[]; // Explicit time-series array
+  field: CoilDecayPoint[];
 }
 
-/**
- * Builds a historical oscillator by appending the current signal 
- * to a rolling buffer of previous states.
- */
 export function buildCoilDecayOscillator(
-  signal: PreparedSignal,
-  history: CoilDecayPoint[] = []
+  signal: PreparedSignal
 ): CoilDecayOutput {
-  const { value, precision, timestamp } = signal;
+  const value = signal.value;
+  const precision = signal.precision;
 
-  // Normalize absolute signal strength (0 to 1)
   const norm = Math.max(0, Math.min(1, Math.abs(value) / 100));
 
-  // Physics Logic
-  const rawHealth = norm * precision;
-  const rawDecay = (1 - rawHealth) * precision;
-  const rawDivergence = Math.abs(rawDecay - rawHealth);
-
-  const newPoint: CoilDecayPoint = {
-    health: rawHealth * 100,
-    decay: rawDecay * 100,
-    divergence: rawDivergence * 100,
-    precision,
-    timestamp
-  };
-
-  // Maintain a historical window (e.g., last 200 samples)
-  const updatedField = [newPoint, ...history].slice(0, 200);
+  const decay = (1 - norm) * precision;
+  const health = norm * precision;
+  const divergence = Math.max(0, decay - health * 0.5);
 
   return {
-    field: updatedField
+    field: [
+      {
+        decay: decay * 100,
+        health: health * 100,
+        divergence: divergence * 100,
+        precision
+      }
+    ]
   };
 }
