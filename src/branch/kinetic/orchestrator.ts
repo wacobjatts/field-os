@@ -97,52 +97,52 @@ export function processSlice(
   // --- 3. TRANSLATION TO TRUNK-SAFE ATOMS ---
   const signals: PreparedSignal[] = [
     toPreparedSignal(
-      KINETIC_DIMENSIONS.kin_force_absorption.id,
+      KINETIC_DIMENSIONS.absorption.id,
       absorption,
       absorptionPrecision,
       snapshot.timestamp,
       source,
-      KINETIC_DIMENSIONS.kin_force_absorption
+      KINETIC_DIMENSIONS.absorption
     ),
     toPreparedSignal(
-      KINETIC_DIMENSIONS.kin_force_mismatch.id,
+      KINETIC_DIMENSIONS.mismatch.id,
       mismatch,
       mismatchPrecision,
       snapshot.timestamp,
       source,
-      KINETIC_DIMENSIONS.kin_force_mismatch
+      KINETIC_DIMENSIONS.mismatch
     ),
     toPreparedSignal(
-      KINETIC_DIMENSIONS.kin_struct_gap.id,
+      KINETIC_DIMENSIONS.realityGap.id,
       normalizedRealityGap,
       realityGapPrecision,
       snapshot.timestamp,
       source,
-      KINETIC_DIMENSIONS.kin_struct_gap
+      KINETIC_DIMENSIONS.realityGap
     ),
     toPreparedSignal(
-      KINETIC_DIMENSIONS.kin_state_tension.id,
+      KINETIC_DIMENSIONS.tension.id,
       tension,
       tensionPrecision,
       snapshot.timestamp,
       source,
-      KINETIC_DIMENSIONS.kin_state_tension
+      KINETIC_DIMENSIONS.tension
     ),
     toPreparedSignal(
-      KINETIC_DIMENSIONS.kin_val_liarindex.id,
+      KINETIC_DIMENSIONS.liarIndex.id,
       liarIndex,
       liarIndexPrecision,
       snapshot.timestamp,
       source,
-      KINETIC_DIMENSIONS.kin_val_liarindex
+      KINETIC_DIMENSIONS.liarIndex
     ),
     toPreparedSignal(
-      KINETIC_DIMENSIONS.kin_sys_entropy.id,
+      KINETIC_DIMENSIONS.entropy.id,
       entropy,
       entropyPrecision,
       snapshot.timestamp,
       source,
-      KINETIC_DIMENSIONS.kin_sys_entropy
+      KINETIC_DIMENSIONS.entropy
     )
   ];
 
