@@ -45,16 +45,18 @@ export default function KineticPage() {
   // --- ENGINE BRIDGE ---
   useEffect(() => {
     if (typeof window !== 'undefined' && window.computeKinetics && window.buildKineticUIModel) {
+      const base = 100 + Math.random() * 20;
+
       const snapshot = {
         book: {
-          bestBid: 100,
-          bestAsk: 101,
-          bestBidSize: 50,
-          bestAskSize: 60,
+          bestBid: base,
+          bestAsk: base + Math.random() * 2,
+          bestBidSize: Math.random() * 200 + 10,
+          bestAskSize: Math.random() * 200 + 10,
           localUpdateTime: Date.now(),
         },
         trades: {
-          tradeCount: 12,
+          tradeCount: Math.floor(Math.random() * 50),
         },
         timestamp: Date.now(),
       };
