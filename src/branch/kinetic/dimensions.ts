@@ -1,3 +1,11 @@
+/**
+ * src/branch/kinetic/dimensions.ts
+ *
+ * Canonical dimension registry for the Kinetic branch.
+ * Keep keys and ids stable for engine compatibility.
+ * Labels may evolve for UI/display naming.
+ */
+
 export const KINETIC_DIMENSIONS = {
   absorption: {
     id: 'absorption',
@@ -6,7 +14,7 @@ export const KINETIC_DIMENSIONS = {
   },
   mismatch: {
     id: 'mismatch',
-    label: 'Mismatch',
+    label: 'Stress Field',
     unit: 'ratio'
   },
   realityGap: {
@@ -21,7 +29,7 @@ export const KINETIC_DIMENSIONS = {
   },
   liarIndex: {
     id: 'liarIndex',
-    label: 'Liar Index',
+    label: 'Displacement Field',
     unit: 'ratio'
   },
   entropy: {
@@ -29,4 +37,4 @@ export const KINETIC_DIMENSIONS = {
     label: 'Entropy',
     unit: 'ratio'
   }
-};
+} as const;
