@@ -1,41 +1,39 @@
-/**
- * KINETIC MEASUREMENT INSTRUMENT
- * TYPE: Reality Gap (Structural Distance)
- * DOMAIN: Structural Physics
- * * Measures the absolute distance between the current market mid-price 
- * and a defined structural anchor (e.g., a volume-weighted base or historical anchor).
- */
+// instruments/realitygap.ts
+// Reality Gap / Execution Integrity Field
 
-export interface RealityGapBookState {
-  bestBid: number;
-  bestAsk: number;
+import { PreparedSignal } from '../../../core/engine/signal';
+
+export interface RealityGapPoint {
+  fidelity: number;      // 0 → 100
+  freshness: number;     // 0 → 100
+  sync: number;          // 0 → 100
+  precision: number;     // 0 → 1
 }
 
-export interface RealityGapInput {
-  book: RealityGapBookState;
+export interface RealityGapOutput {
+  field: RealityGapPoint[];
 }
 
-/**
- * RAW REALITY GAP MEASUREMENT
- * Extracted from src/branch/kinetic/realitygap.ts
- * * Logic: Absolute difference between current Mid and Anchor Mid.
- */
-export function measureRealityGap(
-  input: RealityGapInput,
-  anchorMid: number
-): number {
-  const { book } = input;
+export function buildRealityGapField(
+  signal: PreparedSignal
+): RealityGapOutput {
+  const value = signal.value;
+  const precision = signal.precision;
 
-  // 1. Calculate current midpoint
-  const currentMid = (book.bestBid + book.bestAsk) / 2;
+  const norm = Math.max(0, Math.min(1, Math.abs(value) / 100));
 
-  // 2. Safety Guard: Check for non-finite inputs
-  if (!Number.isFinite(currentMid) || !Number.isFinite(anchorMid)) {
-    return 0;
-  }
+  const fidelity = norm * precision;
+  const freshness = Math.min(1, 0.5 + precision * 0.5);
+  const sync = Math.max(0, 1 - norm * 0.5) * precision;
 
-  // 3. Calculate Absolute Gap
-  // Ensure the result is non-negative as per source logic.
-  return Math.max(0, Math.abs(currentMid - anchorMid));
+  return {
+    field: [
+      {
+        fidelity: fidelity * 100,
+        freshness: freshness * 100,
+        sync: sync * 100,
+        precision
+      }
+    ]
+  };
 }
-
