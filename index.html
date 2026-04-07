@@ -101,6 +101,7 @@
     .ghost-btn { background: #0a0a0a; border: none; color: #fff; padding: 4px 8px; font-size: 10px; cursor: pointer; }
     .icon-btn { background: transparent; border: none; color: #fff; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   </style>
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
 <body>
 
@@ -122,7 +123,9 @@
     </aside>
 
     <main class="center-workspace">
-      <section class="chart-box" id="chartBox">CHART: <span id="activeTickerDisplay">AAPL</span></section>
+      <section class="chart-box" id="chartBox">
+        <div id="chartContainer" style="width:100%;height:100%;"></div>
+      </section>
 
       <div class="middle-stack" id="middleStack"></div>
 
@@ -247,7 +250,8 @@
 
   function renderTickers(name) {
     const list = document.getElementById('tickerList');
-    const activeTicker = document.getElementById('activeTickerDisplay').innerText;
+    // Simplified getter since activeTickerDisplay was replaced by chart
+    const activeTicker = "AAPL"; 
     list.innerHTML = '';
     watchlists[name].forEach(t => {
       const row = document.createElement('div');
@@ -257,7 +261,6 @@
       row.onclick = () => {
         document.querySelectorAll('.ticker-row').forEach(r => r.classList.remove('is-active'));
         row.classList.add('is-active');
-        document.getElementById('activeTickerDisplay').innerText = t[0];
       };
       list.appendChild(row);
     });
@@ -416,8 +419,32 @@
   }
 
   init();
+
+  const chart = LightweightCharts.createChart(document.getElementById('chartContainer'), {
+    layout: { background: { type: LightweightCharts.ColorType.Solid, color: '#000000' }, textColor: '#ccc' },
+    grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
+    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
+    rightPriceScale: { borderColor: '#222' },
+    timeScale: { borderColor: '#222' },
+  });
+  const candleSeries = chart.addCandlestickSeries({
+    upColor: '#00ffff', downColor: '#ff0055', borderVisible: false,
+    wickUpColor: '#00ffff', wickDownColor: '#ff0055',
+  });
+  candleSeries.setData([
+    { time: '2024-04-01', open: 150, high: 155, low: 148, close: 153 },
+    { time: '2024-04-02', open: 153, high: 158, low: 152, close: 157 },
+    { time: '2024-04-03', open: 157, high: 157, low: 151, close: 152 },
+    { time: '2024-04-04', open: 152, high: 156, low: 150, close: 154 },
+    { time: '2024-04-05', open: 154, high: 160, low: 154, close: 159 },
+  ]);
+  const resizeObserver = new ResizeObserver(entries => {
+    if (entries.length === 0 || !entries[0].contentRect) return;
+    const { width, height } = entries[0].contentRect;
+    chart.resize(width, height);
+  });
+  resizeObserver.observe(document.getElementById('chartContainer'));
 </script>
 
 </body>
 </html>
-
