@@ -45,12 +45,33 @@ export default function KineticPage() {
   // --- ENGINE BRIDGE ---
   useEffect(() => {
     if (typeof window !== 'undefined' && window.computeKinetics && window.buildKineticUIModel) {
-      // 1. ENGINE RUNS ON TICKER CHANGE
-      const result = window.computeKinetics(activeTicker);
+      const snapshot = {
+        book: {
+          bestBid: 100,
+          bestAsk: 101,
+          bestBidSize: 50,
+          bestAskSize: 60,
+          localUpdateTime: Date.now(),
+        },
+        trades: {
+          tradeCount: 12,
+        },
+        timestamp: Date.now(),
+      };
 
-      // 2. MODEL BUILT USING activeTicker
+      const result = window.computeKinetics({
+        snapshot,
+        previousMid: 100,
+        anchorMid: 100,
+        source: {
+          name: activeTicker,
+          reliability: 1,
+        },
+        previousDecayEvents: [],
+      });
+
       const ui = window.buildKineticUIModel(activeTicker, result);
-      setKineticUI(ui);
+      setKineticUI(ui ?? null);
     }
   }, [activeTicker]);
 
@@ -152,12 +173,10 @@ export default function KineticPage() {
         {/* CENTER WORKSPACE */}
         <main className="center-workspace" style={styles.centerWorkspace}>
           <section className="chart-box" style={styles.chartBox}>
-            {/* 4. CHART PLACEHOLDER RESTORED */}
             <div id="chartContainer" style={{ width: '100%', height: '100%' }} />
           </section>
 
           <div className="middle-stack" style={styles.middleStack}>
-            {/* 5. STACK RENDERING EXCLUSIVE & GUARDED */}
             {Array.isArray(kineticUI?.stack) && kineticUI.stack.length > 0 ? (
               kineticUI.stack.map((item: any, idx: number) => (
                 <section key={`engine-${idx}`} className="stack-card" style={styles.stackCard}>
