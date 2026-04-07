@@ -305,7 +305,6 @@
   }
 
   function renderStack() {
-    // CLEANUP: Disconnect observers and remove charts
     volumeCharts.forEach(c => {
       if (c.observer) c.observer.disconnect();
       if (c.chart) c.chart.remove();
@@ -379,7 +378,7 @@
       rightPriceScale: { visible: false },
       timeScale: { visible: false },
       handleScroll: false,
-      handleScale: false,
+      handleScale: false
     });
 
     const series = vChart.addHistogramSeries({
@@ -483,7 +482,7 @@
     grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
     crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
     rightPriceScale: { borderColor: '#222' },
-    timeScale: { borderColor: '#222' },
+    timeScale: { borderColor: '#222' }
   });
   const candleSeries = mainChart.addCandlestickSeries({
     upColor: '#00ffff', downColor: '#ff0055', borderVisible: false,
