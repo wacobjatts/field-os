@@ -1,50 +1,39 @@
-/**
- * KINETIC MEASUREMENT INSTRUMENT
- * TYPE: Mismatch (Force Imbalance)
- * DOMAIN: Structural Physics
- * * Measures the directional force imbalance between buy work and sell work.
- * Returns a signed unit value where:
- * +1.0 = Pure Buy Force
- * -1.0 = Pure Sell Force
- * 0.0 = Perfect Equilibrium
- */
+// instruments/stressfield.ts
+// Stress Field
 
-export interface MismatchInput {
-  buyWork: number;
-  sellWork: number;
+import { PreparedSignal } from '../../../core/engine/signal';
+
+export interface StressFieldPoint {
+  stress: number;        // internal imbalance
+  compression: number;   // how concentrated the imbalance is
+  instability: number;   // how unstable the field appears
+  precision: number;
 }
 
-/**
- * Pure mathematical helper to bound values between -1 and 1.
- * Localized to ensure instrument is self-contained.
- */
-function clampSignedUnit(value: number): number {
-  return Math.max(-1, Math.min(1, value));
+export interface StressFieldOutput {
+  field: StressFieldPoint[];
 }
 
-/**
- * RAW MISMATCH MEASUREMENT
- * Extracted from src/branch/kinetic/mismatch.ts
- * * Formula: (BuyWork - SellWork) / (BuyWork + SellWork)
- */
-export function measureMismatch(trades: MismatchInput): number {
-  // 1. Safety Guard: Check for non-finite inputs
-  if (!Number.isFinite(trades.buyWork) || !Number.isFinite(trades.sellWork)) {
-    return 0;
-  }
+export function buildStressField(
+  signal: PreparedSignal
+): StressFieldOutput {
+  const value = signal.value;
+  const precision = signal.precision;
 
-  const { buyWork, sellWork } = trades;
-  const totalWork = buyWork + sellWork;
+  const norm = Math.max(0, Math.min(1, Math.abs(value) / 100));
 
-  // 2. Integrity Guard: If no motion, there is no mismatch
-  if (totalWork <= 0) {
-    return 0;
-  }
+  const stress = norm * precision;
+  const compression = Math.min(1, stress * 1.2);
+  const instability = Math.max(0, stress - precision * 0.3);
 
-  // 3. Calculate raw imbalance
-  const mismatch = (buyWork - sellWork) / totalWork;
+  const point: StressFieldPoint = {
+    stress,
+    compression,
+    instability,
+    precision
+  };
 
-  // 4. Return clamped result [-1, 1]
-  return clampSignedUnit(mismatch);
+  return {
+    field: [point]
+  };
 }
-
