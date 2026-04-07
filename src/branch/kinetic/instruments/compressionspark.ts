@@ -1,11 +1,39 @@
-import { calculateAbsorptionPrecision } from './precision/absorptionprecision';
-import { calculateMismatchPrecision } from './precision/mismatchprecision';
-import { calculateTensionPrecision } from './precision/tensionprecision';
-import { KineticSnapshot } from './types';
+// instruments/compressionspark.ts
+// Compression Spark
 
-export function calculateCompressionSpark(snapshot: KineticSnapshot): number {
-  const mismatch = calculateMismatchPrecision(snapshot.trades);
-  const absorption = calculateAbsorptionPrecision(snapshot);
+import { PreparedSignal } from '../../../core/engine/signal';
 
-  return calculateTensionPrecision(mismatch, absorption);
+export interface CompressionSparkPoint {
+  spark: number;        // release intensity
+  activation: number;   // whether pressure is firing
+  impulse: number;      // sharpness of release
+  precision: number;
+}
+
+export interface CompressionSparkOutput {
+  field: CompressionSparkPoint[];
+}
+
+export function buildCompressionSpark(
+  signal: PreparedSignal
+): CompressionSparkOutput {
+  const value = signal.value;
+  const precision = signal.precision;
+
+  const norm = Math.max(0, Math.min(1, Math.abs(value) / 100));
+
+  const spark = norm * precision;
+  const activation = spark > 0.2 ? 1 : 0;
+  const impulse = Math.min(1, spark * 1.5);
+
+  const point: CompressionSparkPoint = {
+    spark,
+    activation,
+    impulse,
+    precision
+  };
+
+  return {
+    field: [point]
+  };
 }
