@@ -1,3 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FieldOS - Kinetic Manifold</title>
+    <style>
+        /* Styles preserved exactly as requested */
+        :root { --neon-cyan: #00f3ff; --deep-black: #050505; --dark-gray: #1a1a1a; }
+        body { background: var(--deep-black); color: white; font-family: 'Inter', sans-serif; margin: 0; display: flex; height: 100vh; overflow: hidden; }
+        #sidebar { width: 260px; background: #0a0a0a; border-right: 1px solid #333; display: flex; flex-direction: column; }
+        #mainContent { flex: 1; display: flex; flex-direction: column; background: var(--deep-black); }
+        .ticker-bar { height: 40px; background: #111; border-bottom: 1px solid #333; display: flex; align-items: center; padding: 0 20px; overflow: hidden; }
+        #tickerList { display: flex; gap: 30px; font-size: 12px; }
+        .ticker-item { display: flex; gap: 8px; }
+        .up { color: #00ff88; } .down { color: #ff3366; }
+        #middleStack { flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; }
+        .stack-item { background: #111; border: 1px solid #333; padding: 20px; border-radius: 4px; position: relative; }
+        .stack-item-header { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .type-tag { font-size: 10px; text-transform: uppercase; color: var(--neon-cyan); border: 1px solid var(--neon-cyan); padding: 2px 6px; border-radius: 2px; }
+        .item-name { font-weight: 600; font-size: 14px; }
+        .item-desc { color: #888; font-size: 13px; line-height: 1.5; }
+        .category-card { border-bottom: 1px solid #222; }
+        .category-head { width: 100%; padding: 15px 20px; background: none; border: none; color: #ccc; text-align: left; display: flex; justify-content: space-between; cursor: pointer; font-size: 13px; }
+        .category-content { display: none; padding: 0 10px 10px 10px; flex-direction: column; }
+        .category-content.active { display: flex; }
+        .sub-item { padding: 8px 10px; background: none; border: none; color: #888; text-align: left; cursor: pointer; font-size: 12px; border-radius: 4px; }
+        .sub-item:hover { background: #222; color: white; }
+    </style>
+</head>
+<body>
+
+    <div id="sidebar">
+        <div style="padding: 20px; font-weight: bold; border-bottom: 1px solid #333; letter-spacing: 2px;">FIELD OS</div>
+        <div id="categoryContainer"></div>
+    </div>
+
+    <div id="mainContent">
+        <div class="ticker-bar">
+            <div id="tickerList"></div>
+        </div>
+        <div id="middleStack"></div>
+    </div>
+
 <script>
 const watchlists = {
   'Main': [['AAPL', '214.43', '+1.2%'], ['NVDA', '132.17', '-0.5%'], ['TSLA', '176.80', '+2.4%']],
@@ -18,39 +62,79 @@ let stackItems = [
   { id: 'instr-initial', type: 'instrument', name: 'Kinetic Manifold', desc: 'Combines force and truth into a single live view.' }
 ];
 
-let rightModules = [];
+/* UI RENDERING FUNCTIONS */
 
-/* 🔥 ADD THIS (your system running) */
-const data = {
-  book: { bestBid: 50000, bestBidSize: 2, bestAsk: 50010, bestAskSize: 3 },
-  trades: { buyWork: 100000, sellWork: 50000 },
-  previousMid: 50000,
-  anchorMid: 50000
-};
+function renderTickers(key) {
+    const container = document.getElementById('tickerList');
+    if (!container) return;
+    container.innerHTML = watchlists[key].map(t => `
+        <div class="ticker-item">
+            <span class="ticker-symbol">${t[0]}</span>
+            <span class="ticker-price">${t[1]}</span>
+            <span class="ticker-pct ${t[2].includes('+') ? 'up' : 'down'}">${t[2]}</span>
+        </div>
+    `).join('');
+}
 
-/* Note: computeKinetics logic removed as per import restrictions to fix module error */
-console.log("KINETIC SYSTEM READY (DATA LOADED)");
+function renderStack() {
+    const container = document.getElementById('middleStack');
+    if (!container) return;
+    container.innerHTML = stackItems.map(item => `
+        <div class="stack-item" id="${item.id}">
+            <div class="stack-item-header">
+                <span class="type-tag">${item.type}</span>
+                <span class="item-name">${item.name}</span>
+            </div>
+            <div class="item-desc">${item.desc}</div>
+        </div>
+    `).join('');
+}
 
-/* everything else unchanged */
+function toggleCategory(btn) {
+    const content = btn.nextElementSibling;
+    content.classList.toggle('active');
+    const icon = btn.querySelector('span:last-child');
+    icon.textContent = content.classList.contains('active') ? '▴' : '▾';
+}
+
+function addModuleToStack(type, name, desc) {
+    const id = 'item-' + Date.now();
+    stackItems.push({ id, type, name, desc });
+    renderStack();
+}
 
 function init() {
   renderTickers('Main');
   renderStack();
   const container = document.getElementById('categoryContainer');
+  if (!container) return;
+  
   categories.forEach(cat => {
     const card = document.createElement('div');
     card.className = 'category-card';
     card.innerHTML = `
-      <button class="category-head" onclick="toggleCategory(this)"><span>${cat.name}</span><span>▾</span></button>
+      <button class="category-head" onclick="toggleCategory(this)">
+        <span>${cat.name}</span>
+        <span>▾</span>
+      </button>
       <div class="category-content">
-        ${cat.items.map(i => `<button class="sub-item" onclick="addModuleToStack('instrument', '${i[0]}','${i[1]}')">${i[0]}</button>`).join('')}
+        ${cat.items.map(i => `
+            <button class="sub-item" onclick="addModuleToStack('instrument', '${i[0].replace(/'/g, "\\'")}', '${i[1].replace(/'/g, "\\'")}')">
+                ${i[0]}
+            </button>
+        `).join('')}
       </div>
     `;
     container.appendChild(card);
   });
 }
 
-/* keep all your existing functions exactly the same below */
-
-init();
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
 </script>
+
+</body>
+</html>
