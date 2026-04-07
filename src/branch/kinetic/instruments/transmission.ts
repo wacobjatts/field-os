@@ -1,13 +1,13 @@
 // instruments/transmission.ts
-// Absorption Transmission Field (A7)
+// Absorption Transmission Field
 
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface TransmissionPoint {
-  transmission: number;     // flow passing through structure
-  resistance: number;       // structural blocking
-  expression: number;       // visible movement correlation
-  precision: number;
+  transmission: number;   // -100 → 100
+  resistance: number;     // 0 → 100
+  expression: number;     // 0 → 100
+  precision: number;      // 0 → 1
 }
 
 export interface TransmissionOutput {
@@ -17,32 +17,23 @@ export interface TransmissionOutput {
 export function buildTransmissionField(
   signal: PreparedSignal
 ): TransmissionOutput {
-
   const value = signal.value;
   const precision = signal.precision;
 
-  // --- NORMALIZATION ---
   const norm = Math.max(-1, Math.min(1, value / 100));
 
-  // --- CORE INTERPRETATION ---
-
-  // Transmission (what gets through)
   const transmission = norm * precision;
-
-  // Resistance (inverse of transmission)
   const resistance = 1 - Math.abs(transmission);
-
-  // Expression (visible effect strength)
   const expression = Math.abs(norm) * precision;
 
-  const point: TransmissionPoint = {
-    transmission,
-    resistance,
-    expression,
-    precision
-  };
-
   return {
-    field: [point]
+    field: [
+      {
+        transmission: transmission * 100,
+        resistance: resistance * 100,
+        expression: expression * 100,
+        precision
+      }
+    ]
   };
 }
