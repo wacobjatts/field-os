@@ -4,10 +4,10 @@
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface CoilDecayPoint {
-  decay: number;        // pressure weakening
-  health: number;       // remaining structural health
-  divergence: number;   // separation from intact state
-  precision: number;
+  decay: number;        // 0 → 100
+  health: number;       // 0 → 100
+  divergence: number;   // 0 → 100
+  precision: number;    // 0 → 1
 }
 
 export interface CoilDecayOutput {
@@ -26,14 +26,14 @@ export function buildCoilDecayOscillator(
   const health = norm * precision;
   const divergence = Math.max(0, decay - health * 0.5);
 
-  const point: CoilDecayPoint = {
-    decay,
-    health,
-    divergence,
-    precision
-  };
-
   return {
-    field: [point]
+    field: [
+      {
+        decay: decay * 100,
+        health: health * 100,
+        divergence: divergence * 100,
+        precision
+      }
+    ]
   };
 }
