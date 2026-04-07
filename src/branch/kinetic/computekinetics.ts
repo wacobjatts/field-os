@@ -1,18 +1,18 @@
 // system/computeKinetics.ts
 // Kinetic system output bridge
 
-import { SourceProfile } from '../../../core/engine/signal';
+import { SourceProfile } from '../../core/engine/signal';
 import {
   processSlice,
   KineticOrchestratorInput
-} from '../orchestrator';
+} from './orchestrator';
 import {
   wireInstruments,
   WiredInstrumentOutput
-} from '../instruments';
+} from './instruments';
 
-import { KineticSnapshot } from '../types';
-import { DecayEvent } from '../instruments/decayoscillator';
+import { KineticSnapshot } from './types';
+import { DecayEvent } from './instruments/decayoscillator';
 
 export interface ComputeKineticsInput {
   snapshot: KineticSnapshot;
