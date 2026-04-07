@@ -501,8 +501,60 @@
     mainChart.resize(width, height);
   });
   mainResizeObserver.observe(document.getElementById('chartContainer'));
+
+  async function testKineticUI() {
+    const snapshot = {
+      book: {
+        bestBid: 100,
+        bestAsk: 101
+      },
+      trades: {
+        tradeCount: 10
+      },
+      timestamp: Date.now()
+    };
+
+    const source = {
+      name: "demo",
+      reliability: 1
+    };
+
+    const result = window.computeKinetics({
+      snapshot,
+      previousMid: 100,
+      anchorMid: 100,
+      source
+    });
+
+    if (!result) {
+      console.error("computeKinetics not found on window");
+      return;
+    }
+
+    const ui = window.buildKineticUIModel("TEST", result);
+
+    console.log("UI MODEL:", ui);
+
+    const stack = document.getElementById('middleStack');
+    if (!stack) {
+      console.error("middleStack element not found");
+      return;
+    }
+
+    stack.innerHTML = '';
+
+    ui.stack.forEach(item => {
+      const div = document.createElement('div');
+      div.style.padding = '10px';
+      div.style.border = '1px solid #111';
+      div.style.color = '#00ffff';
+      div.innerText = item.title;
+      stack.appendChild(div);
+    });
+  }
+
+  testKineticUI();
 </script>
 
 </body>
 </html>
-
