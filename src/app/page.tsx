@@ -187,6 +187,18 @@ export default function KineticPage() {
                       <button className="icon-btn" style={{...styles.iconBtn, color: '#666'}}>?</button>
                     </div>
                   </div>
+                  <pre
+                    style={{
+                      margin: 0,
+                      padding: '8px',
+                      fontSize: '10px',
+                      color: '#00ffff',
+                      whiteSpace: 'pre-wrap',
+                      overflowX: 'auto',
+                    }}
+                  >
+                    {JSON.stringify(item, null, 2)}
+                  </pre>
                 </section>
               ))
             ) : (
