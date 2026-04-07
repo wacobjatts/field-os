@@ -1,70 +1,54 @@
-/**
- * KINETIC MEASUREMENT INSTRUMENT
- * TYPE: Absorption (Price/Work Efficiency)
- * DOMAIN: Structural Physics
- * * Measures the efficiency of price displacement relative to the "Total Work" 
- * (volume) and the density of the liquidity frontier.
- */
+// instruments/absorptionfield.ts
+// Absorption–Compression Field (A3)
+// Clean, stable, physically-aligned interpretation layer
 
-export interface OrderBookState {
-  bestBid: number;
-  bestBidSize: number;
-  bestAsk: number;
-  bestAskSize: number;
+import { PreparedSignal } from '../../../core/engine/signal';
+
+export interface AbsorptionFieldPoint {
+  compression: number;      // density (mist)
+  absorptionRate: number;  // curve behavior
+  elasticity: number;      // structural response (-1 → 1)
+  sponginess: number;      // capacity (0 → 1)
+  precision: number;       // signal reliability
 }
 
-export interface TradeBufferState {
-  buyWork: number;
-  sellWork: number;
+export interface AbsorptionFieldOutput {
+  field: AbsorptionFieldPoint[];
 }
 
-export interface AbsorptionSnapshot {
-  book: OrderBookState;
-  trades: TradeBufferState;
-}
+export function buildAbsorptionField(
+  signal: PreparedSignal
+): AbsorptionFieldOutput {
 
-/**
- * Pure mathematical helper to bound values between 0 and 1.
- */
-function clamp01(value: number): number {
-  return Math.max(0, Math.min(1, value));
-}
+  const value = signal.value;
+  const precision = signal.precision;
 
-/**
- * RAW ABSORPTION MEASUREMENT
- * Extracted from src/branch/kinetic/absorption.ts
- * * Formula: 1 - (SlippageCost / (TotalWork + SlippageCost))
- * Where SlippageCost = Price Displacement * Average Frontier Density
- */
-export function measureAbsorption(
-  snapshot: AbsorptionSnapshot,
-  previousMid: number
-): number {
-  const { trades, book } = snapshot;
+  // --- NORMALIZATION ---
+  const norm = Math.max(-1, Math.min(1, value / 100));
 
-  // 1. Calculate current midpoint
-  const currentMid = (book.bestBid + book.bestAsk) / 2;
-  
-  // 2. Calculate Price Displacement (Distance moved)
-  const displacement = Math.abs(currentMid - previousMid);
-  
-  // 3. Calculate Total Work (Cumulative Volume Force)
-  const totalWork = trades.buyWork + trades.sellWork;
+  // --- CORE INTERPRETATION ---
 
-  if (totalWork <= 0) return 0;
+  // Compression (mist density)
+  const compression = Math.max(0, norm * precision);
 
-  // 4. Calculate Frontier Density (Liquidity "Thickness" at the edge)
-  const frontierDensity =
-    ((book.bestBid * book.bestBidSize) + (book.bestAsk * book.bestAskSize)) / 2;
+  // Absorption rate (curve sharpness / activity)
+  const absorptionRate = Math.abs(norm) * precision;
 
-  if (!Number.isFinite(frontierDensity) || frontierDensity <= 0) return 0;
+  // Elasticity (structural response)
+  const elasticity = norm;
 
-  // 5. Calculate Slippage Cost (Theoretical cost to move price by 'displacement')
-  const slippageCost = displacement * frontierDensity;
-  
-  // 6. Calculate Absorption (The inverse of efficiency)
-  // Higher absorption means more work was required for less movement.
-  const absorption = 1 - (slippageCost / (totalWork + slippageCost));
+  // Sponginess (capacity)
+  const sponginess = 1 - Math.min(1, compression);
 
-  return clamp01(absorption);
+  const point: AbsorptionFieldPoint = {
+    compression,
+    absorptionRate,
+    elasticity,
+    sponginess,
+    precision
+  };
+
+  return {
+    field: [point]
+  };
 }
