@@ -178,6 +178,17 @@ export default function KineticPage() {
             <div id="chartContainer" style={{ width: '100%', height: '100%' }} />
           </section>
 
+          <div
+            style={{
+              padding: '8px',
+              fontSize: '11px',
+              color: '#00ffff',
+              background: '#050505',
+            }}
+          >
+            ACTIVE TICKER: {activeTicker} | STACK: {Array.isArray(kineticUI?.stack) ? kineticUI.stack.length : 0}
+          </div>
+
           <div className="middle-stack" style={styles.middleStack}>
             {Array.isArray(kineticUI?.stack) && kineticUI.stack.length > 0 ? (
               kineticUI.stack.map((item: any, idx: number) => (
@@ -189,18 +200,6 @@ export default function KineticPage() {
                       <button className="icon-btn" style={{...styles.iconBtn, color: '#666'}}>?</button>
                     </div>
                   </div>
-                  <pre
-                    style={{
-                      margin: 0,
-                      padding: '8px',
-                      fontSize: '10px',
-                      color: '#00ffff',
-                      whiteSpace: 'pre-wrap',
-                      overflowX: 'auto',
-                    }}
-                  >
-                    {JSON.stringify(item, null, 2)}
-                  </pre>
                 </section>
               ))
             ) : (
