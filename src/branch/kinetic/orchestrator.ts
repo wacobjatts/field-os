@@ -68,7 +68,6 @@ export function processSlice(
   const currentMid = (snapshot.book.bestBid + snapshot.book.bestAsk) / 2;
   const displacement = Math.abs(currentMid - previousMid);
 
-  // --- 1. RAW OBSERVATIONS ---
   const absorption = calculateAbsorption(snapshot, previousMid);
   const mismatch = calculateMismatch(snapshot.trades);
   const realityGap = calculateRealityGap(snapshot, anchorMid);
@@ -77,7 +76,6 @@ export function processSlice(
   const liarIndex = calculateLiarIndex(realityGap, displacement);
   const entropy = calculateEntropy(snapshot);
 
-  // --- 2. PRECISION (THE HONESTY PASS) ---
   const absorptionPrecision = calculateAbsorptionPrecision(snapshot);
   const mismatchPrecision = calculateMismatchPrecision(snapshot.trades);
   const realityGapPrecision = calculateRealityGapPrecision(
@@ -94,7 +92,6 @@ export function processSlice(
   );
   const entropyPrecision = calculateEntropyPrecision(snapshot);
 
-  // --- 3. TRANSLATION TO TRUNK-SAFE ATOMS ---
   const signals: PreparedSignal[] = [
     toPreparedSignal(
       KINETIC_DIMENSIONS.absorption.id,
