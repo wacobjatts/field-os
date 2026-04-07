@@ -1,48 +1,39 @@
-/**
- * KINETIC MEASUREMENT INSTRUMENT
- * TYPE: Liar Index (Positional Authenticity)
- * DOMAIN: Structural Physics
- * * Measures the "honesty" of a price move by calculating the ratio 
- * of the structural Reality Gap to the observed Price Displacement.
- * A high index suggests the price is "lying" (straying far from its anchor 
- * without corresponding displacement).
- */
+// instruments/liarindex.ts
+// Displacement Field
 
-/**
- * Pure mathematical helper to bound values between 0 and 1.
- * Localized to ensure instrument is self-contained.
- */
-function clamp01(value: number): number {
-  return Math.max(0, Math.min(1, value));
+import { PreparedSignal } from '../../../core/engine/signal';
+
+export interface DisplacementPoint {
+  displacement: number;   // validated deviation from structure
+  regime: number;         // whether displacement is meaningful
+  activity: number;       // supporting strength / event validity
+  precision: number;
 }
 
-/**
- * RAW LIAR INDEX MEASUREMENT
- * Extracted from src/branch/kinetic/liarindex.ts
- * * Logic: gap / move
- * * Returns: A clamped [0, 1] value representing positional divergence.
- */
-export function measureLiarIndex(
-  realityGap: number,
-  displacement: number
-): number {
-  // 1. Safety Guard: Check for non-finite inputs
-  if (!Number.isFinite(realityGap) || !Number.isFinite(displacement)) {
-    return 0;
-  }
+export interface DisplacementFieldOutput {
+  field: DisplacementPoint[];
+}
 
-  // 2. Normalize inputs to ensure non-negative physics
-  const gap = Math.max(0, realityGap);
-  const move = Math.max(0, displacement);
+export function buildDisplacementField(
+  signal: PreparedSignal
+): DisplacementFieldOutput {
+  const value = signal.value;
+  const precision = signal.precision;
 
-  // 3. Integrity Guard: Prevent division by zero if there is no movement
-  if (move <= 0) {
-    return 0;
-  }
+  const norm = Math.max(0, Math.min(1, Math.abs(value) / 100));
 
-  // 4. Calculate the Ratio
-  const liarIndex = gap / move;
+  const displacement = norm * precision;
+  const regime = displacement > 0.2 ? 1 : 0;
+  const activity = Math.min(1, displacement * 1.5);
 
-  // 5. Return clamped result [0, 1]
-  return clamp01(liarIndex);
+  const point: DisplacementPoint = {
+    displacement,
+    regime,
+    activity,
+    precision
+  };
+
+  return {
+    field: [point]
+  };
 }
