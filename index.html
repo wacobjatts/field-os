@@ -49,6 +49,7 @@
     
     /* INSTRUMENT VISUAL */
     .card-visual { min-height: 90px; background: #050505; display: flex; align-items: center; justify-content: center; color: #00ffff; font-weight: bold; font-size: 14px; text-align: center; padding: 10px; border: none; }
+    .volume-chart { width: 100%; height: 60px; background: #050505; }
     
     /* CARD HEADER */
     .card-header { padding: 6px; display: flex; justify-content: space-between; align-items: center; background: #000; }
@@ -209,6 +210,7 @@
   ];
   
   let rightModules = [];
+  let volumeCharts = new Map();
 
   function init() {
     renderTickers('Main');
@@ -250,7 +252,6 @@
 
   function renderTickers(name) {
     const list = document.getElementById('tickerList');
-    // Simplified getter since activeTickerDisplay was replaced by chart
     const activeTicker = "AAPL"; 
     list.innerHTML = '';
     watchlists[name].forEach(t => {
@@ -304,6 +305,13 @@
   }
 
   function renderStack() {
+    // CLEANUP: Disconnect observers and remove charts
+    volumeCharts.forEach(c => {
+      if (c.observer) c.observer.disconnect();
+      if (c.chart) c.chart.remove();
+    });
+    volumeCharts.clear();
+
     const stack = document.getElementById('middleStack');
     stack.innerHTML = '';
     
@@ -326,7 +334,6 @@
       const toggleIcon = isCollapsed ? '▸' : '▾';
       const volToggle = isVol ? `<button class="icon-btn" onclick="toggleVolumeCollapse(${i})">${toggleIcon}</button>` : '';
 
-      // Conditional Controls: Hide move/remove if volume is collapsed
       const showStandardControls = !isCollapsed;
       const standardControls = showStandardControls ? `
         <button class="icon-btn" onclick="moveItem(${i}, -1)">▲</button>
@@ -334,8 +341,15 @@
         <button class="icon-btn" style="color:#ff4444;" onclick="removeItem(${i})">×</button>
       ` : '';
       
+      let visualHtml = '';
+      if (isVol) {
+          visualHtml = `<div class="volume-chart" id="volumeChart-${i}"></div>`;
+      } else {
+          visualHtml = `<div class="card-visual">${item.name}</div>`;
+      }
+
       card.innerHTML = `
-        ${(!isVol) ? `<div class="card-visual">${item.name}</div>` : ''}
+        ${visualHtml}
         <div class="card-header">
           <div class="card-info">
             <h3 class="card-title">${titleText}</h3>
@@ -348,7 +362,51 @@
         </div>
       `;
       stack.appendChild(card);
+      
+      if (isVol && !isCollapsed) {
+          initVolumeChart(i);
+      }
     });
+  }
+
+  function initVolumeChart(index) {
+    const container = document.getElementById(`volumeChart-${index}`);
+    if (!container) return;
+
+    const vChart = LightweightCharts.createChart(container, {
+      layout: { background: { type: LightweightCharts.ColorType.Solid, color: 'transparent' }, textColor: '#ccc' },
+      grid: { vertLines: { visible: false }, horzLines: { visible: false } },
+      rightPriceScale: { visible: false },
+      timeScale: { visible: false },
+      handleScroll: false,
+      handleScale: false,
+    });
+
+    const series = vChart.addHistogramSeries({
+      color: '#00ffff',
+      priceFormat: { type: 'volume' },
+    });
+
+    const data = [
+      { time: '2024-04-01', value: 10 },
+      { time: '2024-04-02', value: 30 },
+      { time: '2024-04-03', value: 20 },
+      { time: '2024-04-04', value: 50 },
+      { time: '2024-04-05', value: 40 }
+    ];
+
+    series.setData(data);
+    vChart.timeScale().fitContent();
+
+    const observer = new ResizeObserver(entries => {
+      if (entries.length === 0) return;
+      const { width, height } = entries[0].contentRect;
+      vChart.resize(width, height);
+      vChart.timeScale().fitContent();
+    });
+    observer.observe(container);
+
+    volumeCharts.set(index, { chart: vChart, observer });
   }
 
   /* CHOOSER */
@@ -420,14 +478,14 @@
 
   init();
 
-  const chart = LightweightCharts.createChart(document.getElementById('chartContainer'), {
+  const mainChart = LightweightCharts.createChart(document.getElementById('chartContainer'), {
     layout: { background: { type: LightweightCharts.ColorType.Solid, color: '#000000' }, textColor: '#ccc' },
     grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
     crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
     rightPriceScale: { borderColor: '#222' },
     timeScale: { borderColor: '#222' },
   });
-  const candleSeries = chart.addCandlestickSeries({
+  const candleSeries = mainChart.addCandlestickSeries({
     upColor: '#00ffff', downColor: '#ff0055', borderVisible: false,
     wickUpColor: '#00ffff', wickDownColor: '#ff0055',
   });
@@ -438,13 +496,14 @@
     { time: '2024-04-04', open: 152, high: 156, low: 150, close: 154 },
     { time: '2024-04-05', open: 154, high: 160, low: 154, close: 159 },
   ]);
-  const resizeObserver = new ResizeObserver(entries => {
+  const mainResizeObserver = new ResizeObserver(entries => {
     if (entries.length === 0 || !entries[0].contentRect) return;
     const { width, height } = entries[0].contentRect;
-    chart.resize(width, height);
+    mainChart.resize(width, height);
   });
-  resizeObserver.observe(document.getElementById('chartContainer'));
+  mainResizeObserver.observe(document.getElementById('chartContainer'));
 </script>
 
 </body>
 </html>
+
