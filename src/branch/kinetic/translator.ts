@@ -1,27 +1,25 @@
-import { PreparedSignal } from '../../core/engine/signal';
-import { KineticOrchestratorOutput } from './orchestrator';
-import { SourceProfile } from '../../core/engine/signal';
+import { PreparedSignal, SourceProfile } from '../../core/engine/signal';
 
-export function translateToSignals(
-  output: KineticOrchestratorOutput,
+export interface KineticDimension {
+  id: string;
+  name?: string;
+  description?: string;
+}
+
+export function toPreparedSignal(
+  dimensionId: string,
+  value: number,
+  precision: number,
+  timestamp: number,
   source: SourceProfile,
-  timestamp: number
-): PreparedSignal[] {
-  const signals: PreparedSignal[] = [];
-
-  for (const key of Object.keys(output.precision)) {
-    const value = output.raw[key as keyof typeof output.raw];
-    const confidence = output.precision[key as keyof typeof output.precision];
-
-    signals.push({
-      id: `${source.id}-${key}-${timestamp}`,
-      dimension: key,
-      value,
-      confidence,
-      sourceId: source.id,
-      timestamp
-    });
-  }
-
-  return signals;
+  dimension?: KineticDimension
+): PreparedSignal {
+  return {
+    dimensionId,
+    value,
+    precision,
+    timestamp,
+    source,
+    dimension,
+  };
 }
