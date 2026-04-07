@@ -1,4 +1,4 @@
-// system/computeKinetics.ts
+// kinetic/computekinetics.ts
 // Kinetic system output bridge
 
 import { SourceProfile } from '../../core/engine/signal';
