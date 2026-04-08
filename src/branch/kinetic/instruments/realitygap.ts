@@ -1,4 +1,4 @@
-// instruments/realitygap.ts
+// instruments/reality-gap.ts
 // Reality Gap / Execution Integrity Field
 
 import { PreparedSignal } from '../../../core/engine/signal';
@@ -14,7 +14,7 @@ export interface RealityGapOutput {
   field: RealityGapPoint[];
 }
 
-export function buildRealityGapField(
+export function buildRealityGap(
   signal: PreparedSignal
 ): RealityGapOutput {
   const value = signal.value;
