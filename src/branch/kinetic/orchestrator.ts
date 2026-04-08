@@ -2,9 +2,8 @@
  * src/branch/kinetic/orchestrator.ts
  */
 
-import { createClient } from '@supabase/supabase-js'; // Added Supabase Client
+import { createClient } from '@supabase/supabase-js';
 import { PreparedSignal, SourceProfile } from '../../core/engine/signal';
-
 import { KINETIC_DIMENSIONS } from './dimensions';
 import { normalizeRealityGap } from './normalization/normalize';
 import { calculateAbsorption } from './calculators/absorption';
@@ -13,32 +12,28 @@ import { calculateRealityGap } from './calculators/realitygap';
 import { calculateTension } from './calculators/tension';
 import { calculateLiarIndex } from './calculators/liarindex';
 import { calculateEntropy } from './calculators/entropy';
-
 import { calculateAbsorptionPrecision } from './precision/absorptionprecision';
 import { calculateMismatchPrecision } from './precision/mismatchprecision';
 import { calculateRealityGapPrecision } from './precision/realitygapprecision';
 import { calculateTensionPrecision } from './precision/tensionprecision';
 import { calculateLiarIndexPrecision } from './precision/liarindexprecision';
 import { calculateEntropyPrecision } from './precision/entropyprecision';
-
 import { toPreparedSignal } from './translator';
 import { KineticSnapshot } from './types';
 
-// 1. Initialize Supabase Connection
+// 1. Initialize Supabase (Server-side)
 const supabase = createClient(
   'https://gagivrinhxdlygvjxthg.supabase.co',
   'sb_publishable_HKdBK_fko9nwrpTXywBrXA_MdsuAUZY'
 );
 
-// 2. Database Recording Function
-async function recordSignalToDatabase(signal: PreparedSignal) {
-  try {
-    await supabase.from('Projects').insert([
-      { name: `FieldOS Signal: ${signal.dimensionId} | Value: ${signal.adjustedValue}` }
-    ]);
-  } catch (err) {
-    console.error('Supabase Logging Failed:', err);
-  }
+// 2. Logging Function
+async function logToDB(name: string) {
+    try {
+        await supabase.from('Projects').insert([{ name }]);
+    } catch (err) {
+        console.error('Supabase Error:', err);
+    }
 }
 
 export interface KineticOrchestratorInput {
@@ -51,32 +46,21 @@ export interface KineticOrchestratorInput {
 export interface KineticOrchestratorOutput {
   signals: PreparedSignal[];
   raw: {
-    absorption: number;
-    mismatch: number;
-    realityGap: number;
-    normalizedRealityGap: number;
-    tension: number;
-    liarIndex: number;
-    entropy: number;
+    absorption: number; mismatch: number; realityGap: number;
+    normalizedRealityGap: number; tension: number; liarIndex: number; entropy: number;
   };
   precision: {
-    absorption: number;
-    mismatch: number;
-    realityGap: number;
-    tension: number;
-    liarIndex: number;
-    entropy: number;
+    absorption: number; mismatch: number; realityGap: number;
+    tension: number; liarIndex: number; entropy: number;
   };
 }
 
-export function processSlice(
-  input: KineticOrchestratorInput
-): KineticOrchestratorOutput {
+export function processSlice(input: KineticOrchestratorInput): KineticOrchestratorOutput {
   const { snapshot, previousMid, anchorMid, source } = input;
-
   const currentMid = (snapshot.book.bestBid + snapshot.book.bestAsk) / 2;
   const displacement = Math.abs(currentMid - previousMid);
 
+  // Calculations
   const absorption = calculateAbsorption(snapshot, previousMid);
   const mismatch = calculateMismatch(snapshot.trades);
   const realityGap = calculateRealityGap(snapshot, anchorMid);
@@ -85,20 +69,12 @@ export function processSlice(
   const liarIndex = calculateLiarIndex(realityGap, displacement);
   const entropy = calculateEntropy(snapshot);
 
+  // Precision
   const absorptionPrecision = calculateAbsorptionPrecision(snapshot);
   const mismatchPrecision = calculateMismatchPrecision(snapshot.trades);
-  const realityGapPrecision = calculateRealityGapPrecision(
-    snapshot.book,
-    snapshot.timestamp
-  );
-  const tensionPrecision = calculateTensionPrecision(
-    mismatchPrecision,
-    absorptionPrecision
-  );
-  const liarIndexPrecision = calculateLiarIndexPrecision(
-    realityGapPrecision,
-    snapshot.trades
-  );
+  const realityGapPrecision = calculateRealityGapPrecision(snapshot.book, snapshot.timestamp);
+  const tensionPrecision = calculateTensionPrecision(mismatchPrecision, absorptionPrecision);
+  const liarIndexPrecision = calculateLiarIndexPrecision(realityGapPrecision, snapshot.trades);
   const entropyPrecision = calculateEntropyPrecision(snapshot);
 
   const signals: PreparedSignal[] = [
@@ -110,9 +86,9 @@ export function processSlice(
     toPreparedSignal(KINETIC_DIMENSIONS.entropy.id, entropy, entropyPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.entropy)
   ];
 
-  // 3. Trigger the Database Record for the primary signal
+  // 3. LOG TO DATABASE (Triggered on every slice)
   if (signals.length > 0) {
-    recordSignalToDatabase(signals[0]);
+      logToDB(`FieldOS Signal: ${signals[0].dimensionId} | Value: ${signals[0].adjustedValue}`);
   }
 
   return {
