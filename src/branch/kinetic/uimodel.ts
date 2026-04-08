@@ -7,6 +7,8 @@ export interface InstrumentCardModel {
   key: string;
   title: string;
   family: string;
+  rendererKey: string;
+  category: string;
   data: unknown;
 }
 
@@ -32,6 +34,8 @@ export function buildKineticUIModel(
       key: 'absorption-field',
       title: 'Absorption–Compression Field',
       family: 'Absorption',
+      rendererKey: 'absorption-field',
+      category: 'Absorption',
       data: output.instruments.absorptionField
     });
   }
@@ -41,6 +45,8 @@ export function buildKineticUIModel(
       key: 'transmission-field',
       title: 'Absorption Transmission Field',
       family: 'Absorption',
+      rendererKey: 'transmission-field',
+      category: 'Absorption',
       data: output.instruments.transmissionField
     });
   }
@@ -50,6 +56,8 @@ export function buildKineticUIModel(
       key: 'decay-field',
       title: 'Absorption Decay Field',
       family: 'Absorption',
+      rendererKey: 'decay-field',
+      category: 'Absorption',
       data: output.instruments.decayField
     });
   }
@@ -59,6 +67,8 @@ export function buildKineticUIModel(
       key: 'stress-field',
       title: 'Stress Field',
       family: 'Mismatch',
+      rendererKey: 'stress-field',
+      category: 'Mismatch',
       data: output.instruments.stressField
     });
   }
@@ -68,6 +78,8 @@ export function buildKineticUIModel(
       key: 'absorption-tension',
       title: 'Absorption Tension',
       family: 'Tension',
+      rendererKey: 'absorption-tension',
+      category: 'Tension',
       data: output.instruments.absorptionTension
     });
   }
@@ -77,6 +89,8 @@ export function buildKineticUIModel(
       key: 'tension-line',
       title: 'Tension Line',
       family: 'Tension',
+      rendererKey: 'tension-line',
+      category: 'Tension',
       data: output.instruments.tensionLine
     });
   }
@@ -86,6 +100,8 @@ export function buildKineticUIModel(
       key: 'coil-decay',
       title: 'Coil Decay Oscillator',
       family: 'Tension',
+      rendererKey: 'coil-decay',
+      category: 'Tension',
       data: output.instruments.coilDecayField
     });
   }
@@ -95,6 +111,8 @@ export function buildKineticUIModel(
       key: 'compression-spark',
       title: 'Compression Spark',
       family: 'Tension',
+      rendererKey: 'compression-spark',
+      category: 'Tension',
       data: output.instruments.compressionSpark
     });
   }
@@ -104,6 +122,8 @@ export function buildKineticUIModel(
       key: 'kinetic-anchor',
       title: 'Kinetic Anchor',
       family: 'Tension',
+      rendererKey: 'kinetic-anchor',
+      category: 'Tension',
       data: output.instruments.kineticAnchor
     });
   }
@@ -113,6 +133,8 @@ export function buildKineticUIModel(
       key: 'displacement-field',
       title: 'Displacement Field',
       family: 'Displacement',
+      rendererKey: 'displacement-field',
+      category: 'Displacement',
       data: output.instruments.displacementField
     });
   }
@@ -122,6 +144,8 @@ export function buildKineticUIModel(
       key: 'reality-gap',
       title: 'Reality Gap',
       family: 'Reality',
+      rendererKey: 'reality-gap',
+      category: 'Reality',
       data: output.instruments.realityGapField
     });
   }
