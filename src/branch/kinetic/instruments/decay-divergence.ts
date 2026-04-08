@@ -1,20 +1,18 @@
 // src/branch/kinetic/instruments/decay-divergence.ts
-// Decay Divergence
-
 import { PreparedSignal } from '../../../core/engine/signal';
 
 export interface CoilDecayPoint {
-  decay: number;        // 0 → 100
-  health: number;       // 0 → 100
-  divergence: number;   // 0 → 100
-  precision: number;    // 0 → 1
+  decay: number;
+  health: number;
+  divergence: number;
+  precision: number;
 }
 
 export interface CoilDecayOutput {
   field: CoilDecayPoint[];
 }
 
-export function buildDecayDivergence(
+export function buildCoilDecayOscillator(
   signal: PreparedSignal
 ): CoilDecayOutput {
   const value = signal.value;
