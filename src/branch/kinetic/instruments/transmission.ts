@@ -1,5 +1,5 @@
-// instruments/transmission.ts
-// Absorption Transmission Field
+// src/branch/kinetic/instruments/transmission-field.ts
+// Transmission Field
 
 import { PreparedSignal } from '../../../core/engine/signal';
 
