@@ -1,5 +1,5 @@
-// instruments/tensionpoints.ts
-// Tension Line
+// src/branch/kinetic/instruments/tension-points.ts
+// Tension Points
 
 import { PreparedSignal } from '../../../core/engine/signal';
 
@@ -10,13 +10,13 @@ export interface TensionPoint {
   precision: number;    // 0 → 1
 }
 
-export interface TensionLineOutput {
+export interface TensionPointsOutput {
   field: TensionPoint[];
 }
 
-export function buildTensionLine(
+export function buildTensionPoints(
   signal: PreparedSignal
-): TensionLineOutput {
+): TensionPointsOutput {
   const value = signal.value;
   const precision = signal.precision;
 
