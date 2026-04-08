@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useRef, useLayoutEffect } from 'react';
 import '../branch/kinetic/frontendbridge';
 
-// --- RENDERER IMPORTS ---
+// --- RENDERER IMPORTS (SOURCE OF TRUTH) ---
 import { paintTensionField } from '../branch/kinetic/renderer/tension-field-painter';
 import { paintRealityGapField } from '../branch/kinetic/renderer/reality-gap-painter';
 import { paintKineticAnchor } from '../branch/kinetic/renderer/kinetic-anchor-painter';
@@ -16,7 +16,7 @@ import { paintAbsorptionField } from '../branch/kinetic/renderer/absorption-fiel
 import { paintDecayDivergenceField } from '../branch/kinetic/renderer/decay-divergence-painter';
 import { paintTensionPoints } from '../branch/kinetic/renderer/tension-points-painter';
 
-// --- TYPES & DISPATCH ---
+// --- RENDERER MAP ---
 const RENDERER_MAP: Record<string, Function> = {
   'absorption-tension': paintTensionField,
   'reality-gap': paintRealityGapField,
@@ -27,18 +27,22 @@ const RENDERER_MAP: Record<string, Function> = {
   'stress-field': paintStressField,
   'transmission-field': paintTransmissionField,
   'absorption-field': paintAbsorptionField,
-  // Note: paintTensionLine does not exist as a separate file in the current renderer stack.
-  // We use paintTensionPoints for both keys as per current engineering internal state.
-  'tension-line': paintTensionPoints,
   'decay-divergence': paintDecayDivergenceField,
   'tension-points': paintTensionPoints,
+  /**
+   * NOTE: tension-line mapping
+   * This is a temporary visual reuse. tension-line is intentionally sharing the 
+   * same base signal family (Tension Points) for now. No separate paintTensionLine 
+   * integration is wired in this file yet.
+   */
+  'tension-line': paintTensionPoints,
 };
 
 // --- COMPONENTS ---
 
 /**
  * InstrumentCanvas
- * Small React wrapper to bridge data to the real painter functions
+ * Bridge between React lifecycle and the low-level painter functions.
  */
 const InstrumentCanvas = ({ rendererKey, data }: { rendererKey: string; data: any }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -50,27 +54,24 @@ const InstrumentCanvas = ({ rendererKey, data }: { rendererKey: string; data: an
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // Handle DPR
+    // 1. DPR-safe canvas drawing
     const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    const rect = canvas.parentElement?.getBoundingClientRect() || { width: 300, height: 100 };
+    
     canvas.width = rect.width * dpr;
     canvas.height = rect.height * dpr;
+    
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.scale(dpr, dpr);
 
-    // Clear
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    // 2. Data shape extraction
+    const payload = data?.field || data?.events || data;
 
-    // Dispatch
+    // 3. Dispatch to painter
     const painter = RENDERER_MAP[rendererKey];
-    if (painter && data) {
-      // Data extraction: painters expect the point array (field) or event array (events)
-      const payload = data.field || data.events || data;
+    if (painter && payload) {
       painter(ctx, payload);
-    } else {
-      // Fallback visual
-      ctx.strokeStyle = '#222';
-      ctx.setLineDash([5, 5]);
-      ctx.strokeRect(10, 10, rect.width - 20, rect.height - 20);
     }
   }, [rendererKey, data]);
 
@@ -82,37 +83,14 @@ const InstrumentCanvas = ({ rendererKey, data }: { rendererKey: string; data: an
   );
 };
 
-function generateWavePath(freq: number, amp: number) {
-  let path = '';
-  for (let x = 0; x <= 100; x += 2) {
-    const y =
-      50 +
-      Math.sin((x / 100) * Math.PI * 2 * freq + Date.now() / 500) *
-        (amp * 30);
-
-    path += x === 0 ? `M ${x} ${y}` : ` L ${x} ${y}`;
-  }
-  return path;
-}
-
 export default function KineticPage() {
-  // --- STATE ---
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
   const [bottomMenuVisible, setBottomMenuVisible] = useState(true);
-  const [activeList, setActiveList] = useState('Main');
-  const [activeTicker, setActiveTicker] = useState('AAPL');
-  const [chooserOpen, setChooserOpen] = useState(false);
-  const [expandedCategory, setExpandedCategory] = useState<number | null>(null);
-  const [modulePickerOpen, setModulePickerOpen] = useState(false);
-  const [rightModules, setRightModules] = useState<string[]>([]);
   const [kineticUI, setKineticUI] = useState<any>(null);
-  const [stackItems, setStackItems] = useState([
-    { id: 'instr-initial', type: 'instrument', name: 'Kinetic Manifold', category: 'General' },
-  ]);
 
-  // --- EFFECT: DATA LOOP ---
   useEffect(() => {
+    // 2. Event listener name check
     const handleModelUpdate = (e: any) => {
       setKineticUI(e.detail);
     };
@@ -120,137 +98,143 @@ export default function KineticPage() {
     return () => window.removeEventListener('kinetic-model-update', handleModelUpdate);
   }, []);
 
-  // --- HANDLERS ---
   const toggleLeft = () => setLeftCollapsed(!leftCollapsed);
   const toggleRight = () => setRightCollapsed(!rightCollapsed);
-  const toggleMenu = () => setBottomMenuVisible(!bottomMenuVisible);
+  const toggleMenu = (show: boolean) => setBottomMenuVisible(show);
 
   return (
-    <main style={styles.appShell}>
-      {/* WORKSPACE AREA */}
-      <div style={styles.workspaceShell}>
+    <div className="app-shell">
+      <div className="workspace-shell">
+        
         {/* LEFT CURTAIN */}
-        <aside style={{ ...styles.curtain, ...styles.leftCurtain, width: leftCollapsed ? '0px' : '130px' }}>
-          <div style={styles.curtainHeader}>
-            <span>WATCHLIST</span>
-            <button style={styles.iconBtn} onClick={toggleLeft}>×</button>
+        <aside className={`curtain left-curtain ${leftCollapsed ? 'is-collapsed' : ''}`}>
+          <div className="curtain-content">
+            <div className="panel-header">
+              <span className="panel-title">Watchlists</span>
+              <button className="icon-btn">+</button>
+            </div>
+            <input type="text" className="ticker-search" placeholder="Find symbol..." />
           </div>
-          <div style={styles.watchlistScroll}>
-            {['AAPL', 'BTC', 'ETH', 'TSLA', 'NVDA', 'SOL'].map((s) => (
-              <div
-                key={s}
-                style={{ ...styles.watchItem, color: activeTicker === s ? '#00fbff' : '#ccc' }}
-                onClick={() => setActiveTicker(s)}
-              >
-                {s}
-              </div>
-            ))}
-          </div>
+          <button className="curtain-handle" onClick={toggleLeft}>
+            {leftCollapsed ? '›' : '‹'}
+          </button>
         </aside>
 
-        {/* CENTER STACK (SCROLLABLE) */}
-        <section style={styles.mainContainer}>
-          <div style={styles.chartArea}>
-            <div style={styles.chartHeader}>
-              <span style={{ color: '#00fbff' }}>{activeTicker}</span> / FIELD KINETICS
-            </div>
-            <div id="chartContainer" style={styles.chartPlaceholder}>
-              <div style={{ color: '#333', fontSize: '10px' }}>MAIN CHART SURFACE</div>
-            </div>
-          </div>
+        {/* CENTER WORKSPACE */}
+        <main className="center-workspace">
+          <section className="chart-box">
+            <div id="chartContainer" style={{ width: '100%', height: '100%' }}></div>
+          </section>
 
-          <div id="middleStack" style={styles.scrollStack}>
-            {kineticUI?.stack ? (
+          <div className="middle-stack" id="middleStack">
+            {/* 3. Safe fallback state */}
+            {kineticUI?.stack && kineticUI.stack.length > 0 ? (
               kineticUI.stack.map((item: any) => (
-                <div key={item.key} style={styles.instrumentCard}>
-                  <div style={styles.cardHeader}>
-                    <span style={styles.cardTitle}>{item.title}</span>
-                    <span style={styles.cardCategory}>{item.category}</span>
+                <section key={item.key} className="stack-card">
+                  <div className="card-header">
+                    <h3 className="card-title">{item.title}</h3>
+                    <span className="card-category">{item.category}</span>
                   </div>
-                  <div style={styles.cardVisual}>
+                  <div className="card-visual-area">
                     <InstrumentCanvas rendererKey={item.rendererKey} data={item.data} />
                   </div>
-                </div>
+                  <div className="card-readout">
+                    <div className="readout-item"><span className="readout-label">SIG</span><span id={`val-${item.key}-1`}>0</span></div>
+                    <div className="readout-item"><span className="readout-label">DYN</span><span id={`val-${item.key}-2`}>—</span></div>
+                  </div>
+                </section>
               ))
             ) : (
-              stackItems.map((item) => (
-                <div key={item.id} style={styles.instrumentCard}>
-                  <div style={styles.cardHeader}>
-                    <span style={styles.cardTitle}>{item.name}</span>
-                    <span style={styles.cardCategory}>{item.category}</span>
-                  </div>
-                  <div style={styles.cardVisual}>
-                    <svg width="100%" height="100%" viewBox="0 0 100 100" preserveAspectRatio="none">
-                      <path
-                        d={generateWavePath(2, 0.5)}
-                        fill="none"
-                        stroke="rgba(0, 251, 255, 0.3)"
-                        strokeWidth="1"
-                      />
-                    </svg>
-                  </div>
+              <section className="stack-card">
+                <div className="card-header">
+                  <h3 className="card-title">Awaiting Kinetic Data</h3>
+                  <span className="card-category">System</span>
                 </div>
-              ))
+                <div className="card-visual-area" style={{ opacity: 0.1 }}></div>
+              </section>
             )}
           </div>
-        </section>
+
+          <section className="instrument-chooser-area">
+            <button className="ghost-btn" style={{ margin: '20px auto', display: 'block', padding: '10px 20px' }}>
+              + Add Tool
+            </button>
+          </section>
+        </main>
 
         {/* RIGHT CURTAIN */}
-        <aside style={{ ...styles.curtain, ...styles.rightCurtain, width: rightCollapsed ? '0px' : '120px' }}>
-          <div style={styles.curtainHeader}>
-            <button style={styles.iconBtn} onClick={toggleRight}>×</button>
-            <span>DATA</span>
-          </div>
-          <div style={styles.dataGrid}>
-            <div style={styles.dataLabel}>MID</div>
-            <div style={styles.dataValue}>{kineticUI?.rightPanel?.raw?.mid?.toFixed(2) || '0.00'}</div>
-            <div style={styles.dataLabel}>PREC</div>
-            <div style={styles.dataValue}>{(kineticUI?.rightPanel?.precision * 100).toFixed(1)}%</div>
+        <aside className={`curtain right-curtain ${rightCollapsed ? 'is-collapsed' : ''}`}>
+          <button className="curtain-handle" onClick={toggleRight}>
+            {rightCollapsed ? '‹' : '›'}
+          </button>
+          <div className="curtain-content">
+            <div className="panel-header">
+              <span className="panel-title">Info</span>
+            </div>
           </div>
         </aside>
       </div>
 
-      {/* BOTTOM MENU AREA */}
-      {bottomMenuVisible ? (
-        <nav style={styles.bottomMenuWrap}>
-          <button style={styles.menuItem} onClick={() => setActiveList('Main')}>Field</button>
-          <button style={styles.menuItem} onClick={() => setActiveList('Tension')}>Tension</button>
-          <button style={styles.menuItem} onClick={() => setActiveList('Absorption')}>Flow</button>
-          <button style={styles.menuItem} onClick={() => setActiveList('Entropy')}>Entropy</button>
-          <button style={styles.menuItem} onClick={() => setActiveList('System')}>System</button>
-          <button style={styles.menuItem} onClick={() => setModulePickerOpen(true)}>Modules</button>
-          <button style={{ ...styles.menuItem, background: '#111' }} onClick={toggleMenu}>▼</button>
-        </nav>
-      ) : (
-        <button style={styles.reopenMenu} onClick={toggleMenu}>▲ MENU</button>
+      {/* BOTTOM MENU */}
+      <footer className={`bottom-menu-wrap ${!bottomMenuVisible ? 'is-hidden' : ''}`}>
+        <button className="menu-item">Volume</button>
+        <button className="menu-item">Chart</button>
+        <button className="menu-item">Instr</button>
+        <button className="menu-item">Book</button>
+        <button className="menu-item">Sig</button>
+        <button className="menu-item">News</button>
+        <button className="menu-item" style={{ color: '#666' }} onClick={() => toggleMenu(false)}>⌄</button>
+      </footer>
+
+      {!bottomMenuVisible && (
+        <button className="reopen-menu" onClick={() => toggleMenu(true)}>OPEN MENU</button>
       )}
-    </main>
+
+      {/* STYLES PRESERVED FROM index.html */}
+      <style jsx global>{`
+        html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000000; color: #e8e8e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+        .app-shell { position: fixed; inset: 0; display: grid; grid-template-rows: 1fr auto; padding: env(safe-area-inset-top) 10px env(safe-area-inset-bottom) 10px; }
+        .workspace-shell { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; min-height: 0; overflow: hidden; }
+
+        .curtain { height: 100%; overflow: hidden; transition: width 0.2s ease; display: flex; }
+        .left-curtain { width: 130px; }
+        .right-curtain { width: 120px; }
+        .curtain.is-collapsed { width: 20px !important; }
+
+        .curtain-content { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 8px; background: #050505; }
+        .curtain.is-collapsed .curtain-content { display: none; }
+        .curtain-handle { width: 20px; background: #0a0a0a; color: #e8e8e8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: none; }
+
+        .center-workspace { display: flex; flex-direction: column; overflow-y: auto; gap: 6px; scrollbar-width: none; }
+        .center-workspace::-webkit-scrollbar { display: none; }
+        
+        .chart-box { position: sticky; top: 0; z-index: 20; background: #000; width: 100%; aspect-ratio: 1.1 / 1; border: none; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+
+        .middle-stack { display: flex; flex-direction: column; gap: 6px; }
+        
+        .stack-card { border: none; background: #000; display: flex; flex-direction: column; border-bottom: 1px solid #111; }
+        .card-header { padding: 8px 6px; display: flex; justify-content: space-between; align-items: center; background: #000; }
+        .card-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 0; color: #ccc; }
+        .card-category { font-size: 9px; color: #444; text-transform: uppercase; }
+        
+        .card-visual-area { background: #050505; height: 100px; width: 100%; position: relative; overflow: hidden; }
+        .card-readout { display: flex; gap: 12px; padding: 4px 6px; background: #000; border-top: 1px solid #0a0a0a; }
+        .readout-item { font-size: 10px; font-family: monospace; color: #00ffff; }
+        .readout-label { color: #444; margin-right: 4px; }
+
+        .bottom-menu-wrap { border: none; height: 54px; display: grid; grid-template-columns: repeat(6, 1fr) 40px; background: #000; }
+        .menu-item { background: transparent; border: none; color: #fff; font-size: 8px; text-transform: uppercase; cursor: pointer; }
+        .reopen-menu { position: fixed; bottom: 10px; right: 10px; background: #000; border: none; color: #fff; padding: 6px 10px; font-size: 10px; z-index: 100; border-radius: 2px; }
+        .is-hidden { display: none !important; }
+
+        .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .panel-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0; }
+        .ticker-search { width: 100%; background: #111; border: none; color: #fff; padding: 6px; margin-bottom: 10px; font-size: 11px; outline: none; }
+        .ghost-btn { background: #0a0a0a; border: none; color: #fff; padding: 4px 8px; font-size: 10px; cursor: pointer; }
+        .icon-btn { background: transparent; border: none; color: #fff; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+      `}</style>
+    </div>
   );
 }
-
-const styles: Record<string, React.CSSProperties> = {
-  appShell: { position: 'fixed', inset: 0, display: 'grid', gridTemplateRows: '1fr auto', padding: '0 10px', background: '#000', color: '#e8e8e8', fontFamily: 'monospace', overflow: 'hidden' },
-  workspaceShell: { display: 'grid', gridTemplateColumns: 'auto 1fr auto', gap: '10px', minHeight: 0, overflow: 'hidden' },
-  curtain: { height: '100%', overflow: 'hidden', transition: 'width 0.2s ease', display: 'flex', flexDirection: 'column', borderLeft: '1px solid #111', borderRight: '1px solid #111', background: '#050505' },
-  curtainHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px', fontSize: '9px', fontWeight: 'bold', letterSpacing: '1px', borderBottom: '1px solid #111', color: '#666' },
-  iconBtn: { background: 'none', border: 'none', color: '#666', cursor: 'pointer', fontSize: '14px' },
-  watchlistScroll: { flex: 1, overflowY: 'auto', padding: '4px' },
-  watchItem: { padding: '8px', fontSize: '11px', cursor: 'pointer', borderBottom: '1px solid #0a0a0a' },
-  mainContainer: { display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden' },
-  chartArea: { height: '35vh', borderBottom: '1px solid #111', display: 'flex', flexDirection: 'column' },
-  chartHeader: { padding: '6px', fontSize: '10px', fontWeight: 'bold' },
-  chartPlaceholder: { flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#030303' },
-  scrollStack: { flex: 1, overflowY: 'auto', padding: '10px 0', display: 'flex', flexDirection: 'column', gap: '10px' },
-  instrumentCard: { background: '#080808', border: '1px solid #111', borderRadius: '2px', display: 'flex', flexDirection: 'column', minHeight: '140px' },
-  cardHeader: { padding: '6px 10px', display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', borderBottom: '1px solid #0f0f0f' },
-  cardTitle: { fontSize: '10px', fontWeight: 'bold', color: '#aaa', textTransform: 'uppercase' },
-  cardCategory: { fontSize: '8px', color: '#444' },
-  cardVisual: { flex: 1, position: 'relative', overflow: 'hidden' },
-  dataGrid: { padding: '10px', display: 'grid', gridTemplateColumns: '1fr', gap: '4px' },
-  dataLabel: { fontSize: '8px', color: '#444' },
-  dataValue: { fontSize: '10px', color: '#ccc', marginBottom: '8px' },
-  bottomMenuWrap: { height: '48px', display: 'grid', gridTemplateColumns: 'repeat(6, 1fr) 40px', background: '#000', borderTop: '1px solid #111' },
-  menuItem: { background: 'transparent', border: 'none', color: '#666', fontSize: '9px', textTransform: 'uppercase', cursor: 'pointer' },
-  reopenMenu: { position: 'fixed', bottom: '10px', right: '10px', background: '#111', border: 'none', color: '#fff', padding: '6px 10px', fontSize: '10px', cursor: 'pointer' }
-};
-
