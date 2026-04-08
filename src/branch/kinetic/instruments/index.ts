@@ -1,28 +1,28 @@
-// instruments/index.ts
+// src/branch/kinetic/instruments/index.ts
 // Central instrument registry / wiring layer
 
 import { PreparedSignal } from '../../../core/engine/signal';
 
-import { buildAbsorptionField } from './absorptionfield';
-import { buildTransmissionField } from './transmission';
-import { buildDecayField, DecayEvent } from './decayoscillator';
-import { buildCoilDecayOscillator } from './decaydivergence';
-import { buildStressField } from './stressfield';
-import { buildAbsorptionTension } from './tension';
-import { buildTensionLine } from './tensionpoints';
-import { buildCompressionSpark } from './compressionspark';
-import { buildKineticAnchor } from './kineticanchor';
-import { buildDisplacementField } from './displacementfield';
-import { buildRealityGapField } from './realitygap';
+import { buildAbsorptionField } from './absorption-field';
+import { buildTransmissionField } from './transmission-field';
+import { buildDecayOscillator, DecayEvent } from './decay-oscillator';
+import { buildDecayDivergence } from './decay-divergence';
+import { buildStressField } from './stress-field';
+import { buildAbsorptionTension } from './absorption-tension';
+import { buildTensionPoints } from './tension-points';
+import { buildCompressionSpark } from './compression-spark';
+import { buildKineticAnchor } from './kinetic-anchor';
+import { buildDisplacementField } from './displacement-field';
+import { buildRealityGapField } from './reality-gap';
 
 export interface WiredInstrumentOutput {
   absorptionField?: ReturnType<typeof buildAbsorptionField>;
   transmissionField?: ReturnType<typeof buildTransmissionField>;
-  decayField?: ReturnType<typeof buildDecayField>;
-  coilDecayField?: ReturnType<typeof buildCoilDecayOscillator>;
+  decayField?: ReturnType<typeof buildDecayOscillator>;
+  coilDecayField?: ReturnType<typeof buildDecayDivergence>;
   stressField?: ReturnType<typeof buildStressField>;
   absorptionTension?: ReturnType<typeof buildAbsorptionTension>;
-  tensionLine?: ReturnType<typeof buildTensionLine>;
+  tensionLine?: ReturnType<typeof buildTensionPoints>;
   compressionSpark?: ReturnType<typeof buildCompressionSpark>;
   kineticAnchor?: ReturnType<typeof buildKineticAnchor>;
   displacementField?: ReturnType<typeof buildDisplacementField>;
@@ -45,7 +45,7 @@ export function wireInstruments(
     switch (signal.dimensionId) {
       case 'absorption':
         output.absorptionField = buildAbsorptionField(signal);
-        output.decayField = buildDecayField(signal, previousDecayEvents);
+        output.decayField = buildDecayOscillator(signal, previousDecayEvents);
         break;
 
       case 'mismatch':
@@ -59,17 +59,14 @@ export function wireInstruments(
 
       case 'tension':
         output.absorptionTension = buildAbsorptionTension(signal);
-        output.tensionLine = buildTensionLine(signal);
-        output.coilDecayField = buildCoilDecayOscillator(signal);
+        output.tensionLine = buildTensionPoints(signal);
+        output.coilDecayField = buildDecayDivergence(signal);
         output.compressionSpark = buildCompressionSpark(signal);
         output.kineticAnchor = buildKineticAnchor(signal);
         break;
 
       case 'liarIndex':
         output.displacementField = buildDisplacementField(signal);
-        break;
-
-      case 'entropy':
         break;
 
       default:
