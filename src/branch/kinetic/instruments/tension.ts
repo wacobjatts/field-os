@@ -1,4 +1,4 @@
-// instruments/tension.ts
+// src/branch/kinetic/instruments/absorption-tension.ts
 // Absorption Tension
 
 import { PreparedSignal } from '../../../core/engine/signal';
