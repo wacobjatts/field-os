@@ -17,7 +17,6 @@ export function buildCoilDecayOscillator(
 ): CoilDecayOutput {
   const value = signal.value;
   const precision = signal.precision;
-
   const norm = Math.max(0, Math.min(1, Math.abs(value) / 100));
 
   const decay = (1 - norm) * precision;
@@ -25,13 +24,11 @@ export function buildCoilDecayOscillator(
   const divergence = Math.max(0, decay - health * 0.5);
 
   return {
-    field: [
-      {
-        decay: decay * 100,
-        health: health * 100,
-        divergence: divergence * 100,
-        precision
-      }
-    ]
+    field: [{
+      decay: decay * 100,
+      health: health * 100,
+      divergence: divergence * 100,
+      precision
+    }]
   };
 }
