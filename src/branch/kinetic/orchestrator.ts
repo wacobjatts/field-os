@@ -1,11 +1,8 @@
 /**
  * src/branch/kinetic/orchestrator.ts
- *
- * Kinetic branch orchestration for one market-data slice.
- * Computes branch-side observations, derives their precision,
- * normalizes where needed, and translates them into PreparedSignal[].
  */
 
+import { createClient } from '@supabase/supabase-js'; // Added Supabase Client
 import { PreparedSignal, SourceProfile } from '../../core/engine/signal';
 
 import { KINETIC_DIMENSIONS } from './dimensions';
@@ -26,6 +23,23 @@ import { calculateEntropyPrecision } from './precision/entropyprecision';
 
 import { toPreparedSignal } from './translator';
 import { KineticSnapshot } from './types';
+
+// 1. Initialize Supabase Connection
+const supabase = createClient(
+  'https://gagivrinhxdlygvjxthg.supabase.co',
+  'sb_publishable_HKdBK_fko9nwrpTXywBrXA_MdsuAUZY'
+);
+
+// 2. Database Recording Function
+async function recordSignalToDatabase(signal: PreparedSignal) {
+  try {
+    await supabase.from('Projects').insert([
+      { name: `FieldOS Signal: ${signal.dimensionId} | Value: ${signal.adjustedValue}` }
+    ]);
+  } catch (err) {
+    console.error('Supabase Logging Failed:', err);
+  }
+}
 
 export interface KineticOrchestratorInput {
   snapshot: KineticSnapshot;
@@ -55,11 +69,6 @@ export interface KineticOrchestratorOutput {
   };
 }
 
-/**
- * processSlice
- * The main entry point for the Kinetic Branch.
- * Transforms a raw data slice into a multi-dimensional physical vector for FieldOS.
- */
 export function processSlice(
   input: KineticOrchestratorInput
 ): KineticOrchestratorOutput {
@@ -93,74 +102,22 @@ export function processSlice(
   const entropyPrecision = calculateEntropyPrecision(snapshot);
 
   const signals: PreparedSignal[] = [
-    toPreparedSignal(
-      KINETIC_DIMENSIONS.absorption.id,
-      absorption,
-      absorptionPrecision,
-      snapshot.timestamp,
-      source,
-      KINETIC_DIMENSIONS.absorption
-    ),
-    toPreparedSignal(
-      KINETIC_DIMENSIONS.mismatch.id,
-      mismatch,
-      mismatchPrecision,
-      snapshot.timestamp,
-      source,
-      KINETIC_DIMENSIONS.mismatch
-    ),
-    toPreparedSignal(
-      KINETIC_DIMENSIONS.realityGap.id,
-      normalizedRealityGap,
-      realityGapPrecision,
-      snapshot.timestamp,
-      source,
-      KINETIC_DIMENSIONS.realityGap
-    ),
-    toPreparedSignal(
-      KINETIC_DIMENSIONS.tension.id,
-      tension,
-      tensionPrecision,
-      snapshot.timestamp,
-      source,
-      KINETIC_DIMENSIONS.tension
-    ),
-    toPreparedSignal(
-      KINETIC_DIMENSIONS.liarIndex.id,
-      liarIndex,
-      liarIndexPrecision,
-      snapshot.timestamp,
-      source,
-      KINETIC_DIMENSIONS.liarIndex
-    ),
-    toPreparedSignal(
-      KINETIC_DIMENSIONS.entropy.id,
-      entropy,
-      entropyPrecision,
-      snapshot.timestamp,
-      source,
-      KINETIC_DIMENSIONS.entropy
-    )
+    toPreparedSignal(KINETIC_DIMENSIONS.absorption.id, absorption, absorptionPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.absorption),
+    toPreparedSignal(KINETIC_DIMENSIONS.mismatch.id, mismatch, mismatchPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.mismatch),
+    toPreparedSignal(KINETIC_DIMENSIONS.realityGap.id, normalizedRealityGap, realityGapPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.realityGap),
+    toPreparedSignal(KINETIC_DIMENSIONS.tension.id, tension, tensionPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.tension),
+    toPreparedSignal(KINETIC_DIMENSIONS.liarIndex.id, liarIndex, liarIndexPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.liarIndex),
+    toPreparedSignal(KINETIC_DIMENSIONS.entropy.id, entropy, entropyPrecision, snapshot.timestamp, source, KINETIC_DIMENSIONS.entropy)
   ];
+
+  // 3. Trigger the Database Record for the primary signal
+  if (signals.length > 0) {
+    recordSignalToDatabase(signals[0]);
+  }
 
   return {
     signals,
-    raw: {
-      absorption,
-      mismatch,
-      realityGap,
-      normalizedRealityGap,
-      tension,
-      liarIndex,
-      entropy
-    },
-    precision: {
-      absorption: absorptionPrecision,
-      mismatch: mismatchPrecision,
-      realityGap: realityGapPrecision,
-      tension: tensionPrecision,
-      liarIndex: liarIndexPrecision,
-      entropy: entropyPrecision
-    }
+    raw: { absorption, mismatch, realityGap, normalizedRealityGap, tension, liarIndex, entropy },
+    precision: { absorption: absorptionPrecision, mismatch: mismatchPrecision, realityGap: realityGapPrecision, tension: tensionPrecision, liarIndex: liarIndexPrecision, entropy: entropyPrecision }
   };
 }
