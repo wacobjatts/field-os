@@ -1,4 +1,4 @@
-// src/branch/kinetic/instruments/index.ts
+// instruments/index.ts
 // Central instrument registry / wiring layer
 
 import { PreparedSignal } from '../../../core/engine/signal';
@@ -9,11 +9,11 @@ import { buildDecayOscillator, DecayEvent } from './decay-oscillator';
 import { buildDecayDivergence } from './decay-divergence';
 import { buildStressField } from './stress-field';
 import { buildAbsorptionTension } from './absorption-tension';
-import { buildTensionPoints } from './tension-points';
+import { buildTensionLine } from './tension-line';
 import { buildCompressionSpark } from './compression-spark';
 import { buildKineticAnchor } from './kinetic-anchor';
 import { buildDisplacementField } from './displacement-field';
-import { buildRealityGapField } from './reality-gap';
+import { buildRealityGap } from './reality-gap';
 
 export interface WiredInstrumentOutput {
   absorptionField?: ReturnType<typeof buildAbsorptionField>;
@@ -22,11 +22,11 @@ export interface WiredInstrumentOutput {
   coilDecayField?: ReturnType<typeof buildDecayDivergence>;
   stressField?: ReturnType<typeof buildStressField>;
   absorptionTension?: ReturnType<typeof buildAbsorptionTension>;
-  tensionLine?: ReturnType<typeof buildTensionPoints>;
+  tensionLine?: ReturnType<typeof buildTensionLine>;
   compressionSpark?: ReturnType<typeof buildCompressionSpark>;
   kineticAnchor?: ReturnType<typeof buildKineticAnchor>;
   displacementField?: ReturnType<typeof buildDisplacementField>;
-  realityGapField?: ReturnType<typeof buildRealityGapField>;
+  realityGapField?: ReturnType<typeof buildRealityGap>;
 }
 
 export interface WireInstrumentsInput {
@@ -53,13 +53,13 @@ export function wireInstruments(
         break;
 
       case 'realityGap':
-        output.realityGapField = buildRealityGapField(signal);
+        output.realityGapField = buildRealityGap(signal);
         output.displacementField = buildDisplacementField(signal);
         break;
 
       case 'tension':
         output.absorptionTension = buildAbsorptionTension(signal);
-        output.tensionLine = buildTensionPoints(signal);
+        output.tensionLine = buildTensionLine(signal);
         output.coilDecayField = buildDecayDivergence(signal);
         output.compressionSpark = buildCompressionSpark(signal);
         output.kineticAnchor = buildKineticAnchor(signal);
@@ -67,6 +67,9 @@ export function wireInstruments(
 
       case 'liarIndex':
         output.displacementField = buildDisplacementField(signal);
+        break;
+
+      case 'entropy':
         break;
 
       default:
