@@ -1,16 +1,18 @@
-// This script runs in your browser and connects to your server IP
-const socket = new WebSocket('ws://163.192.32.117:3000');
+// field-os/script.js
+const SERVER_IP = '163.192.32.117';
+const socket = new WebSocket(`ws://${SERVER_IP}:3000`);
 
 socket.onopen = () => {
-    console.log('Connected to FieldOS Engine');
+    console.log('✅ CONNECTED TO ENGINE');
+    document.body.innerHTML = '<h1 style="color:cyan; font-family:monospace;">SYSTEM ONLINE: RECEIVING KINETICS</h1>';
 };
 
 socket.onmessage = (event) => {
     const data = JSON.parse(event.data);
-    console.log('Live Data:', data);
-    // Add your UI update logic here
+    console.log('📊 DATA:', data);
+    // This is where your TRON indicators will plug in
 };
 
-socket.onerror = (error) => {
-    console.error('Socket Error: Check if the server is running and port 3000 is open.');
+socket.onerror = (err) => {
+    console.error('❌ CONNECTION REFUSED. Check if PM2 is running and Port 3000 is open.');
 };
