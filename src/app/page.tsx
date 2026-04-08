@@ -16,13 +16,6 @@ function generateWavePath(freq: number, amp: number) {
   return path;
 }
 
-declare global {
-  interface Window {
-    computeKinetics: any;
-    buildKineticUIModel: any;
-  }
-}
-
 export default function KineticPage() {
   // --- STATE ---
   const [leftCollapsed, setLeftCollapsed] = useState(false);
