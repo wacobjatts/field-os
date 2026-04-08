@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>FieldOS / Kinetic</title>
+  <title>FieldOS / Kinetic - Coil Decay Connection</title>
   <style>
-    /* GLOBAL STYLES */
+    /* GLOBAL STYLES - PRESERVED FROM SHELL */
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000000; color: #e8e8e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
     * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -22,20 +22,6 @@
     .curtain.is-collapsed .curtain-content { display: none; }
     .curtain-handle { width: 20px; background: #0a0a0a; color: #e8e8e8; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; border: none; }
 
-    /* TICKER / WATCHLIST */
-    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-    .panel-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0; }
-    .list-selector { display: flex; gap: 4px; overflow-x: auto; margin-bottom: 10px; scrollbar-width: none; }
-    .list-tab { background: transparent; border: none; color: #666; font-size: 9px; padding: 3px 6px; cursor: pointer; white-space: nowrap; }
-    .list-tab.is-active { color: #00ffff; }
-
-    .ticker-search { width: 100%; background: #111; border: none; color: #fff; padding: 6px; margin-bottom: 10px; font-size: 11px; outline: none; }
-    .ticker-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 4px; }
-    .ticker-row { display: grid; grid-template-columns: 1fr auto; padding: 6px; cursor: pointer; font-size: 10px; background: #0a0a0a; }
-    .ticker-row.is-active { background: #001515; color: #00ffff; }
-    .t-price { color: #00ff00; text-align: right; }
-    .t-delta { font-size: 8px; color: #666; display: block; }
-
     /* CENTER WORKSPACE */
     .center-workspace { display: flex; flex-direction: column; overflow-y: auto; gap: 6px; scrollbar-width: none; }
     .center-workspace::-webkit-scrollbar { display: none; }
@@ -43,62 +29,29 @@
     /* CHART BOX */
     .chart-box { position: sticky; top: 0; z-index: 20; background: #000; width: 100%; aspect-ratio: 1.1 / 1; border: none; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-    /* REORDERABLE STACK */
+    /* MIDDLE STACK */
     .middle-stack { display: flex; flex-direction: column; gap: 6px; }
-    .stack-card { border: none; background: #000; display: flex; flex-direction: column; }
     
-    /* INSTRUMENT VISUAL */
-    .card-visual { min-height: 90px; background: #050505; display: flex; align-items: center; justify-content: center; color: #00ffff; font-weight: bold; font-size: 14px; text-align: center; padding: 10px; border: none; }
-    .volume-chart { width: 100%; height: 60px; background: #050505; }
+    /* INSTRUMENT CARD STYLING */
+    .stack-card { border: none; background: #000; display: flex; flex-direction: column; border-bottom: 1px solid #111; }
+    .card-header { padding: 8px 6px; display: flex; justify-content: space-between; align-items: center; background: #000; }
+    .card-title { font-size: 11px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin: 0; color: #ccc; }
+    .card-category { font-size: 9px; color: #444; text-transform: uppercase; }
     
-    /* CARD HEADER */
-    .card-header { padding: 6px; display: flex; justify-content: space-between; align-items: center; background: #000; }
-    .card-info { flex: 1; }
-    .card-title { font-size: 12px; font-weight: bold; margin: 0; color: #ccc; }
-    .card-controls { display: flex; gap: 4px; align-items: center; }
+    .card-visual-area { background: #050505; height: 100px; width: 100%; position: relative; overflow: hidden; }
+    .card-readout { display: flex; gap: 12px; padding: 4px 6px; background: #000; border-top: 1px solid #0a0a0a; }
+    .readout-item { font-size: 10px; font-family: monospace; color: #00ffff; }
+    .readout-label { color: #444; margin-right: 4px; }
 
-    /* VOLUME SPECIFIC OVERRIDES */
-    .stack-card.is-volume .card-header { padding: 3px 6px; }
-    .stack-card.is-volume .card-title { font-size: 11px; color: #00ffff; text-transform: uppercase; letter-spacing: 1px; }
-    .stack-card.is-volume .icon-btn { width: 18px; height: 18px; font-size: 10px; }
-    
-    /* COLLAPSED VOLUME */
-    .stack-card.is-volume.is-collapsed { height: 20px; overflow: hidden; opacity: 0.7; }
-    .stack-card.is-volume.is-collapsed .card-header { padding: 1px 6px; min-height: 20px; }
-    .stack-card.is-volume.is-collapsed .card-title { font-size: 9px; line-height: 18px; }
-    .stack-card.is-volume.is-collapsed .icon-btn { width: 16px; height: 16px; font-size: 9px; }
-
-    /* CHOOSER */
-    .chooser-panel { border: none; display: flex; flex-direction: column; background: #050505; }
-    .chooser-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 8px; background: #111; }
-    .chooser-section-label { font-size: 9px; color: #444; text-transform: uppercase; padding: 10px 10px 4px 10px; letter-spacing: 1px; font-weight: bold; }
-    
-    .quick-access-list { padding: 4px 10px 10px 10px; display: flex; flex-direction: column; gap: 4px; }
-    .quick-btn { background: #0a0a0a; border: none; color: #ccc; padding: 10px; text-align: left; cursor: pointer; font-size: 11px; }
-    .quick-btn:disabled { color: #333; cursor: default; }
-
-    .category-card { border: none; background: #000; }
-    .category-head { width: 100%; background: transparent; border: none; color: #fff; padding: 10px; text-align: left; display: flex; justify-content: space-between; cursor: pointer; font-size: 11px; }
-    .category-content { display: none; flex-direction: column; background: #050505; }
-    .category-card.is-expanded .category-content { display: flex; }
-    .sub-item { padding: 10px; background: transparent; border: none; color: #aaa; text-align: left; font-size: 10px; cursor: pointer; }
-
-    /* RIGHT MODULES */
-    .module-stack { display: grid; gap: 8px; height: 100%; }
-    .module-card { border: none; display: flex; flex-direction: column; min-height: 0; background: #0a0a0a; }
-    .module-head { padding: 4px 8px; border: none; display: flex; justify-content: space-between; align-items: center; background: #111; font-size: 9px; font-weight: bold; }
-    .empty-state { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 10px; color: #444; font-size: 10px; }
-    
-    .module-picker-overlay { border: none; padding: 8px; display: flex; flex-direction: column; gap: 4px; background: #111; margin-bottom: 10px; }
-    .picker-btn { background: #000; border: none; color: #ccc; font-size: 9px; padding: 6px; cursor: pointer; display: block; width: 100%; text-align: left; }
-
-    /* BOTTOM MENU */
+    /* BOTTOM MENU - PRESERVED */
     .bottom-menu-wrap { border: none; height: 54px; display: grid; grid-template-columns: repeat(6, 1fr) 40px; background: #000; }
     .menu-item { background: transparent; border: none; color: #fff; font-size: 8px; text-transform: uppercase; cursor: pointer; }
     .reopen-menu { position: fixed; bottom: 10px; right: 10px; background: #000; border: none; color: #fff; padding: 6px 10px; font-size: 10px; z-index: 100; display: none; border-radius: 2px; }
-
-    /* UTILS */
     .is-hidden { display: none !important; }
+
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .panel-title { font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; color: #666; margin: 0; }
+    .ticker-search { width: 100%; background: #111; border: none; color: #fff; padding: 6px; margin-bottom: 10px; font-size: 11px; outline: none; }
     .ghost-btn { background: #0a0a0a; border: none; color: #fff; padding: 4px 8px; font-size: 10px; cursor: pointer; }
     .icon-btn { background: transparent; border: none; color: #fff; width: 22px; height: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   </style>
@@ -112,448 +65,301 @@
     <aside class="curtain left-curtain" id="leftCurtain">
       <div class="curtain-content">
         <div class="panel-header"><span class="panel-title">Watchlists</span><button class="icon-btn">+</button></div>
-        <div class="list-selector" id="listSelector">
-          <button class="list-tab is-active" onclick="switchList(this, 'Main')">Main</button>
-          <button class="list-tab" onclick="switchList(this, 'Tech')">Tech</button>
-          <button class="list-tab" onclick="switchList(this, 'Alts')">Alts</button>
-        </div>
         <input type="text" class="ticker-search" placeholder="Find symbol...">
-        <div class="ticker-list" id="tickerList"></div>
       </div>
-      <button class="curtain-handle" id="leftHandle" onclick="toggleCurtain('leftCurtain')">‹</button>
+      <button class="curtain-handle" onclick="toggleCurtain('leftCurtain')">‹</button>
     </aside>
 
     <main class="center-workspace">
-      <section class="chart-box" id="chartBox">
+      <section class="chart-box">
         <div id="chartContainer" style="width:100%;height:100%;"></div>
       </section>
 
-      <div class="middle-stack" id="middleStack"></div>
+      <div class="middle-stack" id="middleStack">
+        <section class="stack-card" id="card-absorption-tension">
+          <div class="card-header"><h3 class="card-title">Absorption Tension</h3><span class="card-category">Tension</span></div>
+          <div class="card-visual-area"><canvas id="canvas-tension"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">TENSION</span><span id="val-tension">0</span></div>
+            <div class="readout-item"><span class="readout-label">LOADING</span><span id="val-loading">0</span></div>
+            <div class="readout-item"><span class="readout-label">SATURATION</span><span id="val-saturation">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-reality-gap">
+          <div class="card-header"><h3 class="card-title">Reality Gap</h3><span class="card-category">Reality</span></div>
+          <div class="card-visual-area"><canvas id="canvas-reality-gap"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">FIDELITY</span><span id="val-fidelity">0</span></div>
+            <div class="readout-item"><span class="readout-label">FRESHNESS</span><span id="val-freshness">0</span></div>
+            <div class="readout-item"><span class="readout-label">SYNC</span><span id="val-sync">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-kinetic-anchor">
+          <div class="card-header"><h3 class="card-title">Kinetic Anchor</h3><span class="card-category">Tension</span></div>
+          <div class="card-visual-area"><canvas id="canvas-kinetic-anchor"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">ANCHOR</span><span id="val-anchorStrength">0</span></div>
+            <div class="readout-item"><span class="readout-label">PERSIST</span><span id="val-persistence">0</span></div>
+            <div class="readout-item"><span class="readout-label">SIG</span><span id="val-significance">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-decay-oscillator">
+          <div class="card-header"><h3 class="card-title">Decay Oscillator</h3><span class="card-category">Decay</span></div>
+          <div class="card-visual-area"><canvas id="canvas-decay-oscillator"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">DECAY</span><span id="val-decay-decay">0</span></div>
+            <div class="readout-item"><span class="readout-label">INTENSITY</span><span id="val-decay-intensity">0</span></div>
+            <div class="readout-item"><span class="readout-label">PRECISION</span><span id="val-decay-precision">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-compression-spark">
+          <div class="card-header"><h3 class="card-title">Compression Spark</h3><span class="card-category">Tension</span></div>
+          <div class="card-visual-area"><canvas id="canvas-compression-spark"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">SPARK</span><span id="val-spark">0</span></div>
+            <div class="readout-item"><span class="readout-label">ACTIVE</span><span id="val-activation">0</span></div>
+            <div class="readout-item"><span class="readout-label">IMPULSE</span><span id="val-impulse">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-displacement-field">
+          <div class="card-header"><h3 class="card-title">Displacement Field</h3><span class="card-category">Displacement</span></div>
+          <div class="card-visual-area"><canvas id="canvas-displacement-field"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">DISPLACE</span><span id="val-displacement">0</span></div>
+            <div class="readout-item"><span class="readout-label">ACTIVITY</span><span id="val-activity">0</span></div>
+            <div class="readout-item"><span class="readout-label">REGIME</span><span id="val-regime">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-stress-field">
+          <div class="card-header"><h3 class="card-title">Stress Field</h3><span class="card-category">Tension</span></div>
+          <div class="card-visual-area"><canvas id="canvas-stress-field"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">STRESS</span><span id="val-stress">0</span></div>
+            <div class="readout-item"><span class="readout-label">MISMATCH</span><span id="val-mismatch">0</span></div>
+            <div class="readout-item"><span class="readout-label">PRESSURE</span><span id="val-pressure">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-transmission-field">
+          <div class="card-header"><h3 class="card-title">Transmission Field</h3><span class="card-category">Absorption</span></div>
+          <div class="card-visual-area"><canvas id="canvas-transmission-field"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">TRANSMISSION</span><span id="val-transmission">0</span></div>
+            <div class="readout-item"><span class="readout-label">COHERENCE</span><span id="val-coherence">0</span></div>
+            <div class="readout-item"><span class="readout-label">DRIFT</span><span id="val-drift">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-absorption-field">
+          <div class="card-header"><h3 class="card-title">Absorption–Compression</h3><span class="card-category">Absorption</span></div>
+          <div class="card-visual-area"><canvas id="canvas-absorption-field"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">COMPRESSION</span><span id="val-compression">0</span></div>
+            <div class="readout-item"><span class="readout-label">ELASTICITY</span><span id="val-elasticity">0</span></div>
+            <div class="readout-item"><span class="readout-label">SPONGINESS</span><span id="val-sponginess">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-tension-line">
+          <div class="card-header"><h3 class="card-title">Tension Line</h3><span class="card-category">Tension</span></div>
+          <div class="card-visual-area"><canvas id="canvas-tension-line"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">LINE</span><span id="val-line">0</span></div>
+            <div class="readout-item"><span class="readout-label">STABILITY</span><span id="val-stability">0</span></div>
+            <div class="readout-item"><span class="readout-label">PULL</span><span id="val-pull">0</span></div>
+          </div>
+        </section>
+
+        <section class="stack-card" id="card-coil-decay">
+          <div class="card-header">
+            <h3 class="card-title">Coil Decay</h3>
+            <span class="card-category">Tension</span>
+          </div>
+          <div class="card-visual-area"><canvas id="canvas-coil-decay"></canvas></div>
+          <div class="card-readout">
+            <div class="readout-item"><span class="readout-label">DECAY</span><span id="val-coil-decay">0</span></div>
+            <div class="readout-item"><span class="readout-label">HEALTH</span><span id="val-coil-health">0</span></div>
+            <div class="readout-item"><span class="readout-label">DIVERGENCE</span><span id="val-coil-divergence">0</span></div>
+          </div>
+        </section>
+      </div>
 
       <section class="instrument-chooser-area">
-        <button class="ghost-btn" id="addInstrBtn" onclick="openChooser()" style="margin: 0 auto; display: block; padding: 10px 20px;">+ Add Tool</button>
-
-        <div class="chooser-panel is-hidden" id="chooserPanel">
-          <div class="chooser-top-bar">
-            <span class="panel-title" style="color:#fff">Tools</span>
-            <button class="ghost-btn" onclick="closeChooser()">Hide</button>
-          </div>
-          
-          <div class="chooser-section-label">Quick Access</div>
-          <div class="quick-access-list">
-            <button class="quick-btn" id="volQuickBtn" onclick="addModuleToStack('volume', 'Relative Cloud', 'Deep structural volume analysis.')">Volume (Relative Cloud)</button>
-            <button class="quick-btn" onclick="addModuleToStack('instrument', 'Kinetic Manifold', 'Combines force and truth into a single live view.')">Kinetic Manifold</button>
-            <button class="quick-btn" onclick="addModuleToStack('instrument', 'Compression / Expansion', 'Tracks the breathing cycle of market compression.')">Compression / Expansion</button>
-          </div>
-
-          <div class="chooser-section-label">Categories</div>
-          <div id="categoryContainer"></div>
-        </div>
+        <button class="ghost-btn" id="addInstrBtn" style="margin: 20px auto; display: block; padding: 10px 20px;">+ Add Tool</button>
       </section>
-      <div style="min-height: 20px;"></div>
     </main>
 
     <aside class="curtain right-curtain" id="rightCurtain">
-      <button class="curtain-handle" id="rightHandle" onclick="toggleCurtain('rightCurtain')">›</button>
+      <button class="curtain-handle" onclick="toggleCurtain('rightCurtain')">›</button>
       <div class="curtain-content">
-        <div class="panel-header">
-          <span class="panel-title">Info</span>
-          <button class="icon-btn" onclick="toggleModulePicker()">+</button>
-        </div>
-
-        <div class="module-picker-overlay is-hidden" id="modulePicker">
-          <button class="picker-btn" onclick="addRightModule('Order Book')">Order Book</button>
-          <button class="picker-btn" onclick="addRightModule('Notes')">Notes</button>
-          <button class="picker-btn" onclick="addRightModule('Signals')">Signals</button>
-        </div>
-
-        <div class="empty-state" id="rightEmpty">
-          <span>Workspace Empty</span>
-          <button class="ghost-btn" onclick="toggleModulePicker()">+ Add</button>
-        </div>
-        <div class="module-stack is-hidden" id="rightModuleStack"></div>
+        <div class="panel-header"><span class="panel-title">Info</span></div>
       </div>
     </aside>
   </div>
 
   <footer class="bottom-menu-wrap" id="bottomMenu">
-    <button class="menu-item" onclick="toggleVolumeCollapseAll()">Volume</button>
+    <button class="menu-item">Volume</button>
     <button class="menu-item">Chart</button>
     <button class="menu-item">Instr</button>
     <button class="menu-item">Book</button>
     <button class="menu-item">Sig</button>
     <button class="menu-item">News</button>
-    <button class="menu-item" style="border:none; color:#666;" onclick="toggleBottomMenu(false)">⌄</button>
+    <button class="menu-item" style="color:#666;" onclick="toggleBottomMenu(false)">⌄</button>
   </footer>
 </div>
 
 <button class="reopen-menu" id="reopenMenu" onclick="toggleBottomMenu(true)">OPEN MENU</button>
 
 <script>
-  const watchlists = {
-    'Main': [['AAPL', '214.43', '+1.2%'], ['NVDA', '132.17', '-0.5%'], ['TSLA', '176.80', '+2.4%']],
-    'Tech': [['MSFT', '420.10', '+0.8%'], ['GOOGL', '180.20', '+0.3%']],
-    'Alts': [['BTC', '64,231', '-1.1%'], ['ETH', '3,450', '+0.9%']]
-  };
+  // --- RENDERER LOGIC: decay-divergence-painter.ts ---
+  function paintDecayDivergenceField(ctx, points) {
+    const width = ctx.canvas.width;
+    const height = ctx.canvas.height;
+    const centerY = height / 2;
+    if (points.length < 2) return;
+    const stepX = width / (points.length - 1);
+    const amplitude = height * 0.45;
 
-  const categories = [
-    { name: '1. Structural Field', items: [['Phase Boundaries', 'Architectural thresholds.'], ['Compression Zones', 'Market squeezing.']] },
-    { name: '2. Force Field', items: [['Momentum Vector', 'Directional force.'], ['Acceleration Gradient', 'Speed change.']] },
-    { name: '3. Resistance Field', items: [['Cost-to-Move Curve', 'Friction vs liquidity.'], ['Liquidity Density', 'Order book pockets.']] },
-    { name: '4. Inertia Field', items: [['Move Inertia', 'Difficulty of stopping.'], ['Mass Class', 'Move classification.']] },
-    { name: '5. Interpretation Field', items: [['Truth Field', 'Signal vs Noise.'], ['Confidence Metrics', 'System conviction.']] },
-    { name: '6. Decision Field', items: [['Alignment Score', 'System aggregate.'], ['Entry Readiness', 'Action state.']] }
-  ];
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
 
-  let stackItems = [
-    { id: 'instr-initial', type: 'instrument', name: 'Kinetic Manifold', desc: 'Combines force and truth into a single live view.' }
-  ];
-  
-  let rightModules = [];
-  let volumeCharts = new Map();
+    // 1. BASELINE
+    ctx.beginPath();
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(width, centerY);
+    ctx.stroke();
 
-  function init() {
-    renderTickers('Main');
-    renderStack();
-    const container = document.getElementById('categoryContainer');
-    categories.forEach(cat => {
-      const card = document.createElement('div');
-      card.className = 'category-card';
-      card.innerHTML = `
-        <button class="category-head" onclick="toggleCategory(this)"><span>${cat.name}</span><span>▾</span></button>
-        <div class="category-content">
-          ${cat.items.map(i => `<button class="sub-item" onclick="addModuleToStack('instrument', '${i[0]}','${i[1]}')">${i[0]}</button>`).join('')}
-        </div>
-      `;
-      container.appendChild(card);
+    // 2. STRUCTURAL ZONES (Decay vs Health)
+    for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const x1 = width - (i * stepX);
+        const x2 = width - ((i + 1) * stepX);
+
+        // Decay Zone (Warm)
+        const dY1 = centerY - (p1.decay / 100) * (height * 0.25);
+        const dY2 = centerY - (p2.decay / 100) * (height * 0.25);
+        ctx.beginPath();
+        ctx.moveTo(x1, centerY); ctx.lineTo(x2, centerY); ctx.lineTo(x2, dY2); ctx.lineTo(x1, dY1);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(255, 80, 0, ${0.08 * p1.precision})`;
+        ctx.fill();
+
+        // Health Zone (Cool)
+        const hY1 = centerY + (p1.health / 100) * (height * 0.25);
+        const hY2 = centerY + (p2.health / 100) * (height * 0.25);
+        ctx.beginPath();
+        ctx.moveTo(x1, centerY); ctx.lineTo(x2, centerY); ctx.lineTo(x2, hY2); ctx.lineTo(x1, hY1);
+        ctx.closePath();
+        ctx.fillStyle = `rgba(0, 200, 255, ${0.05 * p1.precision})`;
+        ctx.fill();
+    }
+
+    // 3. DIVERGENCE TRACE
+    for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i];
+        const p2 = points[i + 1];
+        const x1 = width - (i * stepX);
+        const x2 = width - ((i + 1) * stepX);
+        const y1 = centerY - (p1.divergence / 100) * amplitude;
+        const y2 = centerY - (p2.divergence / 100) * amplitude;
+        const avgPrec = (p1.precision + p2.precision) / 2;
+
+        ctx.beginPath();
+        ctx.lineWidth = 1 + avgPrec * 2.5;
+        const colorMix = Math.floor(p1.divergence * 2.5);
+        ctx.strokeStyle = `rgba(${100 + colorMix}, 220, 255, ${0.4 + avgPrec * 0.6})`;
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  // --- PREVIOUS RENDERERS ---
+  function paintTensionLine(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height, b=h*0.92; ctx.clearRect(0,0,w,h); ctx.strokeStyle='cyan'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=b-(p.line/100)*h*0.8; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
+  function paintAbsorptionField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#0ffa'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h/2+(p.elasticity/100)*h*0.4; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
+  function paintTransmissionField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#0ffa'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h/2+(p.transmission/100)*h*0.4; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
+  function paintStressField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='cyan'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h*0.8-(p.stress/100)*h*0.6; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
+  function paintDisplacementField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(0,180,255,0.4)'; pts.forEach((p,i)=>{ if(p.regime>50) ctx.fillRect(w-i*(w/pts.length)-2, h*0.85-(p.displacement/100)*h*0.7, 4, (p.displacement/100)*h*0.7); }); }
+  function paintCompressionSpark(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#0ffa'; pts.forEach((p,i)=>{ if(p.activation>50) { ctx.beginPath(); ctx.moveTo(w-i*(w/pts.length), h*0.85); ctx.lineTo(w-i*(w/pts.length), h*0.85-p.spark); ctx.stroke(); } }); }
+  function paintDecayOscillator(ctx, evs) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.fillStyle='#0fca'; evs.forEach(e=>{ ctx.beginPath(); ctx.arc(w-(e.age/10000)*w, h*0.85-(e.decay/100)*h*0.7, 2, 0, Math.PI*2); ctx.fill(); }); }
+  function paintKineticAnchor(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='cyan'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h/2-p.anchorStrength/2; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
+  function paintRealityGapField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.fillStyle='rgba(0,210,255,0.2)'; pts.forEach((p,i)=>{ ctx.fillRect(w-(i+1)*(w/pts.length), h/2-p.fidelity/2, w/pts.length, p.fidelity); }); }
+  function paintTensionField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#64b4ffcc'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h*0.92-p.tension; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
+
+  // --- MOCK ENGINE CONNECTION ---
+  function updateInstruments() {
+    const dpr = window.devicePixelRatio || 1;
+    const now = Date.now();
+
+    const configs = [
+      {id: 'canvas-tension', paint: paintTensionField, mock: () => ({tension: Math.sin(now/1000)*30+40})},
+      {id: 'canvas-reality-gap', paint: paintRealityGapField, mock: () => ({fidelity: Math.cos(now/800)*40+50})},
+      {id: 'canvas-kinetic-anchor', paint: paintKineticAnchor, mock: () => ({anchorStrength: Math.sin(now/1200)*50+50})},
+      {id: 'canvas-decay-oscillator', paint: paintDecayOscillator, isEvent: true},
+      {id: 'canvas-compression-spark', paint: paintCompressionSpark, mock: () => ({ spark: 40, activation: 100 })},
+      {id: 'canvas-displacement-field', paint: paintDisplacementField, mock: () => ({ displacement: 60, regime: 100 })},
+      {id: 'canvas-stress-field', paint: paintStressField, mock: () => ({ stress: 50 })},
+      {id: 'canvas-transmission-field', paint: paintTransmissionField, mock: () => ({ transmission: Math.sin(now/2000)*80 })},
+      {id: 'canvas-absorption-field', paint: paintAbsorptionField, mock: () => ({ elasticity: Math.sin(now/2500)*60 })},
+      {id: 'canvas-tension-line', paint: paintTensionLine, mock: (i) => ({ line: Math.sin(now/2000-i*0.1)*40+50 })},
+      {id: 'canvas-coil-decay', paint: paintDecayDivergenceField, mock: (i) => {
+          // final page.tsx integration will use real engine output (instruments/decaydivergence.ts)
+          const val = Math.sin(now/1800 - i*0.15);
+          return {
+            decay: (0.5 - val * 0.5) * 80 + 10,
+            health: (0.5 + val * 0.5) * 80 + 10,
+            divergence: Math.abs(val) * 70,
+            precision: 0.92
+          };
+      }}
+    ];
+
+    configs.forEach(cfg => {
+      const canvas = document.getElementById(cfg.id);
+      if (!canvas) return;
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * dpr; canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+      
+      if (cfg.isEvent) {
+        const evs = []; for(let i=0; i<15; i++) evs.push({decay: 70*Math.exp(-i/5), age: i*800, precision: 1});
+        cfg.paint(ctx, evs);
+      } else {
+        const pts = []; for(let i=0; i<40; i++) pts.push(cfg.mock(i));
+        cfg.paint(ctx, pts);
+        if (cfg.id === 'canvas-coil-decay') {
+          // Real field names from instruments/decaydivergence.ts
+          document.getElementById('val-coil-decay').innerText = Math.round(pts[0].decay);
+          document.getElementById('val-coil-health').innerText = Math.round(pts[0].health);
+          document.getElementById('val-coil-divergence').innerText = Math.round(pts[0].divergence);
+        }
+      }
     });
   }
 
-  /* CURTAINS */
-  function toggleCurtain(id) {
-    const curtain = document.getElementById(id);
-    const handle = curtain.querySelector('.curtain-handle');
-    const isCollapsed = curtain.classList.toggle('is-collapsed');
-    if (id === 'leftCurtain') handle.innerText = isCollapsed ? '›' : '‹';
-    else handle.innerText = isCollapsed ? '‹' : '›';
-  }
-  
-  function toggleBottomMenu(show) {
+  function toggleCurtain(id) { document.getElementById(id).classList.toggle('is-collapsed'); }
+  function toggleBottomMenu(show) { 
     document.getElementById('bottomMenu').classList.toggle('is-hidden', !show);
     document.getElementById('reopenMenu').style.display = show ? 'none' : 'block';
   }
 
-  /* WATCHLIST */
-  function switchList(btn, name) {
-    document.querySelectorAll('#listSelector .list-tab').forEach(t => t.classList.remove('is-active'));
-    btn.classList.add('is-active');
-    renderTickers(name);
-  }
-
-  function renderTickers(name) {
-    const list = document.getElementById('tickerList');
-    const activeTicker = "AAPL"; 
-    list.innerHTML = '';
-    watchlists[name].forEach(t => {
-      const row = document.createElement('div');
-      row.className = 'ticker-row';
-      if (t[0] === activeTicker) row.classList.add('is-active');
-      row.innerHTML = `<span>${t[0]}</span><span class="t-price">${t[1]}<span class="t-delta">${t[2]}</span></span>`;
-      row.onclick = () => {
-        document.querySelectorAll('.ticker-row').forEach(r => r.classList.remove('is-active'));
-        row.classList.add('is-active');
-      };
-      list.appendChild(row);
-    });
-  }
-
-  /* STACK LOGIC */
-  function addModuleToStack(type, name, desc) {
-    if (type === 'volume' && stackItems.some(i => i.type === 'volume')) return;
-    stackItems.push({ id: type === 'volume' ? 'vol-01' : Date.now(), type, name, desc, collapsed: false });
-    renderStack();
-    closeChooser();
-  }
-
-  function moveItem(index, dir) {
-    const newIndex = index + dir;
-    if (newIndex < 0 || newIndex >= stackItems.length) return;
-    const item = stackItems.splice(index, 1)[0];
-    stackItems.splice(newIndex, 0, item);
-    renderStack();
-  }
-
-  function removeItem(index) {
-    stackItems.splice(index, 1);
-    renderStack();
-  }
-
-  function toggleVolumeCollapse(index) {
-    stackItems[index].collapsed = !stackItems[index].collapsed;
-    renderStack();
-  }
-
-  function toggleVolumeCollapseAll() {
-    let changed = false;
-    stackItems.forEach((item) => {
-      if (item.type === 'volume') {
-        item.collapsed = !item.collapsed;
-        changed = true;
-      }
-    });
-    if (changed) renderStack();
-  }
-
-  function renderStack() {
-    volumeCharts.forEach(c => {
-      if (c.observer) c.observer.disconnect();
-      if (c.chart) c.chart.remove();
-    });
-    volumeCharts.clear();
-
-    const stack = document.getElementById('middleStack');
-    stack.innerHTML = '';
-    
-    const hasVol = stackItems.some(i => i.type === 'volume');
-    const volBtn = document.getElementById('volQuickBtn');
-    volBtn.disabled = hasVol;
-    volBtn.innerText = hasVol ? "Volume Strip (Active)" : "Volume (Relative Cloud)";
-
-    stackItems.forEach((item, i) => {
-      const card = document.createElement('section');
-      const isVol = item.type === 'volume';
-      const isCollapsed = isVol && item.collapsed;
-      
-      let cardClasses = isVol ? 'stack-card is-volume' : 'stack-card';
-      if (isCollapsed) cardClasses += ' is-collapsed';
-      card.className = cardClasses;
-      
-      const titleText = isVol ? `Volume: ${item.name}` : item.name;
-      const infoButton = isVol ? '' : '<button class="icon-btn" style="color:#666;">?</button>';
-      const toggleIcon = isCollapsed ? '▸' : '▾';
-      const volToggle = isVol ? `<button class="icon-btn" onclick="toggleVolumeCollapse(${i})">${toggleIcon}</button>` : '';
-
-      const showStandardControls = !isCollapsed;
-      const standardControls = showStandardControls ? `
-        <button class="icon-btn" onclick="moveItem(${i}, -1)">▲</button>
-        <button class="icon-btn" onclick="moveItem(${i}, 1)">▼</button>
-        <button class="icon-btn" style="color:#ff4444;" onclick="removeItem(${i})">×</button>
-      ` : '';
-      
-      let visualHtml = '';
-      if (isVol) {
-          visualHtml = `<div class="volume-chart" id="volumeChart-${i}"></div>`;
-      } else {
-          visualHtml = `<div class="card-visual">${item.name}</div>`;
-      }
-
-      card.innerHTML = `
-        ${visualHtml}
-        <div class="card-header">
-          <div class="card-info">
-            <h3 class="card-title">${titleText}</h3>
-          </div>
-          <div class="card-controls">
-            ${standardControls}
-            ${volToggle}
-            ${infoButton}
-          </div>
-        </div>
-      `;
-      stack.appendChild(card);
-      
-      if (isVol && !isCollapsed) {
-          initVolumeChart(i);
-      }
-    });
-  }
-
-  function initVolumeChart(index) {
-    const container = document.getElementById(`volumeChart-${index}`);
-    if (!container) return;
-
-    const vChart = LightweightCharts.createChart(container, {
-      layout: { background: { type: LightweightCharts.ColorType.Solid, color: 'transparent' }, textColor: '#ccc' },
-      grid: { vertLines: { visible: false }, horzLines: { visible: false } },
-      rightPriceScale: { visible: false },
-      timeScale: { visible: false },
-      handleScroll: false,
-      handleScale: false
-    });
-
-    const series = vChart.addHistogramSeries({
-      color: '#00ffff',
-      priceFormat: { type: 'volume' },
-    });
-
-    const data = [
-      { time: '2024-04-01', value: 10 },
-      { time: '2024-04-02', value: 30 },
-      { time: '2024-04-03', value: 20 },
-      { time: '2024-04-04', value: 50 },
-      { time: '2024-04-05', value: 40 }
-    ];
-
-    series.setData(data);
-    vChart.timeScale().fitContent();
-
-    const observer = new ResizeObserver(entries => {
-      if (entries.length === 0) return;
-      const { width, height } = entries[0].contentRect;
-      vChart.resize(width, height);
-      vChart.timeScale().fitContent();
-    });
-    observer.observe(container);
-
-    volumeCharts.set(index, { chart: vChart, observer });
-  }
-
-  /* CHOOSER */
-  function openChooser() {
-    document.getElementById('chooserPanel').classList.remove('is-hidden');
-    document.getElementById('addInstrBtn').classList.add('is-hidden');
-    collapseAllCategories();
-  }
-
-  function closeChooser() {
-    document.getElementById('chooserPanel').classList.add('is-hidden');
-    document.getElementById('addInstrBtn').classList.remove('is-hidden');
-    collapseAllCategories();
-  }
-
-  function toggleCategory(btn) {
-    const card = btn.parentElement;
-    const isExpanded = card.classList.contains('is-expanded');
-    collapseAllCategories();
-    if(!isExpanded) card.classList.add('is-expanded');
-  }
-
-  function collapseAllCategories() { 
-    document.querySelectorAll('.category-card').forEach(c => c.classList.remove('is-expanded')); 
-  }
-
-  /* RIGHT SIDE MODULES */
-  function toggleModulePicker() { 
-    document.getElementById('modulePicker').classList.toggle('is-hidden'); 
-  }
-
-  function addRightModule(type) {
-    rightModules.push(type);
-    document.getElementById('modulePicker').classList.add('is-hidden');
-    renderRightModules();
-  }
-
-  function removeRightModule(index) {
-    rightModules.splice(index, 1);
-    renderRightModules();
-  }
-
-  function renderRightModules() {
-    const stack = document.getElementById('rightModuleStack');
-    const empty = document.getElementById('rightEmpty');
-    if (rightModules.length === 0) {
-      stack.classList.add('is-hidden');
-      empty.classList.remove('is-hidden');
-      return;
-    }
-    empty.classList.add('is-hidden');
-    stack.classList.remove('is-hidden');
-    stack.style.gridTemplateRows = `repeat(${rightModules.length}, minmax(0, 1fr))`;
-    stack.innerHTML = '';
-    rightModules.forEach((m, i) => {
-      const card = document.createElement('div');
-      card.className = 'module-card';
-      card.innerHTML = `
-        <div class="module-head">
-          <span>${m}</span>
-          <button class="icon-btn" style="height:auto; width:auto; font-size:14px;" onclick="removeRightModule(${i})">×</button>
-        </div>
-        <div style="flex:1;padding:8px;font-size:9px;color:#666">
-          ${m === 'Notes' ? '<textarea style="width:100%;height:100%;background:transparent;color:#fff;border:none;outline:none;resize:none;"></textarea>' : 'Live data feed...'}
-        </div>`;
-      stack.appendChild(card);
-    });
-  }
-
-  init();
-
   const mainChart = LightweightCharts.createChart(document.getElementById('chartContainer'), {
-    layout: { background: { type: LightweightCharts.ColorType.Solid, color: '#000000' }, textColor: '#ccc' },
-    grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } },
-    crosshair: { mode: LightweightCharts.CrosshairMode.Normal },
-    rightPriceScale: { borderColor: '#222' },
-    timeScale: { borderColor: '#222' }
+    layout: { background: { type: LightweightCharts.ColorType.Solid, color: '#000' }, textColor: '#ccc' },
+    grid: { vertLines: { color: '#111' }, horzLines: { color: '#111' } }
   });
-  const candleSeries = mainChart.addCandlestickSeries({
-    upColor: '#00ffff', downColor: '#ff0055', borderVisible: false,
-    wickUpColor: '#00ffff', wickDownColor: '#ff0055',
-  });
-  candleSeries.setData([
-    { time: '2024-04-01', open: 150, high: 155, low: 148, close: 153 },
-    { time: '2024-04-02', open: 153, high: 158, low: 152, close: 157 },
-    { time: '2024-04-03', open: 157, high: 157, low: 151, close: 152 },
-    { time: '2024-04-04', open: 152, high: 156, low: 150, close: 154 },
-    { time: '2024-04-05', open: 154, high: 160, low: 154, close: 159 },
-  ]);
-  const mainResizeObserver = new ResizeObserver(entries => {
-    if (entries.length === 0 || !entries[0].contentRect) return;
-    const { width, height } = entries[0].contentRect;
-    mainChart.resize(width, height);
-  });
-  mainResizeObserver.observe(document.getElementById('chartContainer'));
 
-  async function testKineticUI() {
-    const snapshot = {
-      book: {
-        bestBid: 100,
-        bestAsk: 101
-      },
-      trades: {
-        tradeCount: 10
-      },
-      timestamp: Date.now()
-    };
-
-    const source = {
-      name: "demo",
-      reliability: 1
-    };
-
-    const result = window.computeKinetics({
-      snapshot,
-      previousMid: 100,
-      anchorMid: 100,
-      source
-    });
-
-    if (!result) {
-      console.error("computeKinetics not found on window");
-      return;
-    }
-
-    const ui = window.buildKineticUIModel("TEST", result);
-
-    console.log("UI MODEL:", ui);
-
-    const stack = document.getElementById('middleStack');
-    if (!stack) {
-      console.error("middleStack element not found");
-      return;
-    }
-
-    stack.innerHTML = '';
-
-    ui.stack.forEach(item => {
-      const div = document.createElement('div');
-      div.style.padding = '10px';
-      div.style.border = '1px solid #111';
-      div.style.color = '#00ffff';
-      div.innerText = item.title;
-      stack.appendChild(div);
-    });
-  }
-
-  testKineticUI();
+  function loop() { updateInstruments(); requestAnimationFrame(loop); }
+  loop();
 </script>
 
 </body>
