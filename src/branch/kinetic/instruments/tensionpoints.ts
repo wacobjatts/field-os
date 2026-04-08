@@ -1,4 +1,4 @@
-// src/branch/kinetic/instruments/tension-points.ts
+// instruments/tension-points.ts
 // Tension Points
 
 import { PreparedSignal } from '../../../core/engine/signal';
