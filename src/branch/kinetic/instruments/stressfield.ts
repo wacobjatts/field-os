@@ -1,4 +1,4 @@
-// instruments/stressfield.ts
+// instruments/stress-field.ts
 // Stress Field
 
 import { PreparedSignal } from '../../../core/engine/signal';
