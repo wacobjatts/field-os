@@ -1,10 +1,11 @@
 // src/branch/kinetic/renderer/displacement-field-painter.ts
-import { DisplacementPoint } from '../instruments/liarindex';
+import { DisplacementPoint } from '../instruments/displacementfield';
 
 /**
  * Displacement Field Painter
  * Focus: Physical volume occupancy and equilibrium displacement.
- * * Logic Mapping:
+ *
+ * Logic Mapping:
  * - Displacement -> Height of vertical monoliths
  * - Mass -> Smooth supporting curve beneath monoliths
  * - Activity -> Color saturation and core solidity
@@ -30,15 +31,14 @@ export function paintDisplacementField(
   // A smooth filled area representing the "grounded" portion of the displacement.
   ctx.beginPath();
   ctx.moveTo(width, baselineY);
-  
+
   for (let i = 0; i < points.length; i++) {
     const p = points[i];
     const x = width - (i * stepX);
-    // Mass is a dampened version of displacement to feel "heavy"
     const massHeight = (p.displacement / 100) * maxAmplitude * 0.4;
     ctx.lineTo(x, baselineY - massHeight);
   }
-  
+
   ctx.lineTo(width - (points.length - 1) * stepX, baselineY);
   ctx.closePath();
   ctx.fillStyle = 'rgba(40, 60, 80, 0.4)';
@@ -50,7 +50,7 @@ export function paintDisplacementField(
     const p = points[i];
     const x = width - (i * stepX);
     const colWidth = Math.max(2, stepX * 0.8);
-    
+
     const h = (p.displacement / 100) * maxAmplitude;
     const y = baselineY - h;
     const isValid = p.regime > 50;
@@ -58,12 +58,12 @@ export function paintDisplacementField(
     // A. Column Body
     ctx.beginPath();
     const activityAlpha = (p.activity / 100) * (0.2 + p.precision * 0.5);
-    
+
     if (isValid) {
       // Active Displacement: Solid monolith
       ctx.fillStyle = `rgba(0, 180, 255, ${activityAlpha})`;
       ctx.fillRect(x - colWidth / 2, y, colWidth, h);
-      
+
       // Structural Top Cap
       ctx.strokeStyle = `rgba(200, 240, 255, ${p.precision})`;
       ctx.lineWidth = 1 + p.precision;
@@ -80,9 +80,9 @@ export function paintDisplacementField(
     if (isValid && p.activity > 10) {
       const coreH = (p.activity / 100) * h;
       const coreY = baselineY - coreH;
-      
+
       ctx.fillStyle = `rgba(255, 255, 255, ${0.1 * p.precision})`;
-      ctx.fillRect(x - (colWidth * 0.2), coreY, colWidth * 0.4, coreH);
+      ctx.fillRect(x - colWidth * 0.2, coreY, colWidth * 0.4, coreH);
     }
   }
 
@@ -96,4 +96,3 @@ export function paintDisplacementField(
 
   ctx.restore();
 }
-
