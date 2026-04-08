@@ -12,7 +12,7 @@ import {
 } from './instruments';
 
 import { KineticSnapshot } from './types';
-import { DecayEvent } from './instruments/decayoscillator';
+import { DecayEvent } from './instruments/decay-oscillator';
 
 export interface ComputeKineticsInput {
   snapshot: KineticSnapshot;
@@ -29,6 +29,10 @@ export interface ComputeKineticsOutput {
   instruments: WiredInstrumentOutput;
 }
 
+/**
+ * computeKinetics
+ * Coordinates the orchestrator and the instrument wiring logic.
+ */
 export function computeKinetics(
   input: ComputeKineticsInput
 ): ComputeKineticsOutput {
