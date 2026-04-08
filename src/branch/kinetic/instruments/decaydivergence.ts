@@ -1,5 +1,5 @@
-// instruments/decaydivergence.ts
-// Coil Decay Oscillator
+// src/branch/kinetic/instruments/decay-divergence.ts
+// Decay Divergence
 
 import { PreparedSignal } from '../../../core/engine/signal';
 
@@ -14,7 +14,7 @@ export interface CoilDecayOutput {
   field: CoilDecayPoint[];
 }
 
-export function buildCoilDecayOscillator(
+export function buildDecayDivergence(
   signal: PreparedSignal
 ): CoilDecayOutput {
   const value = signal.value;
