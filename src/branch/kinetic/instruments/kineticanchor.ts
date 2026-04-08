@@ -1,4 +1,4 @@
-// instruments/kineticanchor.ts
+// instruments/kinetic-anchor.ts
 // Kinetic Anchor
 
 import { PreparedSignal } from '../../../core/engine/signal';
