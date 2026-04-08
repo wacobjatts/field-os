@@ -1,5 +1,5 @@
-// instruments/decayoscillator.ts
-// Absorption Decay Field
+// src/branch/kinetic/instruments/decay-oscillator.ts
+// Decay Oscillator
 
 import { PreparedSignal } from '../../../core/engine/signal';
 
@@ -15,7 +15,7 @@ export interface DecayFieldOutput {
   events: DecayEvent[];
 }
 
-export function buildDecayField(
+export function buildDecayOscillator(
   signal: PreparedSignal,
   previousEvents: DecayEvent[] = []
 ): DecayFieldOutput {
