@@ -31,12 +31,16 @@ class KineticLoop {
   }
 
   private loop = () => {
-    // 1. Mock Snapshot Generation (In production, this comes from the Engine Socket)
+    // 1. Mock Snapshot Generation
     const currentMid = this.lastMid + (Math.random() - 0.5) * 0.1;
+    
+    // FIX: Wrapping bids/asks inside the 'book' property to match the KineticSnapshot type
     const input: ComputeKineticsInput = {
       snapshot: {
-        bids: [[currentMid - 0.01, 100]],
-        asks: [[currentMid + 0.01, 100]],
+        book: {
+          bids: [[currentMid - 0.01, 100]],
+          asks: [[currentMid + 0.01, 100]],
+        },
         timestamp: Date.now()
       },
       previousMid: this.lastMid,
@@ -73,10 +77,8 @@ if (typeof window !== 'undefined') {
   window.computeKinetics = computeKinetics;
   window.buildKineticUIModel = buildKineticUIModel;
   
-  // Expose start trigger to the environment
   window.startKineticLoop = (symbol: string) => engine.start(symbol);
 
-  // Auto-start for the FieldOS environment
   setTimeout(() => {
     window.startKineticLoop('AAPL');
   }, 1000);
