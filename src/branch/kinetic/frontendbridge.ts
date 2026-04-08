@@ -1,4 +1,4 @@
-// kinetic/frontendbridge.ts
+// src/branch/kinetic/frontendbridge.ts
 import { computeKinetics, ComputeKineticsInput } from './computekinetics';
 import { buildKineticUIModel } from './uimodel';
 
@@ -14,8 +14,6 @@ class KineticLoop {
   private activeSymbol: string = 'AAPL';
   private frameId: number | null = null;
   private lastMid: number = 150.0;
-
-  constructor() {}
 
   public start(symbol: string) {
     this.activeSymbol = symbol;
@@ -36,21 +34,14 @@ class KineticLoop {
       },
       previousMid: this.lastMid,
       anchorMid: 150.0,
-      source: {
-        id: 'primary-feed',
-        weight: 1.0,
-        latency: 15
-      },
+      source: { id: 'primary-feed', weight: 1.0, latency: 15 },
       previousDecayEvents: [] 
     };
 
     const output = computeKinetics(input);
     const uiModel = buildKineticUIModel(this.activeSymbol, output);
 
-    const event = new CustomEvent('kinetic-model-update', {
-      detail: uiModel
-    });
-    window.dispatchEvent(event);
+    window.dispatchEvent(new CustomEvent('kinetic-model-update', { detail: uiModel }));
 
     this.lastMid = currentMid;
     this.frameId = requestAnimationFrame(this.loop);
@@ -59,15 +50,10 @@ class KineticLoop {
 
 if (typeof window !== 'undefined') {
   const engine = new KineticLoop();
-
   window.computeKinetics = computeKinetics;
   window.buildKineticUIModel = buildKineticUIModel;
-  
   window.startKineticLoop = (symbol: string) => engine.start(symbol);
-
-  setTimeout(() => {
-    window.startKineticLoop('AAPL');
-  }, 1000);
+  setTimeout(() => window.startKineticLoop('AAPL'), 1000);
 }
 
 export {};
