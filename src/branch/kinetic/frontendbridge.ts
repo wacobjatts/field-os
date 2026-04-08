@@ -15,6 +15,8 @@ class KineticLoop {
   private frameId: number | null = null;
   private lastMid: number = 150.0;
 
+  constructor() {}
+
   public start(symbol: string) {
     this.activeSymbol = symbol;
     if (this.frameId) cancelAnimationFrame(this.frameId);
@@ -27,6 +29,7 @@ class KineticLoop {
     const input: ComputeKineticsInput = {
       snapshot: {
         book: {
+          // FIX: Changed from [price, size] to { price, size }
           bids: [{ price: currentMid - 0.01, size: 100 }],
           asks: [{ price: currentMid + 0.01, size: 100 }],
         },
