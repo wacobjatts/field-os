@@ -2,9 +2,6 @@
 import { computeKinetics, ComputeKineticsInput } from './computekinetics';
 import { buildKineticUIModel } from './uimodel';
 
-// Define the missing type locally to satisfy the compiler
-type BookLevel = { price: number; size: number };
-
 declare global {
   interface Window {
     computeKinetics: typeof computeKinetics;
@@ -18,6 +15,8 @@ class KineticLoop {
   private frameId: number | null = null;
   private lastMid: number = 150.0;
 
+  constructor() {}
+
   public start(symbol: string) {
     this.activeSymbol = symbol;
     if (this.frameId) cancelAnimationFrame(this.frameId);
@@ -27,7 +26,6 @@ class KineticLoop {
   private loop = () => {
     const currentMid = this.lastMid + (Math.random() - 0.5) * 0.1;
     
-    // FIX: Using explicit objects {price, size} to match the BookLevel type requirements
     const input: ComputeKineticsInput = {
       snapshot: {
         book: {
@@ -38,14 +36,21 @@ class KineticLoop {
       },
       previousMid: this.lastMid,
       anchorMid: 150.0,
-      source: { id: 'primary-feed', weight: 1.0, latency: 15 },
+      source: {
+        id: 'primary-feed',
+        weight: 1.0,
+        latency: 15
+      },
       previousDecayEvents: [] 
     };
 
     const output = computeKinetics(input);
     const uiModel = buildKineticUIModel(this.activeSymbol, output);
 
-    window.dispatchEvent(new CustomEvent('kinetic-model-update', { detail: uiModel }));
+    const event = new CustomEvent('kinetic-model-update', {
+      detail: uiModel
+    });
+    window.dispatchEvent(event);
 
     this.lastMid = currentMid;
     this.frameId = requestAnimationFrame(this.loop);
@@ -54,10 +59,15 @@ class KineticLoop {
 
 if (typeof window !== 'undefined') {
   const engine = new KineticLoop();
+
   window.computeKinetics = computeKinetics;
   window.buildKineticUIModel = buildKineticUIModel;
+  
   window.startKineticLoop = (symbol: string) => engine.start(symbol);
-  setTimeout(() => window.startKineticLoop('AAPL'), 1000);
+
+  setTimeout(() => {
+    window.startKineticLoop('AAPL');
+  }, 1000);
 }
 
 export {};
