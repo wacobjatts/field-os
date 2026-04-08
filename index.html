@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>FieldOS / Kinetic - Coil Decay Connection</title>
+  <title>FieldOS / Kinetic - Connection Pass</title>
   <style>
     /* GLOBAL STYLES - PRESERVED FROM SHELL */
     html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #000000; color: #e8e8e8; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
@@ -43,7 +43,7 @@
     .readout-item { font-size: 10px; font-family: monospace; color: #00ffff; }
     .readout-label { color: #444; margin-right: 4px; }
 
-    /* BOTTOM MENU - PRESERVED */
+    /* BOTTOM MENU */
     .bottom-menu-wrap { border: none; height: 54px; display: grid; grid-template-columns: repeat(6, 1fr) 40px; background: #000; }
     .menu-item { background: transparent; border: none; color: #fff; font-size: 8px; text-transform: uppercase; cursor: pointer; }
     .reopen-menu { position: fixed; bottom: 10px; right: 10px; background: #000; border: none; color: #fff; padding: 6px 10px; font-size: 10px; z-index: 100; display: none; border-radius: 2px; }
@@ -176,18 +176,31 @@
           </div>
         </section>
 
-        <section class="stack-card" id="card-coil-decay">
+        <section class="stack-card" id="card-decay-divergence">
           <div class="card-header">
-            <h3 class="card-title">Coil Decay</h3>
+            <h3 class="card-title">Decay Divergence</h3>
             <span class="card-category">Tension</span>
           </div>
-          <div class="card-visual-area"><canvas id="canvas-coil-decay"></canvas></div>
+          <div class="card-visual-area"><canvas id="canvas-decay-divergence"></canvas></div>
           <div class="card-readout">
-            <div class="readout-item"><span class="readout-label">DECAY</span><span id="val-coil-decay">0</span></div>
-            <div class="readout-item"><span class="readout-label">HEALTH</span><span id="val-coil-health">0</span></div>
-            <div class="readout-item"><span class="readout-label">DIVERGENCE</span><span id="val-coil-divergence">0</span></div>
+            <div class="readout-item"><span class="readout-label">DECAY</span><span id="val-dd-decay">0</span></div>
+            <div class="readout-item"><span class="readout-label">HEALTH</span><span id="val-dd-health">0</span></div>
+            <div class="readout-item"><span class="readout-label">DIVERGENCE</span><span id="val-dd-divergence">0</span></div>
           </div>
         </section>
+
+        <section class="stack-card" id="card-tension-points">
+            <div class="card-header">
+              <h3 class="card-title">Tension Points</h3>
+              <span class="card-category">Tension</span>
+            </div>
+            <div class="card-visual-area"><canvas id="canvas-tension-points"></canvas></div>
+            <div class="card-readout">
+              <div class="readout-item"><span class="readout-label">TENSION</span><span id="val-tp-tension">0</span></div>
+              <div class="readout-item"><span class="readout-label">REGIME</span><span id="val-tp-regime">0</span></div>
+              <div class="readout-item"><span class="readout-label">STABILITY</span><span id="val-tp-stability">0</span></div>
+            </div>
+          </section>
       </div>
 
       <section class="instrument-chooser-area">
@@ -217,74 +230,98 @@
 <button class="reopen-menu" id="reopenMenu" onclick="toggleBottomMenu(true)">OPEN MENU</button>
 
 <script>
-  // --- RENDERER LOGIC: decay-divergence-painter.ts ---
-  function paintDecayDivergenceField(ctx, points) {
+  // --- RENDERER: tension-points-painter.ts ---
+  function paintTensionPoints(ctx, points) {
     const width = ctx.canvas.width;
     const height = ctx.canvas.height;
-    const centerY = height / 2;
-    if (points.length < 2) return;
-    const stepX = width / (points.length - 1);
-    const amplitude = height * 0.45;
+    if (points.length < 1) return;
+    const baselineY = height * 0.9;
+    const topY = height * 0.1;
+    const availableHeight = baselineY - topY;
+    const stepX = width / (Math.max(1, points.length - 1));
 
     ctx.save();
     ctx.clearRect(0, 0, width, height);
 
-    // 1. BASELINE
+    // Frame guides
     ctx.beginPath();
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
     ctx.lineWidth = 1;
-    ctx.moveTo(0, centerY);
-    ctx.lineTo(width, centerY);
+    ctx.moveTo(0, baselineY); ctx.lineTo(width, baselineY);
+    ctx.moveTo(0, topY); ctx.lineTo(width, topY);
     ctx.stroke();
 
-    // 2. STRUCTURAL ZONES (Decay vs Health)
-    for (let i = 0; i < points.length - 1; i++) {
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const x1 = width - (i * stepX);
-        const x2 = width - ((i + 1) * stepX);
+    points.forEach((p, i) => {
+        const x = width - (i * stepX);
+        const y = baselineY - (p.tension / 100) * availableHeight;
+        const alpha = p.precision;
+        const radius = 1.5 + (p.stability / 100) * 3;
 
-        // Decay Zone (Warm)
+        // Stem
+        ctx.beginPath();
+        ctx.moveTo(x, baselineY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 0.08})`;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Point
+        ctx.beginPath();
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        if (p.regime > 50) {
+            ctx.fillStyle = `rgba(0, 255, 255, ${alpha * 0.8})`;
+            ctx.fill();
+            if (p.stability > 70 && alpha > 0.8) {
+                ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+                ctx.beginPath();
+                ctx.arc(x, y, radius * 0.4, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        } else {
+            ctx.strokeStyle = `rgba(255, 100, 0, ${alpha * 0.5})`;
+            ctx.lineWidth = 1;
+            ctx.stroke();
+        }
+    });
+    ctx.restore();
+  }
+
+  // --- RENDERER: decay-divergence-painter.ts ---
+  function paintDecayDivergenceField(ctx, points) {
+    const width = ctx.canvas.width; const height = ctx.canvas.height; const centerY = height / 2;
+    if (points.length < 2) return;
+    const stepX = width / (points.length - 1); const amplitude = height * 0.45;
+    ctx.save();
+    ctx.clearRect(0, 0, width, height);
+    ctx.beginPath(); ctx.strokeStyle = 'rgba(255, 255, 255, 0.15)'; ctx.lineWidth = 1;
+    ctx.moveTo(0, centerY); ctx.lineTo(width, centerY); ctx.stroke();
+
+    for (let i = 0; i < points.length - 1; i++) {
+        const p1 = points[i]; const p2 = points[i + 1];
+        const x1 = width - (i * stepX); const x2 = width - ((i + 1) * stepX);
         const dY1 = centerY - (p1.decay / 100) * (height * 0.25);
         const dY2 = centerY - (p2.decay / 100) * (height * 0.25);
-        ctx.beginPath();
-        ctx.moveTo(x1, centerY); ctx.lineTo(x2, centerY); ctx.lineTo(x2, dY2); ctx.lineTo(x1, dY1);
-        ctx.closePath();
-        ctx.fillStyle = `rgba(255, 80, 0, ${0.08 * p1.precision})`;
-        ctx.fill();
-
-        // Health Zone (Cool)
+        ctx.beginPath(); ctx.moveTo(x1, centerY); ctx.lineTo(x2, centerY); ctx.lineTo(x2, dY2); ctx.lineTo(x1, dY1); ctx.closePath();
+        ctx.fillStyle = `rgba(255, 80, 0, ${0.08 * p1.precision})`; ctx.fill();
         const hY1 = centerY + (p1.health / 100) * (height * 0.25);
         const hY2 = centerY + (p2.health / 100) * (height * 0.25);
-        ctx.beginPath();
-        ctx.moveTo(x1, centerY); ctx.lineTo(x2, centerY); ctx.lineTo(x2, hY2); ctx.lineTo(x1, hY1);
-        ctx.closePath();
-        ctx.fillStyle = `rgba(0, 200, 255, ${0.05 * p1.precision})`;
-        ctx.fill();
+        ctx.beginPath(); ctx.moveTo(x1, centerY); ctx.lineTo(x2, centerY); ctx.lineTo(x2, hY2); ctx.lineTo(x1, hY1); ctx.closePath();
+        ctx.fillStyle = `rgba(0, 200, 255, ${0.05 * p1.precision})`; ctx.fill();
     }
 
-    // 3. DIVERGENCE TRACE
     for (let i = 0; i < points.length - 1; i++) {
-        const p1 = points[i];
-        const p2 = points[i + 1];
-        const x1 = width - (i * stepX);
-        const x2 = width - ((i + 1) * stepX);
+        const p1 = points[i]; const p2 = points[i + 1];
+        const x1 = width - (i * stepX); const x2 = width - ((i + 1) * stepX);
         const y1 = centerY - (p1.divergence / 100) * amplitude;
         const y2 = centerY - (p2.divergence / 100) * amplitude;
-        const avgPrec = (p1.precision + p2.precision) / 2;
-
-        ctx.beginPath();
-        ctx.lineWidth = 1 + avgPrec * 2.5;
-        const colorMix = Math.floor(p1.divergence * 2.5);
-        ctx.strokeStyle = `rgba(${100 + colorMix}, 220, 255, ${0.4 + avgPrec * 0.6})`;
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
+        ctx.beginPath(); ctx.lineWidth = 1 + ((p1.precision+p2.precision)/2) * 2.5;
+        ctx.strokeStyle = `rgba(${100 + Math.floor(p1.divergence * 2.5)}, 220, 255, ${0.4 + ((p1.precision+p2.precision)/2) * 0.6})`;
+        ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
     }
     ctx.restore();
   }
 
-  // --- PREVIOUS RENDERERS ---
+  // --- PREVIOUS RENDERERS (KEPT AS IS) ---
   function paintTensionLine(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height, b=h*0.92; ctx.clearRect(0,0,w,h); ctx.strokeStyle='cyan'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=b-(p.line/100)*h*0.8; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
   function paintAbsorptionField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#0ffa'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h/2+(p.elasticity/100)*h*0.4; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
   function paintTransmissionField(ctx, pts) { const w=ctx.canvas.width, h=ctx.canvas.height; ctx.clearRect(0,0,w,h); ctx.strokeStyle='#0ffa'; ctx.beginPath(); pts.forEach((p,i)=>{ const x=w-i*(w/pts.length), y=h/2+(p.transmission/100)*h*0.4; i==0?ctx.moveTo(x,y):ctx.lineTo(x,y); }); ctx.stroke(); }
@@ -312,14 +349,18 @@
       {id: 'canvas-transmission-field', paint: paintTransmissionField, mock: () => ({ transmission: Math.sin(now/2000)*80 })},
       {id: 'canvas-absorption-field', paint: paintAbsorptionField, mock: () => ({ elasticity: Math.sin(now/2500)*60 })},
       {id: 'canvas-tension-line', paint: paintTensionLine, mock: (i) => ({ line: Math.sin(now/2000-i*0.1)*40+50 })},
-      {id: 'canvas-coil-decay', paint: paintDecayDivergenceField, mock: (i) => {
-          // final page.tsx integration will use real engine output (instruments/decaydivergence.ts)
+      {id: 'canvas-decay-divergence', paint: paintDecayDivergenceField, mock: (i) => {
           const val = Math.sin(now/1800 - i*0.15);
+          return { decay: (0.5 - val * 0.5) * 80 + 10, health: (0.5 + val * 0.5) * 80 + 10, divergence: Math.abs(val) * 70, precision: 0.92 };
+      }},
+      {id: 'canvas-tension-points', paint: paintTensionPoints, mock: (i) => {
+          // Driven by instruments/tensionpoints.ts
+          const val = Math.abs(Math.sin(now/1500 - i * 0.2));
           return {
-            decay: (0.5 - val * 0.5) * 80 + 10,
-            health: (0.5 + val * 0.5) * 80 + 10,
-            divergence: Math.abs(val) * 70,
-            precision: 0.92
+            tension: val * 100,
+            regime: (val > 0.3 ? 1 : 0) * 100, // 0->100 scale per contract
+            stability: (0.5 + val * 0.5) * 100,
+            precision: 0.85
           };
       }}
     ];
@@ -337,11 +378,17 @@
       } else {
         const pts = []; for(let i=0; i<40; i++) pts.push(cfg.mock(i));
         cfg.paint(ctx, pts);
-        if (cfg.id === 'canvas-coil-decay') {
-          // Real field names from instruments/decaydivergence.ts
-          document.getElementById('val-coil-decay').innerText = Math.round(pts[0].decay);
-          document.getElementById('val-coil-health').innerText = Math.round(pts[0].health);
-          document.getElementById('val-coil-divergence').innerText = Math.round(pts[0].divergence);
+        
+        // Final page.tsx integration will use real engine output
+        if (cfg.id === 'canvas-decay-divergence') {
+          document.getElementById('val-dd-decay').innerText = Math.round(pts[0].decay);
+          document.getElementById('val-dd-health').innerText = Math.round(pts[0].health);
+          document.getElementById('val-dd-divergence').innerText = Math.round(pts[0].divergence);
+        }
+        if (cfg.id === 'canvas-tension-points') {
+          document.getElementById('val-tp-tension').innerText = Math.round(pts[0].tension);
+          document.getElementById('val-tp-regime').innerText = Math.round(pts[0].regime);
+          document.getElementById('val-tp-stability').innerText = Math.round(pts[0].stability);
         }
       }
     });
