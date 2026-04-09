@@ -14,7 +14,7 @@ export interface RealityGapOutput {
   field: RealityGapPoint[];
 }
 
-export function buildRealityGap(
+export function buildRealityGapField(
   signal: PreparedSignal
 ): RealityGapOutput {
   const value = signal.value;

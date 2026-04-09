@@ -16,7 +16,7 @@ export interface AbsorptionFieldOutput {
   field: AbsorptionFieldPoint[];
 }
 
-export function buildAbsorptionField(
+export function buildAbsorptionTension(
   signal: PreparedSignal
 ): AbsorptionFieldOutput {
 
