@@ -54,8 +54,18 @@ class KineticLoop {
       },
       previousMid: this.lastMid,
       anchorMid: 150.0,
-      // Removed 'latency' to match the strict SourceProfile type
-      source: { id: 'primary-feed' },
+      // Fully satisfy the SourceProfile interface requirements
+      source: { 
+        id: 'primary-feed',
+        label: 'Primary Feed',
+        kind: 'direct',
+        credibility: 1.0,
+        sampleCount: 1,
+        weight: 1.0,
+        latency: 0,
+        isAggregated: false,
+        tags: []
+      },
       previousDecayEvents: [] 
     };
 
