@@ -54,7 +54,8 @@ class KineticLoop {
       },
       previousMid: this.lastMid,
       anchorMid: 150.0,
-      source: { id: 'primary-feed', weight: 1.0, latency: 15 },
+      // Removed 'weight' to fix the type error
+      source: { id: 'primary-feed', latency: 15 },
       previousDecayEvents: [] 
     };
 
