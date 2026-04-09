@@ -54,11 +54,10 @@ class KineticLoop {
       },
       previousMid: this.lastMid,
       anchorMid: 150.0,
-      // Fully satisfy the SourceProfile interface requirements
       source: { 
         id: 'primary-feed',
         label: 'Primary Feed',
-        kind: 'direct',
+        kind: 'stream',
         credibility: 1.0,
         sampleCount: 1,
         weight: 1.0,
