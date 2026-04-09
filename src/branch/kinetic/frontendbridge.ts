@@ -29,9 +29,26 @@ class KineticLoop {
     const input: ComputeKineticsInput = {
       snapshot: {
         book: {
-          // FIX: Changed from [price, size] to { price, size }
           bids: [{ price: currentMid - 0.01, size: 100 }],
           asks: [{ price: currentMid + 0.01, size: 100 }],
+          bestBid: currentMid - 0.01,
+          bestAsk: currentMid + 0.01,
+          bestBidSize: 100,
+          bestAskSize: 100,
+          lastUpdateId: 0,
+          lastServerTime: Date.now(),
+          localUpdateTime: Date.now(),
+          isSynced: true,
+        },
+        trades: {
+          trades: [],
+          buyWork: 0,
+          sellWork: 0,
+          totalBuyVolume: 0,
+          totalSellVolume: 0,
+          tradeCount: 0,
+          vwap: currentMid,
+          volatility: 0,
         },
         timestamp: Date.now()
       },

@@ -15,7 +15,7 @@ export interface DecayFieldOutput {
   events: DecayEvent[];
 }
 
-export function buildDecayOscillator(
+export function buildDecayField(
   signal: PreparedSignal,
   previousEvents: DecayEvent[] = []
 ): DecayFieldOutput {
