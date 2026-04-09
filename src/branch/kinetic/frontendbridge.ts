@@ -57,7 +57,7 @@ class KineticLoop {
       source: { 
         id: 'primary-feed',
         label: 'Primary Feed',
-        kind: 'stream',
+        kind: 'synthetic',
         credibility: 1.0,
         sampleCount: 1,
         weight: 1.0,
